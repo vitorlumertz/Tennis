@@ -1,0 +1,56 @@
+[TOURNAMENT]
+//Name, Number of Sets, Set Type, Last Set Type
+Torneio Exemplo,1,Normal Set,MatchTieBreak
+
+[CATEGORIES]
+//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized
+1a Classe Simples,SingleElimination,Single
+2a Classe Simples,Groups,Single
+3a Classe Simples,RoundRobin,Single
+4a Classe Simples,Groups,Single
+
+[PLAYERS]
+//Name, Category Name, Seed Number
+Player A,1a Classe Simples,1
+Player B,1a Classe Simples,2
+Player C,1a Classe Simples,3
+Player D,1a Classe Simples,
+Player E,1a Classe Simples,
+Player F,1a Classe Simples,
+Player G,1a Classe Simples,
+Player H,1a Classe Simples,
+
+PlayerA,2a Classe Simples,1
+PlayerB,2a Classe Simples,2
+PlayerC,2a Classe Simples,3
+PlayerD,2a Classe Simples,
+PlayerE,2a Classe Simples,
+PlayerF,2a Classe Simples,
+PlayerG,2a Classe Simples,
+
+PlayerA,3a Classe Simples,1
+PlayerB,3a Classe Simples,2
+PlayerC,3a Classe Simples,
+PlayerD,3a Classe Simples,
+PlayerE,3a Classe Simples,
+
+PlayerA,4a Classe Simples,1
+PlayerB,4a Classe Simples,2
+PlayerC,4a Classe Simples,
+PlayerD,4a Classe Simples,
+PlayerE,4a Classe Simples,
+PlayerF,4a Classe Simples,
+PlayerG,4a Classe Simples,
+PlayerH,4a Classe Simples,
+PlayerI,4a Classe Simples,
+
+[GROUPS]
+//Category, Group, Player
+2a Classe Simples,1,PlayerA
+2a Classe Simples,1,PlayerC
+2a Classe Simples,1,PlayerD
+
+2a Classe Simples,2,PlayerB
+2a Classe Simples,2,PlayerE
+2a Classe Simples,2,PlayerF
+2a Classe Simples,2,PlayerG

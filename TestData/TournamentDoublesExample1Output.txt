@@ -1,0 +1,24 @@
+[TOURNAMENT]
+//Name, Number of Sets, Set Type, Last Set Type
+Torneio Exemplo,1,NormalSet,MatchTieBreak
+
+[CATEGORIES]
+//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized
+1a Classe Duplas,SingleElimination,Double,,
+
+[PLAYERS]
+//Name, Category, Seed Number, Is Seed
+
+[DOUBLES]
+//Player 1, Player 2, Category, Seed Number, Is Seed
+Player A,Player B,1a Classe Duplas,1,True
+Player C,Player D,1a Classe Duplas,2,True
+Player E,Player F,1a Classe Duplas,0,False
+Player G,Player H,1a Classe Duplas,0,False
+
+[MATCHES]
+//Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Players Set
+1a Classe Duplas,002FP001,Player A/Player B,Player G/Player H,,,,,,True
+1a Classe Duplas,002FP002,Player C/Player D,Player E/Player F,,,,,,True
+1a Classe Duplas,001FP001,None,None,,,,,,
+
