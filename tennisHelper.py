@@ -6,16 +6,16 @@ from matchTeams import Team
 def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:
   if setScore[0] == setScore[1]:
     return False
-  
+
   if setType == SetTypes.NotDefined:
     return True
-  
+
   winnerScore = setScore[0]
   loserScore = setScore[1]
   if winnerScore < loserScore:
     winnerScore = setScore[1]
     loserScore = setScore[0]
-  
+
   normalWinScore = 6
   if setType == SetTypes.ShortSet:
     normalWinScore = 4
@@ -26,15 +26,15 @@ def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:
     if winnerScore < normalWinScore :
       return False
     if (winnerScore == normalWinScore) and (loserScore in range(normalWinScore-1)):
-      return True   
+      return True
     if (winnerScore > normalWinScore) and (loserScore == winnerScore - 2):
-      return True    
+      return True
     return False
 
   if (winnerScore == normalWinScore) and (loserScore in range(normalWinScore-1)):
-    return True 
+    return True
   if (winnerScore == normalWinScore + 1) and (loserScore in range(normalWinScore-1, normalWinScore+1)):
-    return True 
+    return True
   return False
 
 
@@ -45,13 +45,13 @@ def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet) -> MatchWin
     (len(score) > sets)
   ):
     return MatchWinnerTypes.NotDefined
-  
+
   for set in score:
     if not IsValidSetScore(set, setType):
       return MatchWinnerTypes.NotDefined
-  
+
   setsToBeWon = int(sets/2 + 0.5)
-  
+
   p1SetsWon = 0
   p2SetsWon = 0
   for set in score:
@@ -59,13 +59,13 @@ def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet) -> MatchWin
       p1SetsWon += 1
     else:
       p2SetsWon += 1
-    
+
   if (p1SetsWon == setsToBeWon) and (p2SetsWon < setsToBeWon):
     return MatchWinnerTypes.Team1
-  
+
   if (p2SetsWon == setsToBeWon) and (p1SetsWon < setsToBeWon):
     return MatchWinnerTypes.Team2
-  
+
   return MatchWinnerTypes.NotDefined
 
 
@@ -117,7 +117,7 @@ def DeleteExtraSeeds(seedsPositions, numSeeds):
     if (p2 is not None) and (p2 > numSeeds):
       p2 = None
     newSeedsPositions.append((p1, p2))
-  
+
   return newSeedsPositions
 
 
@@ -153,7 +153,7 @@ def GetSetGames(setType: SetTypes):
     SetTypes.ShortSet: 4,
     SetTypes.MatchTieBreak: 10,
   }.get(setType)
-  
+
 
 def GetTeamsFromMatches(matches:list[Match]) -> set[Team]:
   teams = set()

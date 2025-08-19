@@ -348,11 +348,7 @@ class Category:
     def GetSeedGroups(playersToDraw: dict[str,Player]) -> dict[int,list[Player]]:
       seedGroups = {}
       for player in playersToDraw.values():
-        seedNum = player.seedNumber
-        if seedNum in seedGroups.keys():
-          seedGroups[seedNum].append(player)
-        else:
-          seedGroups[seedNum] = [player]
+        seedGroups.setdefault(player.seedNumber, []).append(player)
       return seedGroups
 
 

@@ -26,7 +26,7 @@ class Match:
     else:
       self.matchType = MatchTypes.Single
     self.SetScore(score, scoreType)
-    
+
 
   def SetScore(self, score=None, scoreType=ScoreTypes.Normal):
     if not self.isTeamsSet:
