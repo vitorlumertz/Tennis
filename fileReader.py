@@ -86,6 +86,8 @@ def GetBoolean(string):
 
 def GetScore(string):
   string = CleanString(string,cleanSpaces=False, toUper=False)
+  if string == '':
+    return None
   sets = string.split(' ')
   score = []
   for set in sets:
@@ -235,11 +237,14 @@ def ReadMatch(string, tournament: Tournament):
     lastSetType = GetSetType(info[8])
   else:
     lastSetType = tournament.lastSetType
-  isTeamsSet = False
+  isTeam1Set = False
   if (len(info) > 9) and (info[9] != ''):
-    isTeamsSet = GetBoolean(info[9])
+    isTeam1Set = GetBoolean(info[9])
+  isTeam2Set = False
+  if (len(info) > 10) and (info[10] != ''):
+    isTeam2Set = GetBoolean(info[10])
 
-  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeamsSet)
+  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeam1Set, isTeam2Set)
 
 
 def ReadInputFile(filePath) -> Tournament:
@@ -253,7 +258,10 @@ def ReadInputFile(filePath) -> Tournament:
       newSection = GetSection(row, section)
       if newSection != section:
         section = newSection
-        continue
+        if section == FileSections.End:
+          break
+        else:
+          continue
 
       if section == FileSections.Ranking:
         ReadRanking(row)
@@ -271,7 +279,5 @@ def ReadInputFile(filePath) -> Tournament:
         ReadGroup(row, tournament)
       elif section == FileSections.Matches:
         ReadMatch(row, tournament)
-      elif section == FileSections.End:
-        break
 
   return tournament

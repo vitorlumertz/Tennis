@@ -15,8 +15,19 @@ class Tournament:
     self.oldDoubles = [] if oldDoubles is None else oldDoubles
 
 
+  def __repr__(self):
+    return (
+      f"Name: {self.name}\n"
+      f"Number of Sets: {self.sets}\n"
+      f"Set Type: {self.setType.name}\n"
+      f"Last Set Type: {self.lastSetType.name}\n"
+      f"Number of Categories: {len(self.categories)}\n"
+      f"Number of Old Dobles: {len(self.oldDoubles)}\n"
+    )
+
+
   def AddCategory(self, category:Category):
-    if category.name not in self.categories:
+    if (category.name not in self.categories):
       self.categories[category.name] = category
     else:
       raise DuplicatedCategory(category.name)
@@ -38,7 +49,7 @@ class Tournament:
     self.oldDoubles.append((player1Name, player2Name))
 
 
-  def InitializeCategory(self, categoryName):
+  def StartCategory(self, categoryName):
     category = self.GetCategory(categoryName)
     if not category.isInitialized:
       if category.isRandomDoubles:
@@ -50,9 +61,9 @@ class Tournament:
       category.isInitialized = True
 
 
-  def InitializeCategories(self):
+  def StartCategories(self):
     for categoryName in self.categories.keys():
-      self.InitializeCategory(categoryName)
+      self.StartCategory(categoryName)
 
 
   def UpdateBrackets(self):

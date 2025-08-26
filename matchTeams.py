@@ -1,5 +1,5 @@
 class Team:
-  def __init__(self, name, seedNumber=0, isSeed=None):
+  def __init__(self, name:str, seedNumber=0, isSeed=None):
     self.name = name
     self.seedNumber = seedNumber
     if isSeed is None:
@@ -11,7 +11,7 @@ class Team:
 
 
 class Player(Team):
-  def __init__(self, name, seedNumber=0, isSeed=None):
+  def __init__(self, name:str, seedNumber=0, isSeed=None):
     super().__init__(name, seedNumber, isSeed)
 
 

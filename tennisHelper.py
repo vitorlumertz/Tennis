@@ -245,3 +245,10 @@ def GetMatchSortCriteria(matchKey):
   thirdCriteria = secondNum
 
   return((firstCriteria, secondCriteria, thirdCriteria))
+
+
+def GetMaximumStage(matchesKeys:list[str]) -> int|None:
+  keys =[int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey]
+  if len(keys) == 0:
+    return None
+  return max([int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey])

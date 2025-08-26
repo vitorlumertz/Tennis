@@ -68,53 +68,52 @@ PlayerI,4a Classe Simples,0,False
 4a Classe Simples,3,PlayerF
 
 [MATCHES]
-//Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Players Set
-1a Classe Simples,004FP001,Player A,Player G,6x0,Normal,,,,True
-1a Classe Simples,004FP002,Player E,Player H,5x7,Normal,,,,True
-1a Classe Simples,004FP003,Player C,Player F,6x4,Normal,,,,True
-1a Classe Simples,004FP004,Player D,Player B,,,,,,True
-1a Classe Simples,002FP001,Player A,Player H,,,,,,True
-1a Classe Simples,002FP002,Player C,None,,,,,,
-1a Classe Simples,001FP001,None,None,,,,,,
+//Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Team 1 Set, Is Team 2 Set
+1a Classe Simples,004FP001,Player A,Player G,6x0,Normal,,,,True,True
+1a Classe Simples,004FP002,Player E,Player H,5x7,Normal,,,,True,True
+1a Classe Simples,004FP003,Player C,Player F,6x4,Normal,,,,True,True
+1a Classe Simples,004FP004,Player D,Player B,,,,,,True,True
+1a Classe Simples,002FP001,Player A,Player H,,,,,,True,True
+1a Classe Simples,002FP002,Player C,None,,,,,,,
+1a Classe Simples,001FP001,None,None,,,,,,,
 
-2a Classe Simples,001GR001,PlayerA,PlayerC,6x0,Normal,,,,True
-2a Classe Simples,001GR002,PlayerA,PlayerD,6x0,Normal,,,,True
-2a Classe Simples,001GR003,PlayerC,PlayerD,6x0,Normal,,,,True
-2a Classe Simples,002GR001,PlayerB,PlayerE,6x3,Normal,,,,True
-2a Classe Simples,002GR002,PlayerB,PlayerF,6x3,Normal,,,,True
-2a Classe Simples,002GR003,PlayerB,PlayerG,6x3,Normal,,,,True
-2a Classe Simples,002GR004,PlayerE,PlayerF,6x3,Normal,,,,True
-2a Classe Simples,002GR005,PlayerE,PlayerG,6x3,Normal,,,,True
-2a Classe Simples,002GR006,PlayerF,PlayerG,6x3,Normal,,,,True
-2a Classe Simples,002FP001,PlayerB,PlayerC,,,,,,True
-2a Classe Simples,002FP002,PlayerA,PlayerE,,,,,,True
-2a Classe Simples,001FP001,None,None,,,,,,
+2a Classe Simples,001GR001,PlayerA,PlayerC,6x0,Normal,,,,True,True
+2a Classe Simples,001GR002,PlayerA,PlayerD,6x0,Normal,,,,True,True
+2a Classe Simples,001GR003,PlayerC,PlayerD,6x0,Normal,,,,True,True
+2a Classe Simples,002GR001,PlayerB,PlayerE,6x3,Normal,,,,True,True
+2a Classe Simples,002GR002,PlayerB,PlayerF,6x3,Normal,,,,True,True
+2a Classe Simples,002GR003,PlayerB,PlayerG,6x3,Normal,,,,True,True
+2a Classe Simples,002GR004,PlayerE,PlayerF,6x3,Normal,,,,True,True
+2a Classe Simples,002GR005,PlayerE,PlayerG,6x3,Normal,,,,True,True
+2a Classe Simples,002GR006,PlayerF,PlayerG,6x3,Normal,,,,True,True
+2a Classe Simples,002FP001,PlayerB,PlayerC,,,,,,True,True
+2a Classe Simples,002FP002,PlayerA,PlayerE,,,,,,True,True
+2a Classe Simples,001FP001,None,None,,,,,,,
 
-3a Classe Simples,010GU001,PlayerA,PlayerB,,,,,,True
-3a Classe Simples,010GU002,PlayerA,PlayerC,,,,,,True
-3a Classe Simples,010GU003,PlayerA,PlayerD,,,,,,True
-3a Classe Simples,010GU004,PlayerA,PlayerE,,,,,,True
-3a Classe Simples,010GU005,PlayerB,PlayerC,,,,,,True
-3a Classe Simples,010GU006,PlayerB,PlayerD,,,,,,True
-3a Classe Simples,010GU007,PlayerB,PlayerE,,,,,,True
-3a Classe Simples,010GU008,PlayerC,PlayerD,,,,,,True
-3a Classe Simples,010GU009,PlayerC,PlayerE,,,,,,True
-3a Classe Simples,010GU010,PlayerD,PlayerE,,,,,,True
+3a Classe Simples,010GU001,PlayerA,PlayerB,,,,,,True,True
+3a Classe Simples,010GU002,PlayerA,PlayerC,,,,,,True,True
+3a Classe Simples,010GU003,PlayerA,PlayerD,,,,,,True,True
+3a Classe Simples,010GU004,PlayerA,PlayerE,,,,,,True,True
+3a Classe Simples,010GU005,PlayerB,PlayerC,,,,,,True,True
+3a Classe Simples,010GU006,PlayerB,PlayerD,,,,,,True,True
+3a Classe Simples,010GU007,PlayerB,PlayerE,,,,,,True,True
+3a Classe Simples,010GU008,PlayerC,PlayerD,,,,,,True,True
+3a Classe Simples,010GU009,PlayerC,PlayerE,,,,,,True,True
+3a Classe Simples,010GU010,PlayerD,PlayerE,,,,,,True,True
 
-4a Classe Simples,001GR001,PlayerA,PlayerE,6x0,Normal,,,,True
-4a Classe Simples,001GR002,PlayerA,PlayerD,6x0,Normal,,,,True
-4a Classe Simples,001GR003,PlayerE,PlayerD,6x0,Normal,,,,True
-4a Classe Simples,002GR001,PlayerB,PlayerI,6x2,Normal,,,,True
-4a Classe Simples,002GR002,PlayerB,PlayerC,6x2,Normal,,,,True
-4a Classe Simples,002GR003,PlayerI,PlayerC,6x2,Normal,,,,True
-4a Classe Simples,003GR001,PlayerH,PlayerG,6x4,Normal,,,,True
-4a Classe Simples,003GR002,PlayerH,PlayerF,6x4,Normal,,,,True
-4a Classe Simples,003GR003,PlayerG,PlayerF,6x4,Normal,,,,True
-4a Classe Simples,004FP001,PlayerA,None,,Bye_to_T1,,,,True
-4a Classe Simples,004FP002,PlayerG,PlayerI,,,,,,True
-4a Classe Simples,004FP003,PlayerH,PlayerE,,,,,,True
-4a Classe Simples,004FP004,PlayerB,None,,Bye_to_T1,,,,True
-4a Classe Simples,002FP001,PlayerA,None,,,,,,
-4a Classe Simples,002FP002,None,PlayerB,,,,,,
-4a Classe Simples,001FP001,None,None,,,,,,
-
+4a Classe Simples,001GR001,PlayerA,PlayerE,6x0,Normal,,,,True,True
+4a Classe Simples,001GR002,PlayerA,PlayerD,6x0,Normal,,,,True,True
+4a Classe Simples,001GR003,PlayerE,PlayerD,6x0,Normal,,,,True,True
+4a Classe Simples,002GR001,PlayerB,PlayerI,6x2,Normal,,,,True,True
+4a Classe Simples,002GR002,PlayerB,PlayerC,6x2,Normal,,,,True,True
+4a Classe Simples,002GR003,PlayerI,PlayerC,6x2,Normal,,,,True,True
+4a Classe Simples,003GR001,PlayerH,PlayerG,6x4,Normal,,,,True,True
+4a Classe Simples,003GR002,PlayerH,PlayerF,6x4,Normal,,,,True,True
+4a Classe Simples,003GR003,PlayerG,PlayerF,6x4,Normal,,,,True,True
+4a Classe Simples,004FP001,PlayerA,None,,Bye_to_T1,,,,True,True
+4a Classe Simples,004FP002,PlayerG,PlayerI,,,,,,True,True
+4a Classe Simples,004FP003,PlayerH,PlayerE,,,,,,True,True
+4a Classe Simples,004FP004,PlayerB,None,,Bye_to_T1,,,,True,True
+4a Classe Simples,002FP001,PlayerA,None,,,,,,,
+4a Classe Simples,002FP002,None,PlayerB,,,,,,,
+4a Classe Simples,001FP001,None,None,,,,,,,

@@ -22,7 +22,7 @@ def GetSectionComments(section: FileSections):
   elif section is FileSections.Groups:
     comments += 'Category, Group, Player\n'
   elif section is FileSections.Matches:
-    comments += 'Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Players Set\n'
+    comments += 'Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Team 1 Set, Is Team 2 Set\n'
   return comments
 
 
@@ -106,7 +106,8 @@ def WriteDoublesSection(file, tournament: Tournament):
         text += str(double.seedNumber) + ','
         text += str(double.isSeed) + '\n'
         file.write(text)
-    file.write('\n')
+      file.write('\n')
+  file.write('\n')
 
 
 def WriteGroupsSection(file, tournament: Tournament):
@@ -138,7 +139,8 @@ def WriteMatchesSection(file, tournament: Tournament):
       matchProperties.append(str(match.sets) if match.sets != tournament.sets else '')
       matchProperties.append(match.setType.name if match.setType != tournament.setType else '')
       matchProperties.append(match.lastSetType.name if match.lastSetType != tournament.lastSetType else '')
-      matchProperties.append('True' if match.isTeamsSet else '')
+      matchProperties.append('True' if match.isTeam1Set else '')
+      matchProperties.append('True' if match.isTeam2Set else '')
       file.write(','.join(matchProperties))
       file.write('\n')
     file.write('\n')

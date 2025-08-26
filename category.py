@@ -55,6 +55,31 @@ class Category:
     return self.players.get(playerName)
 
 
+  def GetMatches(self, key:str='') -> dict[str,Match]:
+    if key == '':
+      return self.matches
+    matches = {}
+    for matchKey, match in self.matches.items():
+      if key in matchKey:
+        matches[matchKey] = match
+    return matches
+
+
+  def SortTeams(self):
+    def GetSortingValues(team:Team):
+      return (
+        team.seedNumber == 0,
+        team.seedNumber,
+        team.name,
+      )
+
+    def Sort(items:dict):
+      return sorted(items.items(), key=lambda item: GetSortingValues(item[1]))
+
+    self.players = dict(Sort(self.players))
+    self.teams = dict(Sort(self.teams))
+
+
   def SortMatches(self):
     if self.categoryType is CategoryTypes.Groups:
       self.matches = {k: self.matches[k] for k in sorted(self.matches.keys(), key=lambda x: tnh.GetMatchSortCriteria(x))}
@@ -133,7 +158,7 @@ class Category:
     return numByesWithSeeds, numByesWithoutSeeds
 
 
-  def GetGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
+  def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
     matches = list(itertools.combinations(teams, 2))
     if self.categoryType == CategoryTypes.RoundRobin:
       keyPrefix = str(len(matches)).zfill(3) + 'GU'
@@ -141,13 +166,13 @@ class Category:
       keyPrefix = str(groupNumber).zfill(3) + 'GR'
     for matchNum, matchTeams in enumerate(matches):
       matchId = keyPrefix + str(matchNum+1).zfill(3)
-      self.matches[matchId] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeamsSet=True)
+      self.matches[matchId] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
 
 
   def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
     self.UpdateCategoryType()
     if self.categoryType == CategoryTypes.RoundRobin:
-      self.GetGroupMatches(list(self.teams.values()), sets, setType, lastSetType)
+      self.AddGroupMatches(list(self.teams.values()), sets, setType, lastSetType)
 
     elif self.categoryType == CategoryTypes.SingleElimination:
       seeds = self.GetSeeds()
@@ -172,7 +197,7 @@ class Category:
           else:
             team2 = nonSeeds.pop()
 
-        self.matches[matchKey] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeamsSet=True)
+        self.matches[matchKey] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
 
     elif self.categoryType == CategoryTypes.Groups:
       if not self.groups:
@@ -192,7 +217,7 @@ class Category:
         groups.reverse()
         self.groups = groups
       for i, group in enumerate(self.groups):
-        self.GetGroupMatches(group, sets, setType, lastSetType, i+1)
+        self.AddGroupMatches(group, sets, setType, lastSetType, i+1)
 
 
   def GetBracket(self):
@@ -236,26 +261,27 @@ class Category:
 
 
   def UpdateBraket(self):
-    for matchKey, match_aux in self.matches.items():
+    for matchKey, match in self.matches.items():
       if matchKey[3:5] != 'FP':
         continue
-      if match_aux.matchWinner is MatchWinnerTypes.Team1:
-        winner = match_aux.team1
-      elif match_aux.matchWinner is MatchWinnerTypes.Team2:
-        winner = match_aux.team2
+      if match.matchWinner is MatchWinnerTypes.Team1:
+        winner = match.team1
+      elif match.matchWinner is MatchWinnerTypes.Team2:
+        winner = match.team2
+      elif match.matchWinner is MatchWinnerTypes.kNone:
+        winner = None
       else:
         continue
       nextMatchKey, position = tnh.GetNextMatchKey(matchKey)
       if nextMatchKey is not None:
         nextMatch = self.matches[nextMatchKey]
         if position == 0:
-          nextMatch.team1 = winner
-          opponent = nextMatch.team2
+          nextMatch.SetTeam(1, winner)
         else:
-          nextMatch.team2 = winner
-          opponent = nextMatch.team1
-        if opponent is not None:
-          nextMatch.isTeamsSet = True
+          nextMatch.SetTeam(2, winner)
+
+        if (nextMatch.IsTeamsSet()) and ((nextMatch.team1 is None) or (nextMatch.team2 is None)):
+          nextMatch.SetScore()
 
     if (self.categoryType is not CategoryTypes.Groups) or (self.isGroupsFinished):
       return
@@ -306,23 +332,23 @@ class Category:
       for i, match_aux in enumerate(seedsPosition):
         matchKey = matchesKeys[i]
         match = self.matches[matchKey]
-        match.isTeamsSet = True
         seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
         isMatchWithSeed = False if seedNumber is None else True
         if isMatchWithSeed:
-          match.team1 = seeds[seedNumber - 1]
+          match.SetTeam(1, seeds[seedNumber - 1])
           if seedNumber <= numByesWithSeeds:
+            match.SetTeam(2, None)
             match.SetScore()
             continue
         else:
           if (i+1) / stage <= 0.5:
-            match.team1 = secondsUp.pop(random.randint(0, len(secondsUp)-1))
+            match.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
           else:
-            match.team1 = secondsDown.pop(random.randint(0, len(secondsDown)-1))
+            match.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
         if (i+1) / stage <= 0.5:
-          match.team2 = secondsUp.pop(random.randint(0, len(secondsUp)-1))
+          match.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
         else:
-          match.team2 = secondsDown.pop(random.randint(0, len(secondsDown)-1))
+          match.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
 
 
   def DrawDubles(self, oldDoubles: list[tuple[str,str]]):
