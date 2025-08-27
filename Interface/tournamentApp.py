@@ -15,6 +15,7 @@ from newCategoryWindow import OpenNewCategoryWindow
 from newTeamWindow import OpenTeamWindow
 from changeCategoryWindow import OpenChangeCategoryWindow
 from matchesTable import CreateMatchesTable
+from classificationTables import CreateGroupClassificationTable
 from tennisHelper import GetMaximumStage
 
 
@@ -64,7 +65,7 @@ class TournamentApp(tk.Tk):
     sidebar.grid(row=0, column=0, sticky="ns")
     sidebar.grid_propagate(False)
 
-    menuItems = ["Torneio", "Categorias", "Jogadores", "Duplas", "Duplas Antigas", "Jogos", "Salvar Torneio"]
+    menuItems = ["Torneio", "Categorias", "Jogadores", "Duplas", "Duplas Antigas", "Jogos", "Grupos", "Salvar Torneio"]
 
     for item in menuItems:
       if item == "Salvar Torneio":
@@ -94,7 +95,7 @@ class TournamentApp(tk.Tk):
           command=lambda i=item: self.ShowContent(i)
         )
 
-      pady = (2,40) if item == "Jogos" else (2,2)
+      pady = (2,40) if item == "Grupos" else (2,2)
       btn.pack(fill="x", pady=pady)
 
 
@@ -322,6 +323,28 @@ class TournamentApp(tk.Tk):
       CreateMatchesTable(self, category, category.matches, teamStr, title)
 
 
+  def UpdateGroupsContent(self, categoryName=None):
+    if categoryName is None:
+      categoryName = next(iter(self.tournament.categories))
+    category = self.tournament.GetCategory(categoryName)
+
+    self.ClearContent()
+
+    combo = CreateCategoriesComboBox(self.contentFrame, self.tournament, categoryName)
+    combo.bind("<<ComboboxSelected>>", lambda event: self.UpdateGroupsContent(event.widget.get()))
+
+    if (category.groups is None) or (len(category.groups) == 0):
+      tk.Label(self.contentFrame, text="Não há grupos nessa categoria.", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=5)
+      return
+
+    for groupNumber in range(len(category.groups)):
+      classification, isFinal = category.GetGroupClassification(groupNumber)
+      isFinalText = 'finalizado' if isFinal else "em andamento"
+      title = text=f"Grupo {groupNumber+1} ({isFinalText}):"
+      CreateGroupClassificationTable(self, classification, title)
+
+
+
   def OpenNewTournamentWindow(self):
     OpenNewTournamentWindow(self)
 
@@ -436,6 +459,15 @@ class TournamentApp(tk.Tk):
       if self.tournament is not None:
         if len(self.tournament.categories) > 0:
           self.UpdateMatchesContent()
+        else:
+          tk.Label(self.contentFrame, text=f"Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+      else:
+        tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
+
+    elif menuItem == "Grupos":
+      if self.tournament is not None:
+        if len(self.tournament.categories) > 0:
+          self.UpdateGroupsContent()
         else:
           tk.Label(self.contentFrame, text=f"Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:

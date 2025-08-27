@@ -217,7 +217,7 @@ def GetClassification(matches:list[Match]):
       classification[m.team1.name]['Victories'] += 1
     elif m.matchWinner is MatchWinnerTypes.Team2:
       classification[m.team2.name]['Victories'] += 1
-    else:
+    elif m.matchWinner is MatchWinnerTypes.NotDefined:
       isFinalClassification = False
 
     classification[m.team1.name]['SetBalance'] += setBalance

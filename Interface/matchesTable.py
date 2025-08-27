@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from tennisEnums import MatchTypes, CategoryTypes, ScoreTypes
+from tennisEnums import ScoreTypes
 from category import Category
 from match import Match
 from fileReader import GetScore
@@ -31,7 +31,7 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
     team1Name = match.team1.name
   team2Name = ""
   if match.team2 is not None:
-    team2Name = match.team1.name
+    team2Name = match.team2.name
   tk.Label(window, text=f"{team1Name} x {team2Name}", font=('Arial, 14')).pack(anchor="w", padx=10, pady=5)
 
   tk.Label(window, text="Placar:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
