@@ -68,4 +68,4 @@ class Tournament:
 
   def UpdateBrackets(self):
     for category in self.categories.values():
-      category.UpdateBraket()
+      category.UpdateBracket()

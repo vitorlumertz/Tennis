@@ -8,6 +8,7 @@ from tournament import Tournament
 from category import Category
 from fileReader import ReadInputFile
 from fileSave import SaveFile
+from pdfExporter import ExportGroupCategoryToPdf
 
 from interfaceUtils import CreateCategoriesComboBox
 from newTournamentWindow import OpenNewTournamentWindow
@@ -173,15 +174,6 @@ class TournamentApp(tk.Tk):
       if (isinstance(widget, ttk.Treeview)) or (isinstance(widget, tk.Button)):
         widget.destroy()
 
-    table = ttk.Treeview(self.contentFrame, columns=('name', 'seedNumber'), show="headings")
-    table.heading('name', text="Nome")
-    table.heading('seedNumber', text="Nº Cabeça de Chave")
-    table.column('name', width=250, anchor="w")
-    table.column('seedNumber', width=250, anchor="center")
-    table.tag_configure('oddrow', background="white")
-    table.tag_configure('evenrow', background="#e0e0e0")
-    table.pack(anchor="w", padx=10, pady=20, fill="y", expand=True)
-
     category = self.tournament.GetCategory(categoryName)
     category.SortTeams()
     teams = category.teams
@@ -189,6 +181,15 @@ class TournamentApp(tk.Tk):
       teams = category.players
     elif (category.matchType is MatchTypes.Single) and (isDoublesPage):
       teams = {}
+
+    table = ttk.Treeview(self.contentFrame, columns=('name', 'seedNumber'), show="headings", height=len(teams))
+    table.heading('name', text="Nome")
+    table.heading('seedNumber', text="Nº Cabeça de Chave")
+    table.column('name', width=250, anchor="w")
+    table.column('seedNumber', width=250, anchor="center")
+    table.tag_configure('oddrow', background="white")
+    table.tag_configure('evenrow', background="#e0e0e0")
+    table.pack(anchor="w", padx=10, pady=20, fill="y", expand=True)
 
     for i, team in enumerate(teams.values()):
       data = (
@@ -255,7 +256,7 @@ class TournamentApp(tk.Tk):
 
 
   def UpdateOldDoublesContent(self):
-    table = ttk.Treeview(self.contentFrame, columns=('player1', 'player2'), show="headings")
+    table = ttk.Treeview(self.contentFrame, columns=('player1', 'player2'), show="headings", height=len(self.tournament.oldDoubles))
     table.heading('player1', text="Jogador 1")
     table.heading('player2', text="Jogador 2")
     table.column('player1', width=250, anchor="w")
@@ -360,6 +361,21 @@ class TournamentApp(tk.Tk):
       self.UpdateCategories(category.name)
 
 
+  def ExportPdf(self, category:Category):
+    if not category.isInitialized:
+      messagebox.showwarning("Aviso", "É preciso iniciar a categoria.")
+      return
+
+    filePath = filedialog.asksaveasfilename(
+      title="Salvar arquivo como",
+      initialfile=f"{self.tournament.name} - {category.name}.pdf",
+      defaultextension=".pdf",
+      filetypes=[("Arquivos PDF", "*.pdf"), ("Todos os arquivos", "*.*")],
+    )
+    if filePath != '':
+      ExportGroupCategoryToPdf(category, filePath)
+
+
   def DeleteCategory(self, category:Category):
     isConfirmed = messagebox.askyesno("Confirmação", f"Deseja realmente excluir a categoria {category.name}?")
     if not isConfirmed:
@@ -400,6 +416,15 @@ class TournamentApp(tk.Tk):
         self.contentFrame,
         text="Iniciar categoria",
         command=lambda: self.StartCategory(category),
+        font=('Arial, 12'),
+      )
+      button.pack(anchor="w", padx=10, pady=(20,5))
+
+    if category is not None:
+      button = tk.Button(
+        self.contentFrame,
+        text="Exportar PDF",
+        command=lambda: self.ExportPdf(category),
         font=('Arial, 12'),
       )
       button.pack(anchor="w", padx=10, pady=(20,5))

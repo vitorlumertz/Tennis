@@ -250,17 +250,26 @@ class Category:
         self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType)
 
 
-  def GetGroupClassification(self, i: int):
-    matchKeyPrefix = str(i+1).zfill(3) + 'GR'
+  def GetGroupMatches(self, groupNumber:int) -> list[Match]:
+    matchKeyPrefix = str(groupNumber + 1).zfill(3) + 'GR'
     matches = []
     for matchKey, match in self.matches.items():
       if (matchKey[:5] == matchKeyPrefix):
         matches.append(match)
+    return matches
 
+
+  def GetGroupClassification(self, groupNumber:int):
+    matches = self.GetGroupMatches(groupNumber)
     return tnh.GetClassification(matches)
 
 
-  def UpdateBraket(self):
+  def UpdateBracket(self):
+
+    def IsUpInBracket(matchNum, stage):
+      return matchNum / stage <= 0.5
+
+
     for matchKey, match in self.matches.items():
       if matchKey[3:5] != 'FP':
         continue
@@ -283,72 +292,102 @@ class Category:
         if (nextMatch.IsTeamsSet()) and ((nextMatch.team1 is None) or (nextMatch.team2 is None)):
           nextMatch.SetScore()
 
-    if (self.categoryType is not CategoryTypes.Groups) or (self.isGroupsFinished):
-      return
-
-    classified = {}
-    for i, group in enumerate(self.groups):
-      groupClassification, isFinalClassification = self.GetGroupClassification(i)
-      if isFinalClassification:
-        classifiedNames = list(groupClassification.keys())[:2]
-        first = {classifiedNames[0]: groupClassification[classifiedNames[0]]}
-        second = {classifiedNames[1]: groupClassification[classifiedNames[1]]}
-        classified.update({i+1: (first, second)})
+    if (self.categoryType is CategoryTypes.Groups) and (not self.isGroupsFinished):
+      classified = {}
+      for i, group in enumerate(self.groups):
+        groupClassification, isFinalClassification = self.GetGroupClassification(i)
+        if isFinalClassification:
+          classifiedNames = list(groupClassification.keys())[:2]
+          first = {classifiedNames[0]: groupClassification[classifiedNames[0]]}
+          second = {classifiedNames[1]: groupClassification[classifiedNames[1]]}
+          classified.update({i+1: (first, second)})
+        else:
+          break
       else:
-        break
-    else:
-      self.isGroupsFinished = True
-      firstClassified = {}
-      firstGroupDict = {}
-      for group, clf in classified.items():
-        firstGroupDict.update({next(iter(clf[0].keys())): group})
-        firstClassified.update(clf[0])
-      firstClassified = tnh.SortClassification(firstClassified)
-      finalClassification = []
-      for playerName in firstClassified.keys():
-        group = firstGroupDict[playerName]
-        first = self.teams[playerName]
-        second = self.teams[next(iter(classified[group][1].keys()))]
-        finalClassification.append((first, second))
+        self.isGroupsFinished = True
+        firstClassified = {}
+        firstGroupDict = {}
+        for group, clf in classified.items():
+          firstGroupDict.update({next(iter(clf[0].keys())): group})
+          firstClassified.update(clf[0])
+        firstClassified = tnh.SortClassification(firstClassified)
+        finalClassification = []
+        for playerName in firstClassified.keys():
+          group = firstGroupDict[playerName]
+          first = self.teams[playerName]
+          second = self.teams[next(iter(classified[group][1].keys()))]
+          finalClassification.append((first, second))
 
-      seeds = [i[0] for i in finalClassification]
-      numSeeds = len(seeds)
-      numTeams = numSeeds * 2
-      seedsPosition = tnh.GetSeedsPositions(numTeams, numSeeds)
-      secondsUp = []
-      secondsDown = []
-      stage = len(seedsPosition)
-      for i, match_aux in enumerate(seedsPosition):
-        seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
-        if seedNumber is not None:
-          second = finalClassification[seedNumber-1][1]
-          if (i+1) / stage <= 0.5:
-            secondsDown.append(second)
-          else:
-            secondsUp.append(second)
+        seeds = [i[0] for i in finalClassification]
+        numSeeds = len(seeds)
+        numTeams = numSeeds * 2
+        seedsPosition = tnh.GetSeedsPositions(numTeams, numSeeds)
+        secondsUp = []
+        secondsDown = []
+        stage = len(seedsPosition)
+        for i, match_aux in enumerate(seedsPosition):
+          seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
+          if seedNumber is not None:
+            second = finalClassification[seedNumber-1][1]
+            if IsUpInBracket(i+1, stage):
+              secondsDown.append(second)
+            else:
+              secondsUp.append(second)
 
-      numByesWithSeeds, _ = self.GetByes(numSeeds, numTeams)
-      matchesKeys = tnh.GetMatchesKeys(numTeams)
-      for i, match_aux in enumerate(seedsPosition):
-        matchKey = matchesKeys[i]
-        match = self.matches[matchKey]
-        seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
-        isMatchWithSeed = False if seedNumber is None else True
-        if isMatchWithSeed:
-          match.SetTeam(1, seeds[seedNumber - 1])
-          if seedNumber <= numByesWithSeeds:
-            match.SetTeam(2, None)
-            match.SetScore()
-            continue
-        else:
-          if (i+1) / stage <= 0.5:
-            match.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
+        numMatchesWithoutSeedsUp = 0
+        numMatchesWithoutSeedsDown = 0
+        for i, match_aux in enumerate(seedsPosition):
+          if match_aux == (None, None):
+            if IsUpInBracket(i+1, stage):
+              numMatchesWithoutSeedsUp += 1
+            else:
+              numMatchesWithoutSeedsDown += 1
+
+        numByesWithoutSeedsUp = numMatchesWithoutSeedsUp * 2 - len(secondsUp)
+        numByesWithoutSeedsDown = numMatchesWithoutSeedsDown * 2 - len(secondsDown)
+
+        numByesWithSeeds, _ = self.GetByes(numSeeds, numTeams)
+        matchesKeys = tnh.GetMatchesKeys(numTeams)
+        byesWithoutSeedsUpCount = 0
+        byesWithoutSeedsDownCount = 0
+        for i, match_aux in enumerate(seedsPosition):
+          matchKey = matchesKeys[i]
+          match = self.matches[matchKey]
+          seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
+          isMatchWithSeed = False if seedNumber is None else True
+          if isMatchWithSeed:
+            match.SetTeam(1, seeds[seedNumber - 1])
+            if seedNumber <= numByesWithSeeds:
+              match.SetTeam(2, None)
+              match.SetScore()
+              continue
           else:
-            match.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
-        if (i+1) / stage <= 0.5:
-          match.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
-        else:
-          match.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+            if IsUpInBracket(i+1, stage):
+              match.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
+            else:
+              match.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+
+          if not isMatchWithSeed:
+            isBye = False
+            if IsUpInBracket(i+1, stage):
+              if byesWithoutSeedsUpCount < numByesWithoutSeedsUp:
+                byesWithoutSeedsUpCount += 1
+                isBye = True
+            else:
+              if byesWithoutSeedsDownCount < numByesWithoutSeedsDown:
+                byesWithoutSeedsDownCount += 1
+                isBye = True
+            if isBye:
+              match.SetTeam(2, None)
+              match.SetScore()
+              continue
+
+          if IsUpInBracket(i+1, stage):
+            match.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
+          else:
+            match.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+
+        self.UpdateBracket()
 
 
   def DrawDubles(self, oldDoubles: list[tuple[str,str]]):
