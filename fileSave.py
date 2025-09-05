@@ -82,7 +82,8 @@ def WritePlayersSection(file, tournament: Tournament):
       text = player.name + ','
       text += category.name + ','
       text += str(player.seedNumber) + ','
-      text += str(player.isSeed) + '\n'
+      text += str(player.isSeed) + ','
+      text += str(player.isPresent) + '\n'
       file.write(text)
     file.write('\n')
 

@@ -3,6 +3,11 @@ from tkinter import ttk
 from tournament import Tournament
 
 
+def ClearFrame(frame:tk.Frame):
+  for widget in frame.winfo_children():
+    widget.destroy()
+
+
 def CreateCategoriesComboBox(parentFrame:tk.Frame, tournament:Tournament, categoryName=None, isBackGroundWhite=True) -> ttk.Combobox:
   if isBackGroundWhite:
     tk.Label(parentFrame, text="Selecione a Categoria:", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))

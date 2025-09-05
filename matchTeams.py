@@ -11,8 +11,9 @@ class Team:
 
 
 class Player(Team):
-  def __init__(self, name:str, seedNumber=0, isSeed=None):
+  def __init__(self, name:str, seedNumber=0, isSeed=None, isPresent=False):
     super().__init__(name, seedNumber, isSeed)
+    self.isPresent = isPresent
 
 
 class Double(Team):

@@ -10,7 +10,7 @@ from fileReader import ReadInputFile
 from fileSave import SaveFile
 from pdfExporter import ExportGroupCategoryToPdf
 
-from interfaceUtils import CreateCategoriesComboBox
+from interfaceUtils import CreateCategoriesComboBox, ClearFrame
 from newTournamentWindow import OpenNewTournamentWindow
 from newCategoryWindow import OpenNewCategoryWindow
 from newTeamWindow import OpenTeamWindow
@@ -26,7 +26,7 @@ class TournamentApp(tk.Tk):
     self.title("Gerenciador de Torneios de Tênis")
     self.state("zoomed")
 
-    self.columnconfigure(1, weight=1)  # área do conteúdo expande
+    self.columnconfigure(1, weight=1)
     self.rowconfigure(0, weight=1)
 
     self.CreateSidebar()
@@ -66,7 +66,7 @@ class TournamentApp(tk.Tk):
     sidebar.grid(row=0, column=0, sticky="ns")
     sidebar.grid_propagate(False)
 
-    menuItems = ["Torneio", "Categorias", "Jogadores", "Duplas", "Duplas Antigas", "Jogos", "Grupos", "Salvar Torneio"]
+    menuItems = ["Torneio", "Categorias", "Jogadores", "Presença", "Duplas", "Duplas Antigas", "Jogos", "Grupos", "Salvar Torneio"]
 
     for item in menuItems:
       if item == "Salvar Torneio":
@@ -133,8 +133,13 @@ class TournamentApp(tk.Tk):
 
 
   def ClearContent(self):
-    for widget in self.contentFrame.winfo_children():
-      widget.destroy()
+    ClearFrame(self.contentFrame)
+
+
+  def GetCategory(self, categoryName=None):
+    if categoryName is None:
+      categoryName = next(iter(self.tournament.categories))
+    return self.tournament.GetCategory(categoryName)
 
 
   def UpdateTournamentContent(self):
@@ -255,6 +260,49 @@ class TournamentApp(tk.Tk):
     ).pack(anchor="w", padx=10, pady=(5,5))
 
 
+  def UpdatePresentsAndAbsentsLists(self, categoryName, frame):
+
+    def InsertPlayers(players, table:ttk.Treeview):
+      for i, player in enumerate(players):
+        if i % 2 == 0:
+          tags = ('evenrow',)
+        else:
+          tags = ('oddrow',)
+        table.insert(parent='', index='end', values=(player,), tags=tags)
+
+
+    ClearFrame(frame)
+    category = self.GetCategory(categoryName)
+
+    presents = sorted([name for name, player in category.players.items() if player.isPresent])
+    absents = sorted([name for name, player in category.players.items() if not player.isPresent])
+
+    presentsTable = ttk.Treeview(frame, columns=("name"), show="headings", height=len(presents))
+    presentsTable.heading("name", text="Presentes")
+    presentsTable.tag_configure('oddrow', background="white")
+    presentsTable.tag_configure('evenrow', background="#e0e0e0")
+    presentsTable.pack(side="left", fill="both", expand=True, padx=(0,5))
+    InsertPlayers(presents, presentsTable)
+
+    absentsTable = ttk.Treeview(frame, columns=("name"), show="headings", height=len(absents))
+    absentsTable.heading("name", text="Ausentes")
+    absentsTable.tag_configure('oddrow', background="white")
+    absentsTable.tag_configure('evenrow', background="#e0e0e0")
+    absentsTable.pack(side="left", fill="both", expand=True, padx=(5,0))
+    InsertPlayers(absents, absentsTable)
+
+    def UpdatePresence(event:tk.Event):
+      table:ttk.Treeview = event.widget
+      for item in table.selection():
+        playerName = table.item(item)["values"][0]
+        player = category.GetPlayer(playerName)
+        player.isPresent = not player.isPresent
+      self.UpdatePresentsAndAbsentsLists(categoryName, frame)
+
+    presentsTable.bind("<F5>", UpdatePresence)
+    absentsTable.bind("<F5>", UpdatePresence)
+
+
   def UpdateOldDoublesContent(self):
     table = ttk.Treeview(self.contentFrame, columns=('player1', 'player2'), show="headings", height=len(self.tournament.oldDoubles))
     table.heading('player1', text="Jogador 1")
@@ -278,9 +326,7 @@ class TournamentApp(tk.Tk):
 
 
   def UpdateMatchesContent(self, categoryName=None):
-    if categoryName is None:
-      categoryName = next(iter(self.tournament.categories))
-    category = self.tournament.GetCategory(categoryName)
+    category = self.GetCategory(categoryName)
     category.SortMatches()
 
     self.ClearContent()
@@ -325,9 +371,7 @@ class TournamentApp(tk.Tk):
 
 
   def UpdateGroupsContent(self, categoryName=None):
-    if categoryName is None:
-      categoryName = next(iter(self.tournament.categories))
-    category = self.tournament.GetCategory(categoryName)
+    category = self.GetCategory(categoryName)
 
     self.ClearContent()
 
@@ -341,7 +385,7 @@ class TournamentApp(tk.Tk):
     for groupNumber in range(len(category.groups)):
       classification, isFinal = category.GetGroupClassification(groupNumber)
       isFinalText = 'finalizado' if isFinal else "em andamento"
-      title = text=f"Grupo {groupNumber+1} ({isFinalText}):"
+      title = f"Grupo {groupNumber+1} ({isFinalText}):"
       CreateGroupClassificationTable(self, classification, title)
 
 
@@ -473,7 +517,24 @@ class TournamentApp(tk.Tk):
             combo.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsTables(event.widget.get(), True))
             self.UpdateTeamsTables(combo['values'][0], True)
         else:
-          tk.Label(self.contentFrame, text=f"Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+      else:
+        tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
+
+    elif menuItem == "Presença":
+      if self.tournament is not None:
+        if len(self.tournament.categories) > 0:
+          comboboxFrame = tk.Frame(self.contentFrame, bg="white")
+          comboboxFrame.pack(fill="x", padx=0, pady=0)
+
+          tablesFrame = tk.Frame(self.contentFrame, bg="white")
+          tablesFrame.pack(fill="both", expand=True, padx=10, pady=20)
+
+          combo = CreateCategoriesComboBox(comboboxFrame, self.tournament)
+          combo.bind("<<ComboboxSelected>>", lambda event: self.UpdatePresentsAndAbsentsLists(event.widget.get(), tablesFrame))
+          self.UpdatePresentsAndAbsentsLists(combo['values'][0], tablesFrame)
+        else:
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
@@ -485,7 +546,7 @@ class TournamentApp(tk.Tk):
         if len(self.tournament.categories) > 0:
           self.UpdateMatchesContent()
         else:
-          tk.Label(self.contentFrame, text=f"Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
@@ -494,7 +555,7 @@ class TournamentApp(tk.Tk):
         if len(self.tournament.categories) > 0:
           self.UpdateGroupsContent()
         else:
-          tk.Label(self.contentFrame, text=f"Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 

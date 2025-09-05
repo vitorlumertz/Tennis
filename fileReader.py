@@ -148,11 +148,14 @@ def ReadPlayer(string, tournament: Tournament):
   categoryName = CleanString(info[1], cleanSpaces=False, toUper=False)
   seedNumber = 0
   isSeed = None
+  isPresent = False
   if len(info) > 2:
     seedNumber = int(CleanString(info[2], toUper=False))
   if len(info) > 3:
     isSeed = GetBoolean(info[3])
-  player = Player(name, seedNumber, isSeed)
+  if len(info) > 4:
+    isPresent = GetBoolean(info[4])
+  player = Player(name, seedNumber, isSeed, isPresent)
   tournament.AddTeam(player, categoryName)
 
 
