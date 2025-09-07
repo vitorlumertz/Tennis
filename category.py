@@ -8,6 +8,7 @@ import random
 import math
 import random
 from copy import deepcopy
+from collections import defaultdict
 
 
 class Category:
@@ -53,6 +54,22 @@ class Category:
 
   def GetPlayer(self, playerName:str) -> Player|None:
     return self.players.get(playerName)
+
+
+  def GetTeamsSummary(self, isPlayers=False) -> str:
+    if isPlayers and self.matchType is MatchTypes.Double:
+      teams = self.players
+    else:
+      teams = self.teams
+    summary = f"Quantidade total: {len(teams)}\n\n"
+    seedNumbersCount = defaultdict(int)
+    for team in teams.values():
+      seedNumbersCount[team.seedNumber] += 1
+    for t in sorted(seedNumbersCount.items()):
+      seedNumber, count = t
+      summary += f"Quantidade de cabeças de chave nº {seedNumber}: {count}\n"
+
+    return summary
 
 
   def GetMatches(self, key:str='') -> dict[str,Match]:

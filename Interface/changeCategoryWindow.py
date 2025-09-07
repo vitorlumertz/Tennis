@@ -7,13 +7,14 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from matchTeams import Player, Double, Team
-from tennisEnums import MatchTypes
+from matchTeams import Team
 from interfaceUtils import CreateCategoriesComboBox
 
 
 def ChangeCategories(
   app: "TournamentApp",
+  frame: tk.Frame,
+  summaryFrame:tk.Frame,
   window: tk.Toplevel,
   categoryName: str,
   categoryComboBox: ttk.Combobox,
@@ -32,10 +33,10 @@ def ChangeCategories(
       messagebox.showerror("Erro", f"Não foi possível trocar {teamName} para a categoria {newCategory.name}.\n\n{e}")
 
   window.destroy()
-  app.UpdateTeamsTables(categoryName, isDoublesPage)
+  app.UpdateTeamsContent(frame, summaryFrame, categoryName, isDoublesPage)
 
 
-def OpenChangeCategoryWindow(app:"TournamentApp", categoryName:str, teams:dict[str,Team], isDoublesPage:bool, table):
+def OpenChangeCategoryWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:tk.Frame, categoryName:str, teams:dict[str,Team], isDoublesPage:bool, table):
   window = tk.Toplevel(app)
   window.title("Troca de Categoria")
   window.geometry("300x200")
@@ -45,6 +46,6 @@ def OpenChangeCategoryWindow(app:"TournamentApp", categoryName:str, teams:dict[s
   tk.Button(
     window,
     text="Atualizar",
-    command=lambda: ChangeCategories(app, window, categoryName, categoryComboBox, teams, isDoublesPage, table),
+    command=lambda: ChangeCategories(app, frame, summaryFrame, window, categoryName, categoryComboBox, teams, isDoublesPage, table),
     font=('Arial, 12'),
   ).pack(anchor="w", padx=10, pady=(15,5))

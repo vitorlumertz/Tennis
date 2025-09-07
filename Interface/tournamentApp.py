@@ -174,8 +174,8 @@ class TournamentApp(tk.Tk):
     ).pack(anchor="w", padx=10, pady=(20,5))
 
 
-  def UpdateTeamsTables(self, categoryName, isDoublesPage=False):
-    for widget in self.contentFrame.winfo_children():
+  def UpdateTeamsTables(self, frame:tk.Frame, summaryFrame:tk.Frame, categoryName, isDoublesPage=False):
+    for widget in frame.winfo_children():
       if (isinstance(widget, ttk.Treeview)) or (isinstance(widget, tk.Button)):
         widget.destroy()
 
@@ -187,7 +187,7 @@ class TournamentApp(tk.Tk):
     elif (category.matchType is MatchTypes.Single) and (isDoublesPage):
       teams = {}
 
-    table = ttk.Treeview(self.contentFrame, columns=('name', 'seedNumber'), show="headings", height=len(teams))
+    table = ttk.Treeview(frame, columns=('name', 'seedNumber'), show="headings", height=len(teams))
     table.heading('name', text="Nome")
     table.heading('seedNumber', text="Nº Cabeça de Chave")
     table.column('name', width=250, anchor="w")
@@ -216,7 +216,7 @@ class TournamentApp(tk.Tk):
           teamName = table.item(item)["values"][0]
           teams.pop(teamName)
           table.delete(item)
-      self.UpdateTeamsTables(categoryName, isDoublesPage)
+      self.UpdateTeamsContent(frame, summaryFrame, categoryName, isDoublesPage)
     table.bind("<Delete>", DeleteSelectedItems)
 
     def UpdateTeam(_):
@@ -224,7 +224,7 @@ class TournamentApp(tk.Tk):
       if len(selectedItems) != 1:
         messagebox.showwarning("Aviso", "Só é possível atualizar um item por vez.")
       else:
-        OpenTeamWindow(self, categoryName, isDoublesPage, True, table.item(selectedItems[0])["values"])
+        OpenTeamWindow(self, frame, summaryFrame, categoryName, isDoublesPage, True, table.item(selectedItems[0])["values"])
     table.bind("<F2>", UpdateTeam)
 
     def ChangeSeedNumbers(_):
@@ -245,19 +245,30 @@ class TournamentApp(tk.Tk):
           teamName = table.item(item)["values"][0]
           newSeedNumber = change[table.item(item)["values"][1]]
           teams[teamName].seedNumber = newSeedNumber
-      self.UpdateTeamsTables(categoryName, isDoublesPage)
+      self.UpdateTeamsContent(frame, summaryFrame, categoryName, isDoublesPage)
     table.bind("<F3>", ChangeSeedNumbers)
 
     def ChangeCategory(_):
-      OpenChangeCategoryWindow(self, categoryName, teams, isDoublesPage, table)
+      OpenChangeCategoryWindow(self, frame, summaryFrame, categoryName, teams, isDoublesPage, table)
     table.bind("<F4>", ChangeCategory)
 
     tk.Button(
-      self.contentFrame,
+      frame,
       text="Adicionar",
-      command=lambda: OpenTeamWindow(self, categoryName, isDoublesPage),
+      command=lambda: OpenTeamWindow(self, frame, summaryFrame, categoryName, isDoublesPage),
       font=('Arial, 12'),
     ).pack(anchor="w", padx=10, pady=(5,5))
+
+
+  def UpdateTeamsSummary(self, frame:tk.Frame, categoryName:str, isDoublesPage:bool):
+    ClearFrame(frame)
+    summary = self.tournament.GetCategory(categoryName).GetTeamsSummary(not isDoublesPage)
+    tk.Label(frame, text=summary, font=('Arial, 16'), bg='white', justify="left").pack(anchor="w", padx=50, pady=90)
+
+
+  def UpdateTeamsContent(self, teamsFrame:tk.Frame, summaryFrame:tk.Frame, categoryName:str, isDoublesPage=False):
+    self.UpdateTeamsTables(teamsFrame, summaryFrame, categoryName, isDoublesPage)
+    self.UpdateTeamsSummary(summaryFrame, categoryName, isDoublesPage)
 
 
   def UpdatePresentsAndAbsentsLists(self, categoryName, frame):
@@ -509,13 +520,17 @@ class TournamentApp(tk.Tk):
     elif (menuItem == "Jogadores") or (menuItem == "Duplas"):
       if self.tournament is not None:
         if len(self.tournament.categories) > 0:
-          combo = CreateCategoriesComboBox(self.contentFrame, self.tournament)
+          leftFrame = tk.Frame(self.contentFrame, bg="white")
+          rightFrame = tk.Frame(self.contentFrame, bg="white")
+          leftFrame.pack(side="left", fill="y", padx=0, pady=0)
+          rightFrame.pack(side="left", fill="y", padx=0, pady=0)
+          combobox = CreateCategoriesComboBox(leftFrame, self.tournament)
           if menuItem == "Jogadores":
-            combo.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsTables(event.widget.get()))
-            self.UpdateTeamsTables(combo['values'][0])
+            combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsContent(leftFrame, rightFrame, event.widget.get()))
+            self.UpdateTeamsContent(leftFrame, rightFrame, combobox['values'][0])
           else:
-            combo.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsTables(event.widget.get(), True))
-            self.UpdateTeamsTables(combo['values'][0], True)
+            combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsContent(leftFrame, rightFrame, event.widget.get(), True))
+            self.UpdateTeamsContent(leftFrame, rightFrame, combobox['values'][0], True)
         else:
           tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
@@ -530,9 +545,9 @@ class TournamentApp(tk.Tk):
           tablesFrame = tk.Frame(self.contentFrame, bg="white")
           tablesFrame.pack(fill="both", expand=True, padx=10, pady=20)
 
-          combo = CreateCategoriesComboBox(comboboxFrame, self.tournament)
-          combo.bind("<<ComboboxSelected>>", lambda event: self.UpdatePresentsAndAbsentsLists(event.widget.get(), tablesFrame))
-          self.UpdatePresentsAndAbsentsLists(combo['values'][0], tablesFrame)
+          combobox = CreateCategoriesComboBox(comboboxFrame, self.tournament)
+          combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdatePresentsAndAbsentsLists(event.widget.get(), tablesFrame))
+          self.UpdatePresentsAndAbsentsLists(combobox['values'][0], tablesFrame)
         else:
           tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
       else:

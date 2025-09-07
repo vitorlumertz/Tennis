@@ -13,6 +13,8 @@ from tennisEnums import MatchTypes
 
 def CreateTeam(
   app: "TournamentApp",
+  frame: tk.Frame,
+  summaryFrame:tk.Frame,
   window: tk.Toplevel,
   categoryName: str,
   name1Entry: tk.Entry,
@@ -52,10 +54,10 @@ def CreateTeam(
   if isUpdate:
     window.destroy()
 
-  app.UpdateTeamsTables(categoryName, isDoublesPage)
+  app.UpdateTeamsContent(frame, summaryFrame, categoryName, isDoublesPage)
 
 
-def OpenTeamWindow(app:"TournamentApp", categoryName:str, isDoublesPage=False, isUpdate=False, row=None):
+def OpenTeamWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:tk.Frame, categoryName:str, isDoublesPage=False, isUpdate=False, row=None):
   title = "Dupla" if isDoublesPage else "Jogador"
   window = tk.Toplevel(app)
   window.title(title)
@@ -89,7 +91,7 @@ def OpenTeamWindow(app:"TournamentApp", categoryName:str, isDoublesPage=False, i
   if isUpdate:
     if isDoublesPage:
       doubleName = row[0]
-      names = doubleName.split(',')
+      names = doubleName.split('/')
       name1 = names[0]
       name2 = names[1]
       name2Entry.delete(0, tk.END)
@@ -110,6 +112,6 @@ def OpenTeamWindow(app:"TournamentApp", categoryName:str, isDoublesPage=False, i
   tk.Button(
     window,
     text=text,
-    command=lambda: CreateTeam(app, window, categoryName, name1Entry, name2Entry, seedNumberCombo, isDoublesPage, isUpdate, oldTeamName),
+    command=lambda: CreateTeam(app, frame, summaryFrame, window, categoryName, name1Entry, name2Entry, seedNumberCombo, isDoublesPage, isUpdate, oldTeamName),
     font=('Arial, 12'),
   ).pack(anchor="w", padx=10, pady=(15,5))
