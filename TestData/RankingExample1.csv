@@ -1,0 +1,5 @@
+Category,Position,Name,Points,1,2,3,DiscardedValue
+A,1,Player A,18,10,2,6,0
+A,2,Player B,8,8,,,0
+A,3,Player C,8,4,4,0,0
+A,4,Player D,6,,6,0,0

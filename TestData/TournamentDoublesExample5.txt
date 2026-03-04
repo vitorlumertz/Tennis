@@ -1,0 +1,65 @@
+[TOURNAMENT]
+//Name, Number of Sets, Set Type, Last Set Type
+TournamentDoublesExample5,1,NormalSet,NormalSet
+
+[CATEGORIES]
+//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized
+A,Groups,Double,True,,True
+B,RoundRobin,Double,True,,True
+
+[PLAYERS]
+//Name, Category, Seed Number, Is Seed
+
+
+[OLDDOUBLES]
+//Player 1, Player 2
+
+[DOUBLES]
+//Player 1, Player 2, Category, Seed Number, Is Seed
+Player A,Player B,A,0,False
+Player C,Player D,A,0,True
+Player E,Player F,A,0,False
+Player G,Player H,A,0,False
+Player I,Player J,A,0,False
+Player K,Player L,A,0,True
+
+Player A,Player B,B,0,False
+Player C,Player D,B,0,False
+Player E,Player F,B,0,True
+Player G,Player H,B,0,False
+
+
+[GROUPS]
+//Category, Group, Player
+A,1,Player K/Player L
+A,1,Player I/Player J
+A,1,Player A/Player B
+
+A,2,Player C/Player D
+A,2,Player G/Player H
+A,2,Player E/Player F
+
+B,1,Player A/Player B
+B,1,Player C/Player D
+B,1,Player E/Player F
+B,1,Player G/Player H
+
+[MATCHES]
+//Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Team 1 Set, Is Team 2 Set
+A,001GR001,Player K/Player L,Player I/Player J,6x0,Normal,,,,True,True
+A,001GR002,Player K/Player L,Player A/Player B,6x0,Normal,,,,True,True
+A,001GR003,Player I/Player J,Player A/Player B,6x0,Normal,,,,True,True
+A,002GR001,Player C/Player D,Player G/Player H,6x3,Normal,,,,True,True
+A,002GR002,Player C/Player D,Player E/Player F,6x3,Normal,,,,True,True
+A,002GR003,Player G/Player H,Player E/Player F,6x3,Normal,,,,True,True
+A,002FP001,Player K/Player L,Player G/Player H,6x4,Normal,,,,True,True
+A,002FP002,Player C/Player D,Player I/Player J,6x4,Normal,,,,True,True
+A,001FP001,Player K/Player L,Player C/Player D,6x2,Normal,,,,True,True
+
+B,006GU001,Player A/Player B,Player C/Player D,6x0,Normal,,,,True,True
+B,006GU002,Player A/Player B,Player E/Player F,6x0,Normal,,,,True,True
+B,006GU003,Player A/Player B,Player G/Player H,6x0,Normal,,,,True,True
+B,006GU004,Player C/Player D,Player E/Player F,6x0,Normal,,,,True,True
+B,006GU005,Player C/Player D,Player G/Player H,6x0,Normal,,,,True,True
+B,006GU006,Player E/Player F,Player G/Player H,6x0,Normal,,,,True,True
+

@@ -103,14 +103,20 @@ class Category:
 
 
   def UpdateCategoryType(self):
-    if (self.categoryType == CategoryTypes.Automatic) and (self.teams is not None):
-      n = len(self.teams)
+    if self.teams is None:
+      return
+
+    n = len(self.teams)
+    if self.categoryType == CategoryTypes.Automatic:
       if n < 6:
         self.categoryType = CategoryTypes.RoundRobin
       elif n < 10:
         self.categoryType = CategoryTypes.Groups
       else:
         self.categoryType = CategoryTypes.SingleElimination
+
+    elif (self.categoryType == CategoryTypes.Groups) and (n < 6):
+      self.categoryType = CategoryTypes.RoundRobin
 
 
   def GetNumberOfGroups(self):
@@ -189,7 +195,9 @@ class Category:
   def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
     self.UpdateCategoryType()
     if self.categoryType == CategoryTypes.RoundRobin:
-      self.AddGroupMatches(list(self.teams.values()), sets, setType, lastSetType)
+      group = list(self.teams.values())
+      self.groups = [group]
+      self.AddGroupMatches(group, sets, setType, lastSetType)
 
     elif self.categoryType == CategoryTypes.SingleElimination:
       seeds = self.GetSeeds()
@@ -268,6 +276,9 @@ class Category:
 
 
   def GetGroupMatches(self, groupNumber:int) -> list[Match]:
+    if self.categoryType is CategoryTypes.RoundRobin:
+      return list(self.matches.values())
+
     matchKeyPrefix = str(groupNumber + 1).zfill(3) + 'GR'
     matches = []
     for matchKey, match in self.matches.items():
@@ -276,7 +287,15 @@ class Category:
     return matches
 
 
-  def GetGroupClassification(self, groupNumber:int):
+  def GetEliminatoryMAtches(self) -> dict[str, Match]:
+    matches = {}
+    for matchKey, match in self.matches.items():
+      if (matchKey[3:5] == 'FP'):
+        matches[matchKey] = match
+    return matches
+
+
+  def GetGroupClassification(self, groupNumber:int) -> tuple[dict[str, dict[str, int]], bool]:
     matches = self.GetGroupMatches(groupNumber)
     return tnh.GetClassification(matches)
 

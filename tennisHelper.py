@@ -199,7 +199,7 @@ def SortClassification(classification):
   return finalClassification
 
 
-def GetClassification(matches:list[Match]):
+def GetClassification(matches:list[Match]) -> tuple[dict[str, dict[str, int]], bool]:
   teams = GetTeamsFromMatches(matches)
   classification = {}
   for team in teams:
