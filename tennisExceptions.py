@@ -6,6 +6,15 @@ class CategoryNotFound(Exception):
     return f"Category ({self.categoryName}) does not exist."
 
 
+class PlayerNotFound(Exception):
+  def __init__(self, playerName, categoryName):
+    self.playerName = playerName
+    self.categoryName = categoryName
+
+  def __str__(self):
+    return f"Player ({self.playerName}) not found in category ({self.categoryName})."
+
+
 class AddingDoubleInSingleCategory(Exception):
   def __init__(self, doubleName, categoryName):
     self.doubleName = doubleName

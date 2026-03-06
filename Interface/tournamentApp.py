@@ -357,7 +357,7 @@ class TournamentApp(tk.Tk):
       8: 'Oitavas de Final:',
     }
 
-    if (category.categoryType == CategoryTypes.Groups) or (category.categoryType == CategoryTypes.SingleElimination):
+    if (category.categoryType == CategoryTypes.Groups and category.groups is not None) or (category.categoryType == CategoryTypes.SingleElimination):
       if category.categoryType == CategoryTypes.Groups:
         for i in range(len(category.groups)):
           key = str(i+1).zfill(3) + 'GR'
@@ -412,8 +412,11 @@ class TournamentApp(tk.Tk):
 
     isConfirmed = messagebox.askyesno("Confirmação", f"Deseja realmente iniciar a categoria {category.name}?")
     if isConfirmed:
-      self.tournament.StartCategory(category.name)
-      self.UpdateCategories(category.name)
+      try:
+        self.tournament.StartCategory(category.name)
+        self.UpdateCategories(category.name)
+      except Exception as e:
+        messagebox.showerror("Erro", f"Ocorreu um erro ao iniciar a categoria:\n\n{e}")
 
 
   def ExportPdf(self, category:Category):
