@@ -281,7 +281,7 @@ class Category:
     return tnh.GetClassification(matches)
 
 
-  def UpdateBracket(self):
+  def UpdateBracket(self) -> None:
 
     def IsUpInBracket(matchNum, stage):
       return matchNum / stage <= 0.5
@@ -309,7 +309,7 @@ class Category:
         if (nextMatch.IsTeamsSet()) and ((nextMatch.team1 is None) or (nextMatch.team2 is None)):
           nextMatch.SetScore()
 
-    if (self.categoryType is CategoryTypes.Groups) and (not self.isGroupsFinished):
+    if (self.categoryType is CategoryTypes.Groups) and (self.groups is not None) and (not self.isGroupsFinished):
       classified = {}
       for i, group in enumerate(self.groups):
         groupClassification, isFinalClassification = self.GetGroupClassification(i)
@@ -409,11 +409,17 @@ class Category:
 
   def DrawDubles(self, oldDoubles: list[tuple[str,str]]):
 
+    def Pop(playersToDraw:dict[str,Player], playerName:str) -> None:
+      try:
+        playersToDraw.pop(playerName)
+      except KeyError:
+        raise PlayerNotFound(playerName, self.name)
+
     def RemoveDefinedDoublePlayers() -> dict[str,Player]:
       playersToDraw = deepcopy(self.players)
       for double in self.teams.values():
-        playersToDraw.pop(double.player1.name)
-        playersToDraw.pop(double.player2.name)
+        Pop(playersToDraw, double.player1.name)
+        Pop(playersToDraw, double.player2.name)
       return playersToDraw
 
 
