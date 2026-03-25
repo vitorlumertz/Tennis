@@ -14,7 +14,7 @@ def GetSectionComments(section: FileSections):
   elif section is FileSections.Categories:
     comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized\n'
   elif section is FileSections.Players:
-    comments += 'Name, Category, Seed Number, Is Seed\n'
+    comments += 'Name, Category, Seed Number, Is Seed, Is Present\n'
   elif section is FileSections.OldDoubles:
     comments += 'Player 1, Player 2\n'
   elif section is FileSections.Doubles:
