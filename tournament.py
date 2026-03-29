@@ -1,8 +1,8 @@
 from tennisEnums import *
 from tennisExceptions import *
 from category import Category
-from matchTeams import Team, Player, Double
-
+from matchTeams import Team, Player
+from GoogleSheets.playersImport import GetPlayersFromSheet
 
 
 class Tournament:
@@ -47,6 +47,19 @@ class Tournament:
 
   def AddOldDouble(self, player1Name:str, player2Name:str):
     self.oldDoubles.append((player1Name, player2Name))
+
+
+  def ImportPlayersFromGoogleSheet(self, sheetTitle:str, folderId:str, worksheetNumber:int):
+    data = GetPlayersFromSheet(sheetTitle, folderId, worksheetNumber)
+    failedRows = []
+    for row in data.itertuples():
+      player = Player(row.Player)
+      try:
+        self.AddTeam(player, row.Category)
+      except Exception:
+        failedRows.append(row)
+
+    return failedRows
 
 
   def StartCategory(self, categoryName):
