@@ -15,6 +15,7 @@ from newTournamentWindow import OpenNewTournamentWindow
 from newCategoryWindow import OpenNewCategoryWindow
 from newTeamWindow import OpenTeamWindow
 from changeCategoryWindow import OpenChangeCategoryWindow
+from playersImportWindow import OpenImportPlayersWindow
 from matchesTable import CreateMatchesTable
 from classificationTables import CreateGroupClassificationTable
 from tennisHelper import GetMaximumStage
@@ -170,6 +171,13 @@ class TournamentApp(tk.Tk):
       self.contentFrame,
       text="Abrir Torneio",
       command=lambda: self.OpenTournament(),
+      font=('Arial, 12'),
+    ).pack(anchor="w", padx=10, pady=(20,5))
+
+    tk.Button(
+      self.contentFrame,
+      text="Importar Inscritos de Google Sheets",
+      command=lambda: self.OpenImportPlayersWindow(),
       font=('Arial, 12'),
     ).pack(anchor="w", padx=10, pady=(20,5))
 
@@ -403,6 +411,10 @@ class TournamentApp(tk.Tk):
 
   def OpenNewTournamentWindow(self):
     OpenNewTournamentWindow(self)
+
+
+  def OpenImportPlayersWindow(self):
+    OpenImportPlayersWindow(self)
 
 
   def StartCategory(self, category:Category):
