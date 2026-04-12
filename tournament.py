@@ -3,6 +3,7 @@ from tennisExceptions import *
 from category import Category
 from matchTeams import Team, Player
 from GoogleSheets.playersImport import GetPlayersFromSheet
+from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
 
 
 class Tournament:
@@ -60,6 +61,10 @@ class Tournament:
         failedRows.append(row)
 
     return failedRows
+
+
+  def ExportToGoogleSheets(self, sheetTitle:str, folderId:str, categoriesStages:dict[str:int]) -> None:
+    ExportTournamentToGoogleSheets(self, sheetTitle, folderId, categoriesStages)
 
 
   def StartCategory(self, categoryName):

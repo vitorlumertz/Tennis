@@ -16,6 +16,7 @@ from newCategoryWindow import OpenNewCategoryWindow
 from newTeamWindow import OpenTeamWindow
 from changeCategoryWindow import OpenChangeCategoryWindow
 from playersImportWindow import OpenImportPlayersWindow
+from exportTournamentWindow import OpenExportTournamentWindow
 from matchesTable import CreateMatchesTable
 from classificationTables import CreateGroupClassificationTable
 from tennisHelper import GetMaximumStage
@@ -178,6 +179,13 @@ class TournamentApp(tk.Tk):
       self.contentFrame,
       text="Importar Inscritos de Google Sheets",
       command=lambda: self.OpenImportPlayersWindow(),
+      font=('Arial, 12'),
+    ).pack(anchor="w", padx=10, pady=(20,5))
+
+    tk.Button(
+      self.contentFrame,
+      text="Exportar Torneio para Google Sheets",
+      command=lambda: self.OpenExportTournamentWindow(),
       font=('Arial, 12'),
     ).pack(anchor="w", padx=10, pady=(20,5))
 
@@ -408,13 +416,16 @@ class TournamentApp(tk.Tk):
       CreateGroupClassificationTable(self, classification, title)
 
 
-
   def OpenNewTournamentWindow(self):
     OpenNewTournamentWindow(self)
 
 
   def OpenImportPlayersWindow(self):
     OpenImportPlayersWindow(self)
+
+
+  def OpenExportTournamentWindow(self):
+    OpenExportTournamentWindow(self)
 
 
   def StartCategory(self, category:Category):
