@@ -25,12 +25,14 @@ def PrintMatches(tournament: Tournament):
 
 
 if __name__ == '__main__':
-  n = 7
-  tournamentName = 'TournamentExample'
-  # tournamentName = 'TournamentDoublesExample'
+  n = 5
+  #tournamentName = 'TournamentExample'
+  tournamentName = 'TournamentDoublesExample'
   tournament = ReadInputFile(f'.\\TestData\\{tournamentName}{n}.txt')
-  PrintMatches(tournament)
+  # PrintMatches(tournament)
   # tournament.StartCategories()
-  tournament.UpdateBrackets()
-  PrintBrackets(tournament)
+  # tournament.UpdateBrackets()
+  # PrintBrackets(tournament)
   # SaveFile(f'.\\TestData\\{tournamentName}{n}Output.txt', tournament)
+  from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
+  ExportTournamentToGoogleSheets(tournament, "InscricoesTeste1", "1Va2dpkfftGt0RFTnp1rt4x0A23fD6h2K", {"A":8,"B":4})
