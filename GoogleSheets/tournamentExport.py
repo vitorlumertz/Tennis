@@ -67,46 +67,41 @@ def ExportGroupStage(tournament:"Tournament", gsConnection:GoogleSheetsConnectio
 
 
   def AddCategoryWorkSheet():
-    nonlocal row
+    nonlocal classificationValues
     gsConnection.AddWorkSheet(workSheetName)
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(row, kCategoryName), [["Categoria " + category.name]])
-    row += 1
+    classificationValues.append(["Categoria " + category.name])
+    classificationValues.append([])
 
 
-  def AddGroupName() -> int:
-    nonlocal row
-    row += 1
-    groupStartRow = row
+  def AddGroupName():
+    nonlocal classificationValues
     groupName = "Grupo " + str(i+1)
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(row, kGroupName), [[groupName]])
-    row += 1
-    return groupStartRow
+    classificationValues.append([groupName])
 
 
   def AddGroupHead():
-    nonlocal row
-    cellsRange = GetRange(row, kPosition, row, kGamesScore)
-    gsConnection.WriteInWorkSheet(workSheetName, cellsRange, [groupHead])
-    row += 1
+    nonlocal classificationValues
+    classificationValues.append(groupHead)
 
 
   def AddGroupClassification():
-    nonlocal row
-    startRow = row
-    groupLastRow = row + len(group) - 1
-    groupMatchesLastRow = row + len(groupMatches) - 1
-    values = []
+    nonlocal classificationValues
+    headRow = len(classificationValues)
+    groupLastRow = headRow + len(group)
+    groupMatchesLastRow = headRow + len(groupMatches)
+    firstTeamRow = headRow + 1
 
-    team1Range = GetRange(row, kTeam1, groupMatchesLastRow, kTeam1, isFixed=True)
-    team2Range = GetRange(row, kTeam2, groupMatchesLastRow, kTeam2, isFixed=True)
-    victoryT1Range = GetRange(row, kVictoryT1, groupMatchesLastRow, kVictoryT1, isFixed=True)
-    victoryT2Range = GetRange(row, kVictoryT2, groupMatchesLastRow, kVictoryT2, isFixed=True)
-    victoriesRange = GetRange(row, kVictories, groupLastRow, kVictories, isFixed=True)
-    gamesScoreT1Range = GetRange(row, kGamesScoreT1, groupMatchesLastRow, kGamesScoreT1, isFixed=True)
-    gamesScoreT2Range = GetRange(row, kGamesScoreT2, groupMatchesLastRow, kGamesScoreT2, isFixed=True)
-    gamesScoreRange = GetRange(row, kGamesScore, groupLastRow, kGamesScore, isFixed=True)
+    team1Range = GetRange(firstTeamRow, kTeam1, groupMatchesLastRow, kTeam1, isFixed=True)
+    team2Range = GetRange(firstTeamRow, kTeam2, groupMatchesLastRow, kTeam2, isFixed=True)
+    victoryT1Range = GetRange(firstTeamRow, kVictoryT1, groupMatchesLastRow, kVictoryT1, isFixed=True)
+    victoryT2Range = GetRange(firstTeamRow, kVictoryT2, groupMatchesLastRow, kVictoryT2, isFixed=True)
+    victoriesRange = GetRange(firstTeamRow, kVictories, groupLastRow, kVictories, isFixed=True)
+    gamesScoreT1Range = GetRange(firstTeamRow, kGamesScoreT1, groupMatchesLastRow, kGamesScoreT1, isFixed=True)
+    gamesScoreT2Range = GetRange(firstTeamRow, kGamesScoreT2, groupMatchesLastRow, kGamesScoreT2, isFixed=True)
+    gamesScoreRange = GetRange(firstTeamRow, kGamesScore, groupLastRow, kGamesScore, isFixed=True)
 
     for team in group:
+      row = len(classificationValues) + 1
       teamCell = GetRange(row, kTeam)
       victoriesCell = GetRange(row, kVictories)
       gamesScoreCell = GetRange(row, kGamesScore)
@@ -116,32 +111,28 @@ def ExportGroupStage(tournament:"Tournament", gsConnection:GoogleSheetsConnectio
       matchesFormula = f'={kCountIfs}({team1Range};{teamCell};{gamesScoreT1Range};"<>0") + {kCountIfs}({team2Range};{teamCell};{gamesScoreT2Range};"<>0")'
       gamesScoreFormula = f'={kSumIf}({team1Range};{teamCell};{gamesScoreT1Range}) + {kSumIf}({team2Range};{teamCell};{gamesScoreT2Range})'
 
-      values.append([positionFormula, team.name, victoriesFormula, matchesFormula, gamesScoreFormula])
-      row += 1
+      classificationValues.append([positionFormula, team.name, victoriesFormula, matchesFormula, gamesScoreFormula])
 
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(startRow, kPosition, groupLastRow, kGamesScore), values, isFormula=True)
+    emptyRows = len(groupMatches) - len(group) + 1
+    for _ in range(emptyRows):
+      classificationValues.append([])
 
 
   def AddGroupMatchesName():
-    nonlocal row
-    row = groupStartRow
+    nonlocal matchesValues
     groupMatchesStr = "Jogos do Grupo " + str(i+1)
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(row, kGroupMatchesTitle), [[groupMatchesStr]])
-    row += 1
+    matchesValues.append([groupMatchesStr])
 
 
   def AddGroupMatchesHead():
-    nonlocal row
-    cellsRange = GetRange(row, kCourt, row, kGamesScoreT2)
-    gsConnection.WriteInWorkSheet(workSheetName, cellsRange, [matchesHead])
-    row += 1
+    nonlocal matchesValues
+    matchesValues.append(matchesHead)
 
 
   def AddGroupMatches():
-    nonlocal row
-    startRow = row
-    values = []
-    for match in category.GetGroupMatches(i):
+    nonlocal matchesValues
+    for match in groupMatches:
+      row = len(matchesValues) + 3
       gamesT1Cell = GetRange(row, kGamesT1)
       gamesT2Cell = GetRange(row, kGamesT2)
       victoryT1Formula = f'={kIf}({gamesT1Cell}>{gamesT2Cell};1;0)'
@@ -149,10 +140,9 @@ def ExportGroupStage(tournament:"Tournament", gsConnection:GoogleSheetsConnectio
       gamesScoreT1Formula = f'={gamesT1Cell}-{gamesT2Cell}'
       gamesScoreT2Formula = f'={gamesT2Cell}-{gamesT1Cell}'
 
-      values.append([match.team1.name, "x", match.team2.name, '', '', victoryT1Formula, victoryT2Formula, gamesScoreT1Formula, gamesScoreT2Formula])
-      row += 1
+      matchesValues.append(["", match.team1.name, "x", match.team2.name, '', '', victoryT1Formula, victoryT2Formula, gamesScoreT1Formula, gamesScoreT2Formula])
 
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(startRow, kTeam1, row, kGamesScoreT2), values, isFormula=True)
+    matchesValues.append([])
 
 
   groupHead = ["Posição", "Dupla", "Vitórias", "Partidas Jogadas", "Saldo de Games"]
@@ -163,17 +153,21 @@ def ExportGroupStage(tournament:"Tournament", gsConnection:GoogleSheetsConnectio
       continue
 
     workSheetName = "Grupos " + category.name
-    row = 1
+    classificationValues = []
+    matchesValues = []
     AddCategoryWorkSheet()
 
     for i, group in enumerate(category.groups):
       groupMatches = category.GetGroupMatches(i)
-      groupStartRow = AddGroupName()
+      AddGroupName()
       AddGroupHead()
       AddGroupClassification()
       AddGroupMatchesName()
       AddGroupMatchesHead()
       AddGroupMatches()
+
+    gsConnection.WriteInWorkSheet(workSheetName, GetRange(1, kPosition, len(classificationValues), kGamesScore), classificationValues, isFormula=True)
+    gsConnection.WriteInWorkSheet(workSheetName, GetRange(3, kCourt, len(matchesValues)+2, kGamesScoreT2), matchesValues, isFormula=True)
 
 
 def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsConnection, categoriesStages:dict[str,int]) -> None:
@@ -188,20 +182,6 @@ def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsCon
   kGamesT2 = 7
 
 
-  def AddCategoryName():
-    nonlocal row
-    categoryName = "Categoria " + category.name
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(row, kCategoryName), [[categoryName]])
-    row += 1
-
-
-  def AddCategoryHead():
-    nonlocal row
-    head = ["Quadra", "Fase", "Dupla 1", "", "Dupla 2", "Games D1", "Games D2"]
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(row, kCourt, row, kGamesT2), [head])
-    row += 1
-
-
   def GetWinnerFormula(fatherStageRow:int) -> str:
     team1Cell = GetRange(fatherStageRow, kTeam1)
     team2Cell = GetRange(fatherStageRow, kTeam2)
@@ -211,12 +191,10 @@ def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsCon
 
 
   def AddMatches():
-    nonlocal row
-    startRow = row
-    fatherStageRow = row
+    nonlocal values
+    fatherStageRow = len(values) + 1
     categoryStage = categoriesStages[category.name]
     stage = categoryStage
-    values = []
     while stage >= 1:
       stageName = GetStageName(stage)
       stageCount = 0
@@ -229,23 +207,25 @@ def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsCon
           fatherStageRow += 1
           team2 = GetWinnerFormula(fatherStageRow)
           fatherStageRow += 1
-        values.append([stageName, team1, "x", team2])
+        values.append(["", stageName, team1, "x", team2])
         stageCount += 1
-        row += 1
       stage /= 2
-
-    gsConnection.WriteInWorkSheet(workSheetName, GetRange(startRow, kStage, row, kTeam2), values, isFormula=True)
 
 
   workSheetName = "Fase Eliminatória"
   gsConnection.AddWorkSheet(workSheetName)
-  row = 1
+  head = ["Quadra", "Fase", "Dupla 1", "", "Dupla 2", "Games D1", "Games D2"]
+  values = []
 
   for category in tournament.categories.values():
-    AddCategoryName()
-    AddCategoryHead()
+    categoryName = "Categoria " + category.name
+    values.append([categoryName])
+    values.append(head)
     AddMatches()
-    row += 2
+    for _ in range(2):
+      values.append([])
+
+  gsConnection.WriteInWorkSheet(workSheetName, GetRange(1, kCourt, len(values), kGamesT2), values, isFormula=True)
 
 
 def ExportTournamentToGoogleSheets(tournament:"Tournament", sheetTitle:str, folderId:str, categoriesStages:dict[str,int]) -> None:
