@@ -301,8 +301,12 @@ class TournamentApp(tk.Tk):
     ClearFrame(frame)
     category = self.GetCategory(categoryName)
 
-    presents = sorted([name for name, player in category.players.items() if player.isPresent])
-    absents = sorted([name for name, player in category.players.items() if not player.isPresent])
+    # Em categorias de simples os jogadores ficam em category.teams; em duplas,
+    # os jogadores individuais ficam em category.players.
+    players = category.players if category.matchType is MatchTypes.Double else category.teams
+
+    presents = sorted([name for name, player in players.items() if player.isPresent])
+    absents = sorted([name for name, player in players.items() if not player.isPresent])
 
     presentsTable = ttk.Treeview(frame, columns=("name"), show="headings", height=len(presents))
     presentsTable.heading("name", text="Presentes")
@@ -322,7 +326,7 @@ class TournamentApp(tk.Tk):
       table:ttk.Treeview = event.widget
       for item in table.selection():
         playerName = table.item(item)["values"][0]
-        player = category.GetPlayer(playerName)
+        player = players[playerName]
         player.isPresent = not player.isPresent
       self.UpdatePresentsAndAbsentsLists(categoryName, frame)
 
