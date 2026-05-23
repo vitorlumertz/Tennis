@@ -63,7 +63,7 @@ class Tournament:
     return failedRows
 
 
-  def ExportToGoogleSheets(self, sheetTitle:str, folderId:str, categoriesStages:dict[str:int]) -> None:
+  def ExportToGoogleSheets(self, sheetTitle:str, folderId:str, categoriesStages:dict[str,int]) -> None:
     ExportTournamentToGoogleSheets(self, sheetTitle, folderId, categoriesStages)
 
 
