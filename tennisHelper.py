@@ -1,6 +1,13 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 from tennisEnums import *
-from match import Match
 from matchTeams import Team
+
+if TYPE_CHECKING:
+  # Apenas para type hints. Importar Match em runtime cria um import circular
+  # (match.py importa tennisHelper), que quebra dependendo da ordem de import.
+  from match import Match
 
 
 def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:
