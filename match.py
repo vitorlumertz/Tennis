@@ -82,7 +82,7 @@ class Match:
           matchWinner = MatchWinnerTypes.NotDefined
         else:
           if (scoreType is ScoreTypes.Normal) or (scoreType is ScoreTypes.NotDefined):
-            matchWinner = tnh.IsValidScore(score, self.sets)
+            matchWinner = tnh.IsValidScore(score, self.sets, self.setType, self.lastSetType)
             if matchWinner is MatchWinnerTypes.NotDefined:
               scoreType = ScoreTypes.Invalid
             else:
