@@ -138,7 +138,10 @@ def ReadCategory(string, tournament: Tournament):
     randomDoubles = GetBoolean(info[4])
   if len(info) > 5:
     isInitialized = GetBoolean(info[5])
-  category = Category(name, categoryType, matchType, isGroupsfinished, randomDoubles, isInitialized)
+  hasEliminationPhase = None
+  if (len(info) > 6) and (info[6].strip() != ''):
+    hasEliminationPhase = GetBoolean(info[6])
+  category = Category(name, categoryType, matchType, isGroupsfinished, randomDoubles, isInitialized, hasEliminationPhase=hasEliminationPhase)
   tournament.AddCategory(category)
 
 

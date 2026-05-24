@@ -218,6 +218,10 @@ def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsCon
   values = []
 
   for category in tournament.categories.values():
+    if not category.hasEliminationPhase:
+      continue
+    if category.name not in categoriesStages:
+      raise Exception(f"A categoria '{category.name}' tem fase eliminatória, mas nenhuma fase inicial foi informada para ela na exportação.")
     categoryName = "Categoria " + category.name
     values.append([categoryName])
     values.append(head)

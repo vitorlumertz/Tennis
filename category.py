@@ -20,6 +20,7 @@ class Category:
     isGroupsFinished: bool = False,
     isRandomDoubles: bool = False,
     isInitialized: bool = False,
+    hasEliminationPhase: bool | None = None,
     players: dict[str, Player] | None = None,
     teams: dict[str, Team] | None = None,
     groups: list[list[Team]] | None = None,
@@ -30,6 +31,10 @@ class Category:
     self.isGroupsFinished = isGroupsFinished
     self.isRandomDoubles = isRandomDoubles
     self.isInitialized = isInitialized
+    # Round robin não tem fase eliminatória; os demais tipos têm por padrão.
+    if hasEliminationPhase is None:
+      hasEliminationPhase = categoryType is not CategoryTypes.RoundRobin
+    self.hasEliminationPhase = hasEliminationPhase
     self.teams = {} if teams is None else teams
     self.players = {} if players is None else players
     self.groups = groups

@@ -491,6 +491,7 @@ class TournamentApp(tk.Tk):
         tk.Label(self.contentFrame, text=f"Categoria inicializada? {category.isInitialized}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
         tk.Label(self.contentFrame, text=f"Grupos finalizados? {category.isGroupsFinished}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
         tk.Label(self.contentFrame, text=f"Duplas sorteadas? {category.isRandomDoubles}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
+        tk.Label(self.contentFrame, text=f"Tem fase eliminatória? {category.hasEliminationPhase}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
 
     if category is not None:
       button = tk.Button(

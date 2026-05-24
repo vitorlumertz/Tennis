@@ -11,7 +11,7 @@ from tennisEnums import MatchTypes, CategoryTypes
 from category import Category
 
 
-def CreateCategory(app:"TournamentApp", window:tk.Toplevel, categoryName:str, categoryType:CategoryTypes, matchType:MatchTypes, isRandomDoubles:str):
+def CreateCategory(app:"TournamentApp", window:tk.Toplevel, categoryName:str, categoryType:CategoryTypes, matchType:MatchTypes, isRandomDoubles:str, hasEliminationPhase:bool):
   if categoryName.replace(' ', '') == '':
     messagebox.showerror("Erro", "Não é possível criar uma categoria com nome vazio.")
     window.destroy()
@@ -23,6 +23,7 @@ def CreateCategory(app:"TournamentApp", window:tk.Toplevel, categoryName:str, ca
     categoryType = categoryType,
     matchType = matchType,
     isRandomDoubles = isRandomDoubles,
+    hasEliminationPhase = hasEliminationPhase,
   )
   try:
     app.tournament.AddCategory(category)
@@ -82,9 +83,17 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
+  hasEliminationPhase = tk.BooleanVar(value=True)
+  tk.Checkbutton(
+    window,
+    text="Tem fase eliminatória?",
+    variable=hasEliminationPhase,
+    font=('Arial, 12'),
+  ).pack(anchor="w", padx=10, pady=(20,5))
+
   tk.Button(
     window,
     text="Criar Categoria",
-    command=lambda: CreateCategory(app, window, nameEntry.get(), CategoryTypes[categoryType.get()], MatchTypes[matchType.get()], isRandomDoubles.get()),
+    command=lambda: CreateCategory(app, window, nameEntry.get(), CategoryTypes[categoryType.get()], MatchTypes[matchType.get()], isRandomDoubles.get(), hasEliminationPhase.get()),
     font=('Arial, 12'),
   ).pack(anchor="w", padx=10, pady=(20,5))

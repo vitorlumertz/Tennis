@@ -12,7 +12,7 @@ def GetSectionComments(section: FileSections):
   if section is FileSections.Tournament:
     comments += 'Name, Number of Sets, Set Type, Last Set Type\n'
   elif section is FileSections.Categories:
-    comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized\n'
+    comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Has Elimination Phase\n'
   elif section is FileSections.Players:
     comments += 'Name, Category, Seed Number, Is Seed, Is Present\n'
   elif section is FileSections.OldDoubles:
@@ -66,6 +66,8 @@ def WriteCategoriesSection(file, tournament: Tournament):
     text += ','
     if category.isInitialized:
       text += str(category.isInitialized)
+    text += ','
+    text += str(category.hasEliminationPhase)
     text += '\n'
     file.write(text)
   file.write('\n')
