@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tournament import Tournament
+import theme
 
 
 def ClearFrame(frame:tk.Frame):
@@ -9,10 +10,8 @@ def ClearFrame(frame:tk.Frame):
 
 
 def CreateCategoriesComboBox(parentFrame:tk.Frame, tournament:Tournament, categoryName=None, isBackGroundWhite=True) -> ttk.Combobox:
-  if isBackGroundWhite:
-    tk.Label(parentFrame, text="Selecione a Categoria:", font=('Segoe UI', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
-  else:
-    tk.Label(parentFrame, text="Selecione a Categoria:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(parentFrame, text="Selecione a categoria", font=theme.FONT_SMALL, bg=theme.BG,
+           fg=theme.TEXT_MUTED).pack(anchor="w", padx=10, pady=(16,4))
   categoriesNames = [c for c in tournament.categories]
   combo =  ttk.Combobox(
     parentFrame,
