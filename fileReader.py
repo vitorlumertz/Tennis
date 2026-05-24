@@ -121,7 +121,10 @@ def ReadTournament(string):
   sets = int(CleanString(info[1], toUper=False))
   setType = GetSetType(info[2])
   lastSetType = GetSetType(info[3])
-  return Tournament(name, sets, setType, lastSetType)
+  countTiebreakInGameBalance = False
+  if len(info) > 4:
+    countTiebreakInGameBalance = GetBoolean(info[4])
+  return Tournament(name, sets, setType, lastSetType, countTiebreakInGameBalance)
 
 
 def ReadCategory(string, tournament: Tournament):
@@ -247,7 +250,7 @@ def ReadMatch(string, tournament: Tournament):
   if (len(info) > 10) and (info[10] != ''):
     isTeam2Set = GetBoolean(info[10])
 
-  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeam1Set, isTeam2Set)
+  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeam1Set, isTeam2Set, tournament.countTiebreakInGameBalance)
 
 
 def ReadInputFile(filePath) -> Tournament:

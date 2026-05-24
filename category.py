@@ -182,7 +182,7 @@ class Category:
     return numByesWithSeeds, numByesWithoutSeeds
 
 
-  def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
+  def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None, countTiebreak=True):
     matches = list(itertools.combinations(teams, 2))
     if self.categoryType == CategoryTypes.RoundRobin:
       keyPrefix = str(len(matches)).zfill(3) + 'GU'
@@ -190,15 +190,15 @@ class Category:
       keyPrefix = str(groupNumber).zfill(3) + 'GR'
     for matchNum, matchTeams in enumerate(matches):
       matchId = keyPrefix + str(matchNum+1).zfill(3)
-      self.matches[matchId] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
+      self.matches[matchId] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, countTiebreakInGameBalance=countTiebreak)
 
 
-  def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
+  def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak, countTiebreak=True):
     self.UpdateCategoryType()
     if self.categoryType == CategoryTypes.RoundRobin:
       group = list(self.teams.values())
       self.groups = [group]
-      self.AddGroupMatches(group, sets, setType, lastSetType)
+      self.AddGroupMatches(group, sets, setType, lastSetType, countTiebreak=countTiebreak)
 
     elif self.categoryType == CategoryTypes.SingleElimination:
       seeds = self.GetSeeds()
@@ -223,7 +223,7 @@ class Category:
           else:
             team2 = nonSeeds.pop()
 
-        self.matches[matchKey] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
+        self.matches[matchKey] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, countTiebreakInGameBalance=countTiebreak)
 
     elif self.categoryType == CategoryTypes.Groups:
       if not self.groups:
@@ -243,7 +243,7 @@ class Category:
         groups.reverse()
         self.groups = groups
       for i, group in enumerate(self.groups):
-        self.AddGroupMatches(group, sets, setType, lastSetType, i+1)
+        self.AddGroupMatches(group, sets, setType, lastSetType, i+1, countTiebreak)
 
 
   def GetBracket(self):
@@ -270,10 +270,10 @@ class Category:
     self.bracket = bracket
 
 
-  def CompleteMatches(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
+  def CompleteMatches(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak, countTiebreak=True):
     for key in self.bracket:
       if key not in self.matches:
-        self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType)
+        self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType, countTiebreakInGameBalance=countTiebreak)
 
 
   def GetGroupMatches(self, groupNumber:int) -> list[Match]:

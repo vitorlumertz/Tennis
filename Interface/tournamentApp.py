@@ -154,11 +154,13 @@ class TournamentApp(tk.Tk):
       numberOfSets = str(self.tournament.sets)
       setType = self.tournament.setType.name
       lastSetType = self.tournament.lastSetType.name
+      countTiebreak = "Sim" if self.tournament.countTiebreakInGameBalance else "Não"
 
       tk.Label(self.contentFrame, text=f"Nome do Torneio: {tournamentName}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=5)
       tk.Label(self.contentFrame, text=f"Quantidade de Sets: {numberOfSets}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
       tk.Label(self.contentFrame, text=f"Tipo de Set: {setType}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
       tk.Label(self.contentFrame, text=f"Tipo do último Set: {lastSetType}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+      tk.Label(self.contentFrame, text=f"Tiebreakão conta no saldo de games: {countTiebreak}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
 
     button = tk.Button(
       self.contentFrame,

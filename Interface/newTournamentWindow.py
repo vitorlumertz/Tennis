@@ -11,7 +11,7 @@ from tournament import Tournament
 from tennisEnums import SetTypes
 
 
-def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str, numberOfSets:int, setType:SetTypes, lastSetType:SetTypes):
+def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str, numberOfSets:int, setType:SetTypes, lastSetType:SetTypes, countTiebreakInGameBalance:bool):
   if tournamentName.replace(' ', '') == '':
     messagebox.showerror("Erro", "Não é possível criar um torneio com nome vazio.")
     window.destroy()
@@ -25,6 +25,7 @@ def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str
       sets = numberOfSets,
       setType = setType,
       lastSetType = lastSetType,
+      countTiebreakInGameBalance = countTiebreakInGameBalance,
     )
     app.UpdateTournamentContent()
   else:
@@ -82,9 +83,17 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
+  countTiebreak = tk.BooleanVar(value=False)
+  tk.Checkbutton(
+    window,
+    text="Contar pontos do tiebreakão no saldo de games",
+    variable=countTiebreak,
+    font=('Arial, 12'),
+  ).pack(anchor="w", padx=10, pady=(20,5))
+
   tk.Button(
     window,
     text="Criar Torneio",
-    command=lambda: CreateTournament(app, window, nameEntry.get(), int(numberOfSets.get()), SetTypes[setType.get()], SetTypes[lastSetType.get()]),
+    command=lambda: CreateTournament(app, window, nameEntry.get(), int(numberOfSets.get()), SetTypes[setType.get()], SetTypes[lastSetType.get()], countTiebreak.get()),
     font=('Arial, 12'),
   ).pack(anchor="w", padx=10, pady=(20,5))

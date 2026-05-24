@@ -10,7 +10,7 @@ def GetSectionTitle(section: FileSections):
 def GetSectionComments(section: FileSections):
   comments = '//'
   if section is FileSections.Tournament:
-    comments += 'Name, Number of Sets, Set Type, Last Set Type\n'
+    comments += 'Name, Number of Sets, Set Type, Last Set Type, Count Tiebreak In Game Balance\n'
   elif section is FileSections.Categories:
     comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized\n'
   elif section is FileSections.Players:
@@ -47,7 +47,8 @@ def WriteTournamentSection(file, tournament: Tournament):
   text = tournament.name + ','
   text += str(tournament.sets) + ','
   text += tournament.setType.name + ','
-  text += tournament.lastSetType.name + '\n\n'
+  text += tournament.lastSetType.name + ','
+  text += str(tournament.countTiebreakInGameBalance) + '\n\n'
   file.write(text)
 
 

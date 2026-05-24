@@ -7,11 +7,12 @@ from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
 
 
 class Tournament:
-  def __init__(self, name, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak, categories: dict[str,Category]|None=None, oldDoubles:list[tuple[str,str]]|None=None):
+  def __init__(self, name, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak, countTiebreakInGameBalance=False, categories: dict[str,Category]|None=None, oldDoubles:list[tuple[str,str]]|None=None):
     self.name = name
     self.sets = sets
     self.setType = setType
     self.lastSetType = lastSetType
+    self.countTiebreakInGameBalance = countTiebreakInGameBalance
     self.categories = {} if categories is None else categories
     self.oldDoubles = [] if oldDoubles is None else oldDoubles
 
@@ -22,6 +23,7 @@ class Tournament:
       f"Number of Sets: {self.sets}\n"
       f"Set Type: {self.setType.name}\n"
       f"Last Set Type: {self.lastSetType.name}\n"
+      f"Count Tiebreak In Game Balance: {self.countTiebreakInGameBalance}\n"
       f"Number of Categories: {len(self.categories)}\n"
       f"Number of Old Dobles: {len(self.oldDoubles)}\n"
     )
@@ -72,9 +74,9 @@ class Tournament:
     if not category.isInitialized:
       if category.isRandomDoubles:
         category.DrawDubles(self.oldDoubles)
-      category.GetFirstRound(self.sets, self.setType, self.lastSetType)
+      category.GetFirstRound(self.sets, self.setType, self.lastSetType, self.countTiebreakInGameBalance)
       category.GetBracket()
-      category.CompleteMatches(self.sets, self.setType, self.lastSetType)
+      category.CompleteMatches(self.sets, self.setType, self.lastSetType, self.countTiebreakInGameBalance)
       category.SortMatches()
       category.isInitialized = True
 

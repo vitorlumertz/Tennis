@@ -171,12 +171,18 @@ def GetMatchBalances(match:Match):
   if (match.matchWinner is MatchWinnerTypes.kNone) or (match.matchWinner is MatchWinnerTypes.NotDefined):
     return setBalance, gameBalance
 
-  for set in match.score:
+  countTiebreak = getattr(match, 'countTiebreakInGameBalance', True)
+  for i, set in enumerate(match.score):
     if set[0] > set[1]:
       setBalance += 1
     else:
       setBalance -= 1
-    gameBalance += set[0] - set[1] # pontos do tiebreakao nao estao entrando aqui?
+    # O tiebreakão (match tie-break do set decisivo) só entra no saldo de games
+    # se o torneio estiver configurado para isso; o saldo de sets sempre conta.
+    currentSetType = match.lastSetType if (match.sets > 1 and i == match.sets - 1) else match.setType
+    if (currentSetType is SetTypes.MatchTieBreak) and (not countTiebreak):
+      continue
+    gameBalance += set[0] - set[1]
 
   return setBalance, gameBalance
 

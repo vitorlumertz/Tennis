@@ -14,13 +14,15 @@ class Match:
     setType = SetTypes.NormalSet,
     lastSetType = SetTypes.MatchTieBreak,
     isTeam1Set = False,
-    isTeam2Set = False
+    isTeam2Set = False,
+    countTiebreakInGameBalance = True
   ):
     self.team1 = team1
     self.team2 = team2
     self.sets = sets
     self.setType = setType
     self.lastSetType = lastSetType
+    self.countTiebreakInGameBalance = countTiebreakInGameBalance
     self.isTeam1Set = isTeam1Set if team1 is None else True
     self.isTeam2Set = isTeam2Set if team2 is None else True
     if (isinstance(self.team1, Double)) or (isinstance(self.team2, Double)):
