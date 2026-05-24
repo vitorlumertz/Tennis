@@ -1,42 +1,44 @@
-"""Tema visual centralizado do app (paleta, tipografia, estilos ttk).
+"""Tema visual centralizado do app — estilo Spotify (dark).
 
-Identidade "clube de tênis": sidebar slate profundo, acento terracota (saibro)
-e conteúdo claro. Use as constantes daqui em vez de cores/fontes soltas para
-manter tudo consistente.
+Paleta near-black com sidebar preta, cartões cinza-escuros, acento verde e
+texto branco/cinza. Use as constantes daqui em vez de cores/fontes soltas.
+O theming é aplicado globalmente (inclusive nos diálogos) via option_add +
+estilos ttk, então telas que não setam cor explicitamente já saem escuras.
 """
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tkfont
 
-# Paleta ---------------------------------------------------------------------
-BG          = "#eef1f5"   # fundo da área de conteúdo
-SURFACE     = "#ffffff"   # cartões, tabelas, campos
-SIDEBAR     = "#1e293b"   # menu lateral (slate)
-SIDEBAR_HOV = "#33425a"   # hover de item do menu
-SIDEBAR_TXT = "#cbd5e1"   # texto do menu
-ACCENT      = "#c2410c"   # acento (terracota / saibro)
-ACCENT_HOV  = "#ea580c"   # acento em hover
-ACCENT_SOFT = "#fbe3d6"   # seleção de linha / realce suave
-TEXT        = "#0f172a"   # texto principal
-TEXT_MUTED  = "#64748b"   # texto secundário
-BORDER      = "#dfe4ea"   # bordas / divisórias
-ROW_ALT     = "#f5f7fa"   # linha alternada de tabela
+# Paleta (Spotify) -----------------------------------------------------------
+BG          = "#121212"   # base da área de conteúdo
+SIDEBAR     = "#000000"   # menu lateral (preto)
+SURFACE     = "#181818"   # cartões / tabelas
+ELEV        = "#282828"   # superfície elevada / campos / hover
+SIDEBAR_HOV = "#1a1a1a"
+SIDEBAR_TXT = "#b3b3b3"   # texto do menu (cinza -> branco no hover)
+ACCENT      = "#1ed760"   # verde Spotify
+ACCENT_HOV  = "#1fdf64"
+ACCENT_SOFT = "#233a2a"   # verde escuro p/ realces
+TEXT        = "#ffffff"
+TEXT_MUTED  = "#b3b3b3"
+BORDER      = "#2a2a2a"
+ROW_ALT     = "#1a1a1a"   # linha alternada de tabela
 
 # Tipografia -----------------------------------------------------------------
-# Segoe UI é a fonte nativa do Windows (plataforma alvo do app); em outros
-# sistemas o tkinter faz fallback para uma sans padrão.
+# O tkinter não carrega fontes web (como a Circular da Spotify). Usa-se Segoe UI
+# (nativa do Windows, alvo do app) com pesos/tamanhos para criar a hierarquia.
 FAMILY = "Segoe UI"
 
 FONT_TITLE    = (FAMILY, 26, "bold")
 FONT_SUBTITLE = (FAMILY, 16, "bold")
-FONT_HEADING  = (FAMILY, 13, "bold")
+FONT_HEADING  = (FAMILY, 12, "bold")
 FONT_BODY     = (FAMILY, 11)
 FONT_SMALL    = (FAMILY, 10)
 FONT_BUTTON   = (FAMILY, 11, "bold")
 
 
 def setup(root: tk.Tk) -> None:
-    """Aplica fontes padrão e estilos ttk. Chamar uma vez no app principal."""
+    """Aplica fontes padrão e estilos (tk + ttk). Chamar uma vez no app."""
     for named in ("TkDefaultFont", "TkTextFont", "TkMenuFont"):
         try:
             tkfont.nametofont(named).configure(family=FAMILY, size=11)
@@ -45,21 +47,43 @@ def setup(root: tk.Tk) -> None:
 
     root.configure(bg=BG)
 
-    # Defaults para widgets tk clássicos (aplicam-se onde não houver override).
-    root.option_add("*Button.background", ACCENT)
-    root.option_add("*Button.foreground", "white")
-    root.option_add("*Button.activeBackground", ACCENT_HOV)
-    root.option_add("*Button.activeForeground", "white")
-    root.option_add("*Button.relief", "flat")
-    root.option_add("*Button.borderWidth", 0)
-    root.option_add("*Button.padX", 14)
-    root.option_add("*Button.padY", 8)
-    root.option_add("*Button.cursor", "hand2")
-    root.option_add("*Entry.relief", "flat")
-    root.option_add("*Entry.background", SURFACE)
-    root.option_add("*Entry.highlightThickness", 1)
-    root.option_add("*Entry.highlightColor", ACCENT)
-    root.option_add("*Entry.highlightBackground", BORDER)
+    # Defaults globais p/ widgets tk clássicos (escurece inclusive diálogos).
+    opt = root.option_add
+    opt("*background", BG)
+    opt("*foreground", TEXT)
+    opt("*Toplevel.background", BG)
+    opt("*Frame.background", BG)
+    opt("*Label.background", BG)
+    opt("*Label.foreground", TEXT)
+    # Botões: CTA verde com texto preto (assinatura Spotify).
+    opt("*Button.background", ACCENT)
+    opt("*Button.foreground", "#000000")
+    opt("*Button.activeBackground", ACCENT_HOV)
+    opt("*Button.activeForeground", "#000000")
+    opt("*Button.relief", "flat")
+    opt("*Button.borderWidth", "0")
+    opt("*Button.padX", "16")
+    opt("*Button.padY", "9")
+    opt("*Button.cursor", "hand2")
+    # Campos de texto.
+    opt("*Entry.background", ELEV)
+    opt("*Entry.foreground", TEXT)
+    opt("*Entry.insertBackground", TEXT)
+    opt("*Entry.relief", "flat")
+    opt("*Entry.highlightThickness", "1")
+    opt("*Entry.highlightColor", ACCENT)
+    opt("*Entry.highlightBackground", BORDER)
+    # Checkbutton.
+    opt("*Checkbutton.background", BG)
+    opt("*Checkbutton.foreground", TEXT)
+    opt("*Checkbutton.activeBackground", BG)
+    opt("*Checkbutton.activeForeground", TEXT)
+    opt("*Checkbutton.selectColor", ELEV)
+    # Lista do dropdown do Combobox.
+    opt("*TCombobox*Listbox.background", ELEV)
+    opt("*TCombobox*Listbox.foreground", TEXT)
+    opt("*TCombobox*Listbox.selectBackground", ACCENT)
+    opt("*TCombobox*Listbox.selectForeground", "#000000")
 
     style = ttk.Style(root)
     try:
@@ -71,29 +95,36 @@ def setup(root: tk.Tk) -> None:
     style.configure(
         "Treeview",
         background=SURFACE, fieldbackground=SURFACE, foreground=TEXT,
-        rowheight=32, font=FONT_BODY, borderwidth=0,
+        rowheight=34, font=FONT_BODY, borderwidth=0,
     )
     style.map("Treeview",
-              background=[("selected", ACCENT_SOFT)],
-              foreground=[("selected", TEXT)])
+              background=[("selected", ELEV)],
+              foreground=[("selected", "#ffffff")])
     style.configure(
         "Treeview.Heading",
-        background=SIDEBAR, foreground="white", font=FONT_HEADING,
-        relief="flat", padding=(12, 9),
+        background="#000000", foreground=TEXT_MUTED, font=FONT_HEADING,
+        relief="flat", padding=(12, 10),
     )
-    style.map("Treeview.Heading", background=[("active", SIDEBAR_HOV)])
+    style.map("Treeview.Heading",
+              background=[("active", SURFACE)],
+              foreground=[("active", TEXT)])
 
     # Combobox
     style.configure(
         "TCombobox",
-        padding=7, font=FONT_BODY,
-        fieldbackground=SURFACE, background=SURFACE,
-        bordercolor=BORDER, arrowcolor=SIDEBAR,
+        padding=7, foreground=TEXT, arrowcolor=TEXT,
+        fieldbackground=ELEV, background=ELEV,
+        bordercolor=BORDER, lightcolor=ELEV, darkcolor=ELEV,
     )
+    style.map("TCombobox",
+              fieldbackground=[("readonly", ELEV)],
+              background=[("readonly", ELEV)],
+              foreground=[("readonly", TEXT)])
 
     # Scrollbar
     style.configure("Vertical.TScrollbar",
-                    background=BORDER, troughcolor=BG, borderwidth=0, arrowcolor=TEXT_MUTED)
+                    background=ELEV, troughcolor=BG, borderwidth=0, arrowcolor=TEXT_MUTED)
+    style.map("Vertical.TScrollbar", background=[("active", "#3a3a3a")])
 
 
 def maximize(root: tk.Tk) -> None:
@@ -110,9 +141,9 @@ def maximize(root: tk.Tk) -> None:
 def make_button(parent, text, command, variant="primary", **kw):
     """Botão estilizado com hover. variant: primary | ghost | sidebar."""
     palette = {
-        "primary": (ACCENT, "white", ACCENT_HOV, "white"),
-        "ghost":   (SURFACE, TEXT, BG, TEXT),
-        "sidebar": (SIDEBAR, SIDEBAR_TXT, SIDEBAR_HOV, "white"),
+        "primary": (ACCENT, "#000000", ACCENT_HOV, "#000000"),
+        "ghost":   (ELEV, TEXT, "#3a3a3a", TEXT),
+        "sidebar": (SIDEBAR, SIDEBAR_TXT, SIDEBAR, "#ffffff"),
     }
     bg, fg, hover, hover_fg = palette[variant]
     btn = tk.Button(
