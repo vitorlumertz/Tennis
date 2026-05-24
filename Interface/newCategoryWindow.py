@@ -39,11 +39,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
 
   tk.Label(window, text="Configure a Nova Categoria", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
 
-  tk.Label(window, text="Nome da Categoria:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
-  nameEntry = tk.Entry(window, width=50, font=('Arial, 12'))
+  tk.Label(window, text="Nome da Categoria:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=5)
+  nameEntry = tk.Entry(window, width=50, font=('Arial', 12))
   nameEntry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Tipo:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [categoryType.name for categoryType in CategoryTypes]
   categoryType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
@@ -52,11 +52,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Arial', 12),
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Simples ou Duplas:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Simples ou Duplas:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [matchType.name for matchType in MatchTypes]
   matchType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
@@ -65,11 +65,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Arial', 12),
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Sortear Duplas?", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Sortear Duplas?", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = ['Sim', 'Não']
   isRandomDoubles = tk.StringVar(value=options[1])
   combo = ttk.Combobox(
@@ -78,7 +78,7 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Arial', 12),
   )
   combo.pack(anchor="w", padx=10)
 
@@ -86,5 +86,5 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     window,
     text="Criar Categoria",
     command=lambda: CreateCategory(app, window, nameEntry.get(), CategoryTypes[categoryType.get()], MatchTypes[matchType.get()], isRandomDoubles.get()),
-    font=('Arial, 12'),
+    font=('Arial', 12),
   ).pack(anchor="w", padx=10, pady=(20,5))

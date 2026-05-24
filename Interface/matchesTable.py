@@ -32,13 +32,13 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
   team2Name = ""
   if match.team2 is not None:
     team2Name = match.team2.name
-  tk.Label(window, text=f"{team1Name} x {team2Name}", font=('Arial, 14')).pack(anchor="w", padx=10, pady=5)
+  tk.Label(window, text=f"{team1Name} x {team2Name}", font=('Arial', 14)).pack(anchor="w", padx=10, pady=5)
 
-  tk.Label(window, text="Placar:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
-  scoreEntry = tk.Entry(window, width=50, font=('Arial, 12'))
+  tk.Label(window, text="Placar:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=5)
+  scoreEntry = tk.Entry(window, width=50, font=('Arial', 12))
   scoreEntry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Tipo:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [
     ScoreTypes.Normal.name,
     ScoreTypes.WO_to_T1.name,
@@ -55,7 +55,7 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Arial', 12),
   )
   combo.pack(anchor="w", padx=10)
 
@@ -63,7 +63,7 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
     window,
     text="Atualizar",
     command=lambda: UpdateScore(app, window, category, match, scoreEntry.get(), ScoreTypes[scoreType.get()]),
-    font=('Arial, 12'),
+    font=('Arial', 12),
   ).pack(anchor="w", padx=10, pady=(20,5))
 
 

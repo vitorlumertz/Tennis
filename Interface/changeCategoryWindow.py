@@ -47,5 +47,5 @@ def OpenChangeCategoryWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:t
     window,
     text="Atualizar",
     command=lambda: ChangeCategories(app, frame, summaryFrame, window, categoryName, categoryComboBox, teams, isDoublesPage, table),
-    font=('Arial, 12'),
+    font=('Arial', 12),
   ).pack(anchor="w", padx=10, pady=(15,5))
