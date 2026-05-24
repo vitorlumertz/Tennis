@@ -64,18 +64,18 @@ def OpenTeamWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:tk.Frame, c
   window.geometry("600x500")
 
   text = "Configure a Dupla" if isDoublesPage else "Configure o Jogador"
-  tk.Label(window, text=text, font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
+  tk.Label(window, text=text, font=("Segoe UI", 28)).pack(padx=10, pady=20, anchor="w")
 
-  tk.Label(window, text="Nome do Jogador:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
-  name1Entry = tk.Entry(window, width=50, font=('Arial, 12'))
+  tk.Label(window, text="Nome do Jogador:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=5)
+  name1Entry = tk.Entry(window, width=50, font=('Segoe UI', 12))
   name1Entry.pack(anchor="w", padx=10)
 
-  name2Entry = tk.Entry(window, width=50, font=('Arial, 12'))
+  name2Entry = tk.Entry(window, width=50, font=('Segoe UI', 12))
   if isDoublesPage:
-    tk.Label(window, text="Nome do Jogador:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
+    tk.Label(window, text="Nome do Jogador:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=5)
     name2Entry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Número de Cabeça de Chave:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
+  tk.Label(window, text="Número de Cabeça de Chave:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=5)
   options = [str(i) for i in range(21)]
   default = options[0]
   seedNumberCombo = ttk.Combobox(
@@ -84,7 +84,7 @@ def OpenTeamWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:tk.Frame, c
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   )
   seedNumberCombo.pack(anchor="w", padx=10)
 
@@ -113,5 +113,5 @@ def OpenTeamWindow(app:"TournamentApp", frame:tk.Frame, summaryFrame:tk.Frame, c
     window,
     text=text,
     command=lambda: CreateTeam(app, frame, summaryFrame, window, categoryName, name1Entry, name2Entry, seedNumberCombo, isDoublesPage, isUpdate, oldTeamName),
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   ).pack(anchor="w", padx=10, pady=(15,5))

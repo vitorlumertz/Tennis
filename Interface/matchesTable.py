@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+import theme
 from tennisEnums import ScoreTypes
 from category import Category
 from match import Match
@@ -32,13 +33,13 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
   team2Name = ""
   if match.team2 is not None:
     team2Name = match.team2.name
-  tk.Label(window, text=f"{team1Name} x {team2Name}", font=('Arial, 14')).pack(anchor="w", padx=10, pady=5)
+  tk.Label(window, text=f"{team1Name} x {team2Name}", font=('Segoe UI', 14)).pack(anchor="w", padx=10, pady=5)
 
-  tk.Label(window, text="Placar:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
-  scoreEntry = tk.Entry(window, width=50, font=('Arial, 12'))
+  tk.Label(window, text="Placar:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=5)
+  scoreEntry = tk.Entry(window, width=50, font=('Segoe UI', 12))
   scoreEntry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Tipo:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [
     ScoreTypes.Normal.name,
     ScoreTypes.WO_to_T1.name,
@@ -55,7 +56,7 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   )
   combo.pack(anchor="w", padx=10)
 
@@ -63,15 +64,15 @@ def OpenScoreWindow(app:"TournamentApp", category:Category, match:Match):
     window,
     text="Atualizar",
     command=lambda: UpdateScore(app, window, category, match, scoreEntry.get(), ScoreTypes[scoreType.get()]),
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   ).pack(anchor="w", padx=10, pady=(20,5))
 
 
 def CreateMatchesTable(app:"TournamentApp", category:Category, matches:dict[str, Match], teamStr:str, labelTitle:str=''):
-  frame = tk.Frame(app.contentFrame, bg="white")
+  frame = tk.Frame(app.contentFrame, bg=theme.BG)
   frame.pack(anchor="w", padx=10, pady=10)
   if labelTitle != '':
-    tk.Label(frame, text=labelTitle, font=("Arial", 12), bg="white").pack(pady=(0,2), anchor="w")
+    tk.Label(frame, text=labelTitle, font=("Segoe UI", 12), bg=theme.BG).pack(pady=(0,2), anchor="w")
   table = ttk.Treeview(frame, columns=('team1', 'team2', 'score', 'key'), show="headings", height=len(matches))
   table.heading('team1', text=f"{teamStr} 1")
   table.heading('team2', text=f"{teamStr} 2")
@@ -81,8 +82,8 @@ def CreateMatchesTable(app:"TournamentApp", category:Category, matches:dict[str,
   table.column('team2', width=250, anchor="center")
   table.column('score', width=150, anchor="center")
   table.column('key', width=0, stretch=False)
-  table.tag_configure('oddrow', background="white")
-  table.tag_configure('evenrow', background="#e0e0e0")
+  table.tag_configure('oddrow', background=theme.SURFACE)
+  table.tag_configure('evenrow', background=theme.ROW_ALT)
   table.pack(anchor="w", pady=(0,5))
 
   for i, (key, match) in enumerate(matches.items()):

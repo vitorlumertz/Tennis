@@ -38,13 +38,13 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
   window.title("Novo Torneio")
   window.geometry("600x500")
 
-  tk.Label(window, text="Configure o Novo Torneio", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
+  tk.Label(window, text="Configure o Novo Torneio", font=("Segoe UI", 28)).pack(padx=10, pady=20, anchor="w")
 
-  tk.Label(window, text="Nome do Torneio:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=5)
-  nameEntry = tk.Entry(window, width=50, font=('Arial, 12'))
+  tk.Label(window, text="Nome do Torneio:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=5)
+  nameEntry = tk.Entry(window, width=50, font=('Segoe UI', 12))
   nameEntry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Quantidade de Sets:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Quantidade de Sets:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = ["1", "3", "5"]
   numberOfSets = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
@@ -53,11 +53,11 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo de Set:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Tipo de Set:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [setType.name for setType in SetTypes]
   setType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
@@ -66,11 +66,11 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo do último Set:", font=('Arial, 12')).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(window, text="Tipo do último Set:", font=('Segoe UI', 12)).pack(anchor="w", padx=10, pady=(20,5))
   lastSetType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
     window,
@@ -78,7 +78,7 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
     values=options,
     state="readonly",
     width=30,
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   )
   combo.pack(anchor="w", padx=10)
 
@@ -86,5 +86,5 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
     window,
     text="Criar Torneio",
     command=lambda: CreateTournament(app, window, nameEntry.get(), int(numberOfSets.get()), SetTypes[setType.get()], SetTypes[lastSetType.get()]),
-    font=('Arial, 12'),
+    font=('Segoe UI', 12),
   ).pack(anchor="w", padx=10, pady=(20,5))
