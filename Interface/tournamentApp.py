@@ -130,7 +130,6 @@ class TournamentApp(tk.Tk):
         if last >= 1:
           return
         canvas.yview_scroll(1, "units")
-      canvas.yview_scroll(-1 * int(event.delta / 120), "units")
     canvas.bind_all("<MouseWheel>", onMousewheel)
 
 
