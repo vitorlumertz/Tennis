@@ -26,7 +26,7 @@ class TournamentApp(tk.Tk):
   def __init__(self):
     super().__init__()
     self.title("Gerenciador de Torneios de Tênis")
-    self.state("zoomed")
+    self.Maximize()
 
     self.columnconfigure(1, weight=1)
     self.rowconfigure(0, weight=1)
@@ -41,6 +41,17 @@ class TournamentApp(tk.Tk):
     style = ttk.Style()
     style.configure("Treeview", font=("Arial", 12))
     style.configure("Treeview.Heading", font=("Arial", 16, "bold"))
+
+
+  def Maximize(self):
+    # "zoomed" só existe no Windows; no Linux/WSLg levanta TclError.
+    try:
+      self.state("zoomed")
+    except tk.TclError:
+      try:
+        self.attributes("-zoomed", True)
+      except tk.TclError:
+        self.geometry("1280x800")
 
 
   def OpenTournament(self):
@@ -147,23 +158,23 @@ class TournamentApp(tk.Tk):
     self.ClearContent()
     tk.Label(self.contentFrame, text="Informações do Torneio", font=("Arial", 28), bg="white").pack(padx=10, pady=20, anchor="w")
     if self.tournament is None:
-      tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial, 18'), bg='white').pack(anchor="w", padx=10, pady=5)
+      tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 18), bg='white').pack(anchor="w", padx=10, pady=5)
     else:
       tournamentName = self.tournament.name
       numberOfSets = str(self.tournament.sets)
       setType = self.tournament.setType.name
       lastSetType = self.tournament.lastSetType.name
 
-      tk.Label(self.contentFrame, text=f"Nome do Torneio: {tournamentName}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=5)
-      tk.Label(self.contentFrame, text=f"Quantidade de Sets: {numberOfSets}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
-      tk.Label(self.contentFrame, text=f"Tipo de Set: {setType}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
-      tk.Label(self.contentFrame, text=f"Tipo do último Set: {lastSetType}", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+      tk.Label(self.contentFrame, text=f"Nome do Torneio: {tournamentName}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
+      tk.Label(self.contentFrame, text=f"Quantidade de Sets: {numberOfSets}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+      tk.Label(self.contentFrame, text=f"Tipo de Set: {setType}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+      tk.Label(self.contentFrame, text=f"Tipo do último Set: {lastSetType}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
 
     button = tk.Button(
       self.contentFrame,
       text="Criar Torneio",
       command=self.OpenNewTournamentWindow,
-      font=('Arial, 12'),
+      font=('Arial', 12),
     )
     button.pack(anchor="w", padx=10, pady=(20,5))
 
@@ -171,21 +182,21 @@ class TournamentApp(tk.Tk):
       self.contentFrame,
       text="Abrir Torneio",
       command=lambda: self.OpenTournament(),
-      font=('Arial, 12'),
+      font=('Arial', 12),
     ).pack(anchor="w", padx=10, pady=(20,5))
 
     tk.Button(
       self.contentFrame,
       text="Importar Inscritos de Google Sheets",
       command=lambda: self.OpenImportPlayersWindow(),
-      font=('Arial, 12'),
+      font=('Arial', 12),
     ).pack(anchor="w", padx=10, pady=(20,5))
 
     tk.Button(
       self.contentFrame,
       text="Exportar Torneio para Google Sheets",
       command=lambda: self.OpenExportTournamentWindow(),
-      font=('Arial, 12'),
+      font=('Arial', 12),
     ).pack(anchor="w", padx=10, pady=(20,5))
 
 
@@ -271,14 +282,14 @@ class TournamentApp(tk.Tk):
       frame,
       text="Adicionar",
       command=lambda: OpenTeamWindow(self, frame, summaryFrame, categoryName, isDoublesPage),
-      font=('Arial, 12'),
+      font=('Arial', 12),
     ).pack(anchor="w", padx=10, pady=(5,5))
 
 
   def UpdateTeamsSummary(self, frame:tk.Frame, categoryName:str, isDoublesPage:bool):
     ClearFrame(frame)
     summary = self.tournament.GetCategory(categoryName).GetTeamsSummary(not isDoublesPage)
-    tk.Label(frame, text=summary, font=('Arial, 16'), bg='white', justify="left").pack(anchor="w", padx=50, pady=90)
+    tk.Label(frame, text=summary, font=('Arial', 16), bg='white', justify="left").pack(anchor="w", padx=50, pady=90)
 
 
   def UpdateTeamsContent(self, teamsFrame:tk.Frame, summaryFrame:tk.Frame, categoryName:str, isDoublesPage=False):
@@ -409,7 +420,7 @@ class TournamentApp(tk.Tk):
     combo.bind("<<ComboboxSelected>>", lambda event: self.UpdateGroupsContent(event.widget.get()))
 
     if (category.groups is None) or (len(category.groups) == 0):
-      tk.Label(self.contentFrame, text="Não há grupos nessa categoria.", font=('Arial, 12'), bg='white').pack(anchor="w", padx=10, pady=5)
+      tk.Label(self.contentFrame, text="Não há grupos nessa categoria.", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
       return
 
     for groupNumber in range(len(category.groups)):
@@ -500,7 +511,7 @@ class TournamentApp(tk.Tk):
         self.contentFrame,
         text="Iniciar categoria",
         command=lambda: self.StartCategory(category),
-        font=('Arial, 12'),
+        font=('Arial', 12),
       )
       button.pack(anchor="w", padx=10, pady=(20,5))
 
@@ -509,7 +520,7 @@ class TournamentApp(tk.Tk):
         self.contentFrame,
         text="Exportar PDF",
         command=lambda: self.ExportPdf(category),
-        font=('Arial, 12'),
+        font=('Arial', 12),
       )
       button.pack(anchor="w", padx=10, pady=(20,5))
 
@@ -518,7 +529,7 @@ class TournamentApp(tk.Tk):
         self.contentFrame,
         text="Criar categoria",
         command=lambda: OpenNewCategoryWindow(self),
-        font=('Arial, 12'),
+        font=('Arial', 12),
       )
       button.pack(anchor="w", padx=10, pady=(20,5))
 
@@ -527,7 +538,7 @@ class TournamentApp(tk.Tk):
         self.contentFrame,
         text="Excluir categoria",
         command=lambda: self.DeleteCategory(category),
-        font=('Arial, 12'),
+        font=('Arial', 12),
       )
       button.pack(anchor="w", padx=10, pady=(20,5))
 
@@ -561,7 +572,7 @@ class TournamentApp(tk.Tk):
             combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsContent(leftFrame, rightFrame, event.widget.get(), True))
             self.UpdateTeamsContent(leftFrame, rightFrame, combobox['values'][0], True)
         else:
-          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial', 16), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
@@ -578,7 +589,7 @@ class TournamentApp(tk.Tk):
           combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdatePresentsAndAbsentsLists(event.widget.get(), tablesFrame))
           self.UpdatePresentsAndAbsentsLists(combobox['values'][0], tablesFrame)
         else:
-          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial', 16), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
@@ -590,7 +601,7 @@ class TournamentApp(tk.Tk):
         if len(self.tournament.categories) > 0:
           self.UpdateMatchesContent()
         else:
-          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial', 16), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
@@ -599,7 +610,7 @@ class TournamentApp(tk.Tk):
         if len(self.tournament.categories) > 0:
           self.UpdateGroupsContent()
         else:
-          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial, 16'), bg='white').pack(anchor="w", padx=10, pady=5)
+          tk.Label(self.contentFrame, text="Nenhuma categoria criada!", font=('Arial', 16), bg='white').pack(anchor="w", padx=10, pady=5)
       else:
         tk.Label(self.contentFrame, text="Nenhum torneio carregado!", font=('Arial', 20), bg='white').pack(anchor="w", padx=10, pady=(15,5))
 
