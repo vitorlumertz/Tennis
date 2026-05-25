@@ -38,7 +38,7 @@ def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:
   return False
 
 
-def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet) -> MatchWinnerTypes:
+def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet) -> MatchWinnerTypes:
   if (
     (score is None) or
     (sets % 2 == 0) or
@@ -46,8 +46,11 @@ def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet) -> MatchWin
   ):
     return MatchWinnerTypes.NotDefined
 
-  for set in score:
-    if not IsValidSetScore(set, setType):
+  for i, set in enumerate(score):
+    # O set decisivo (o de número `sets`) usa lastSetType; os demais usam setType.
+    # Em partidas de 1 set (sets == 1) não há set decisivo especial.
+    currentSetType = lastSetType if (sets > 1 and i == sets - 1) else setType
+    if not IsValidSetScore(set, currentSetType):
       return MatchWinnerTypes.NotDefined
 
   setsToBeWon = int(sets/2 + 0.5)
