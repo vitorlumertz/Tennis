@@ -64,6 +64,16 @@ class CategoryTypeTests(unittest.TestCase):
         cat.UpdateCategoryType()
         self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
 
+    def test_has_eliminatory_stage(self):
+        cat = single(ctype=CategoryTypes.RoundRobin)
+        self.assertFalse(cat.HasEliminatoryStage())
+
+        cat = single(ctype=CategoryTypes.Groups)
+        self.assertTrue(cat.HasEliminatoryStage())
+
+        cat = single(ctype=CategoryTypes.SingleElimination)
+        self.assertTrue(cat.HasEliminatoryStage())
+
 
 class GroupAndByeMathTests(unittest.TestCase):
     def test_get_number_of_groups(self):
