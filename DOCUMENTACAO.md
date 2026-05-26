@@ -336,5 +336,3 @@ exportar para o Sheets.
 - Não há testes automatizados nem README/empacotamento; a execução depende de configurar o
   `PYTHONPATH` manualmente (não há `__init__.py`/launcher).
 - Persistência apenas em arquivo `.txt` (sem banco de dados).
-- Existem comentários/observações no código apontando possíveis ajustes (ex.: em
-  `GetMatchBalances`, dúvida sobre pontos de tie-break entrarem no saldo de games).
