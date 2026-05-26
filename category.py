@@ -120,6 +120,10 @@ class Category:
       self.categoryType = CategoryTypes.RoundRobin
 
 
+  def HasEliminatoryStage(self) -> bool:
+    return self.categoryType is not CategoryTypes.RoundRobin
+
+
   def GetNumberOfGroups(self):
     n = len(self.teams)
     groupsOf4 = n % 3

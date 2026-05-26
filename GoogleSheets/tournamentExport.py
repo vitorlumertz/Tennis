@@ -211,13 +211,20 @@ def ExportEliminatoryStage(tournament:"Tournament", gsConnection:GoogleSheetsCon
         stageCount += 1
       stage /= 2
 
+  categoriesWithEliminatory = [c for c in tournament.categories.values() if c.HasEliminatoryStage()]
+
+  if len(categoriesWithEliminatory) == 0:
+    return
 
   workSheetName = "Fase Eliminatória"
   gsConnection.AddWorkSheet(workSheetName)
   head = ["Quadra", "Fase", "Dupla 1", "", "Dupla 2", "Games D1", "Games D2"]
   values = []
 
-  for category in tournament.categories.values():
+  for category in categoriesWithEliminatory:
+    if category.name not in categoriesStages:
+      raise Exception(f"Error exporting eliminatory stage. Category ({category.name}) with initial stage not defined.")
+
     categoryName = "Categoria " + category.name
     values.append([categoryName])
     values.append(head)
