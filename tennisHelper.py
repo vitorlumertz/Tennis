@@ -258,7 +258,7 @@ def GetMatchSortCriteria(matchKey):
 
 
 def GetMaximumStage(matchesKeys:list[str]) -> int|None:
-  keys =[int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey]
-  if len(keys) == 0:
+  stages = [int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey]
+  if len(stages) == 0:
     return None
-  return max([int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey])
+  return max(stages)
