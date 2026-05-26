@@ -45,6 +45,12 @@ def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:
   return False
 
 
+def GetSetType(setIndex:int, sets:int, setType:SetTypes, lastSetType:SetTypes) -> SetTypes:
+  if (sets > 1) and (setIndex == sets - 1):
+    return lastSetType
+  return setType
+
+
 def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet) -> MatchWinnerTypes:
   if (
     (score is None) or
@@ -54,9 +60,7 @@ def IsValidScore(score: list, sets: int, setType=SetTypes.NormalSet, lastSetType
     return MatchWinnerTypes.NotDefined
 
   for i, set in enumerate(score):
-    # O set decisivo (o de número `sets`) usa lastSetType; os demais usam setType.
-    # Em partidas de 1 set (sets == 1) não há set decisivo especial.
-    currentSetType = lastSetType if (sets > 1 and i == sets - 1) else setType
+    currentSetType = GetSetType(i, sets, setType, lastSetType)
     if not IsValidSetScore(set, currentSetType):
       return MatchWinnerTypes.NotDefined
 
@@ -175,18 +179,20 @@ def GetTeamsFromMatches(matches:list[Match]) -> set[Team]:
   return teams
 
 
-def GetMatchBalances(match:Match):
+def GetMatchBalances(match:Match) -> tuple[int,int]:
   setBalance = 0
   gameBalance = 0
   if (match.matchWinner is MatchWinnerTypes.kNone) or (match.matchWinner is MatchWinnerTypes.NotDefined):
     return setBalance, gameBalance
 
-  for set in match.score:
+  for i, set in enumerate(match.score):
     if set[0] > set[1]:
       setBalance += 1
     else:
       setBalance -= 1
-    gameBalance += set[0] - set[1] # pontos do tiebreakao nao estao entrando aqui?
+
+    if match.GetSetType(i) is not SetTypes.MatchTieBreak:
+      gameBalance += set[0] - set[1]
 
   return setBalance, gameBalance
 
