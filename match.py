@@ -104,3 +104,7 @@ class Match:
         scoreStr += ' '
       scoreStr += f'{set[0]}x{set[1]}'
     return scoreStr
+
+
+  def GetSetType(self, setIndex:int) -> SetTypes:
+    return tnh.GetSetType(setIndex, self.sets, self.setType, self.lastSetType)

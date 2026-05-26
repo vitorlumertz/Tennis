@@ -140,10 +140,10 @@ class BracketMathTests(unittest.TestCase):
 
 
 class ClassificationTests(unittest.TestCase):
-    def _match(self, n1, n2, score):
+    def _match(self, n1, n2, score, sets=1, lastSetType=SetTypes.NormalSet):
         return Match(
             Player(n1), Player(n2), score=score, scoreType=ScoreTypes.Normal,
-            sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet,
+            sets=sets, setType=SetTypes.NormalSet, lastSetType=lastSetType,
             isTeam1Set=True, isTeam2Set=True,
         )
 
@@ -153,8 +153,18 @@ class ClassificationTests(unittest.TestCase):
         self.assertEqual(names, {"A", "B", "C"})
 
     def test_get_match_balances(self):
-        m = self._match("A", "B", [(6, 4)])
-        self.assertEqual(tnh.GetMatchBalances(m), (1, 2))
+        def test(score, sets, setBalanceResult, gameBalanceResult, lastSetType=SetTypes.NormalSet):
+            m = self._match("A", "B", score, sets, lastSetType)
+            self.assertEqual(tnh.GetMatchBalances(m), (setBalanceResult, gameBalanceResult))
+
+        test([(6,4)], 1,  1,  2)
+        test([(1,6)], 1, -1, -5)
+        test([(6,3), (6,4)], 3,  2,  5)
+        test([(0,6), (6,7)], 3, -2, -7)
+        test([(0,6), (6,0), (10,5)],  3,  1, 0, SetTypes.MatchTieBreak)
+        test([(7,5), (6,7), (10,12)], 3, -1, 1, SetTypes.MatchTieBreak)
+        test([(7,5), (6,7), (6,1)], 3,  1,  6)
+        test([(6,1), (1,6), (3,6)], 3, -1, -3)
 
     def test_match_balances_zero_when_no_winner(self):
         m = Match(Player("A"), Player("B"), sets=1)  # sem placar
