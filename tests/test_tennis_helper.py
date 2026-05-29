@@ -105,20 +105,6 @@ class BracketMathTests(unittest.TestCase):
         self.assertEqual(tnh.GetTournamentStage(5), 4)
         self.assertEqual(tnh.GetTournamentStage(8), 4)
 
-    def test_get_matches_keys(self):
-        self.assertEqual(tnh.GetMatchesKeys(4), ["002FP001", "002FP002"])
-        self.assertEqual(
-            tnh.GetMatchesKeys(8),
-            ["004FP001", "004FP002", "004FP003", "004FP004"],
-        )
-
-    def test_get_next_match_key(self):
-        self.assertEqual(tnh.GetNextMatchKey("002FP001"), ("001FP001", 0))
-        self.assertEqual(tnh.GetNextMatchKey("002FP002"), ("001FP001", 1))
-        self.assertEqual(tnh.GetNextMatchKey("004FP003"), ("002FP002", 0))
-        self.assertEqual(tnh.GetNextMatchKey("004FP004"), ("002FP002", 1))
-        self.assertEqual(tnh.GetNextMatchKey("001FP001"), (None, None))
-
     def test_delete_extra_seeds(self):
         self.assertEqual(
             tnh.DeleteExtraSeeds([(1, 8), (5, 4), (3, 6), (7, 2)], 4),
@@ -198,21 +184,6 @@ class SortingTests(unittest.TestCase):
             "C": {"Victories": 1, "SetBalance": 1, "GameBalance": 0},
         }
         self.assertEqual(list(tnh.SortClassification(data).keys()), ["B", "C", "A"])
-
-    def test_match_sort_criteria_group_before_elimination(self):
-        gr = tnh.GetMatchSortCriteria("001GR001")
-        fp = tnh.GetMatchSortCriteria("004FP001")
-        self.assertLess(gr, fp)
-
-    def test_match_sort_criteria_elimination_order(self):
-        # fase maior (mais jogos restantes) deve vir antes da final
-        early = tnh.GetMatchSortCriteria("004FP001")
-        final = tnh.GetMatchSortCriteria("001FP001")
-        self.assertLess(early, final)
-
-    def test_get_maximum_stage(self):
-        self.assertEqual(tnh.GetMaximumStage(["001GR001", "004FP001", "002FP001"]), 4)
-        self.assertIsNone(tnh.GetMaximumStage(["001GR001", "006GU001"]))
 
 
 if __name__ == "__main__":

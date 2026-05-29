@@ -3,7 +3,6 @@ import unittest
 
 from category import Category
 from matchTeams import Player, Double
-from match import Match
 from tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes
 from tennisExceptions import (
     AddingDoubleInSingleCategory,
@@ -110,7 +109,7 @@ class FirstRoundTests(unittest.TestCase):
         cat = single(n=4, ctype=CategoryTypes.RoundRobin)
         cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
         self.assertEqual(len(cat.matches), 6)  # C(4,2)
-        self.assertTrue(all(k[3:5] == "GU" for k in cat.matches))
+        self.assertTrue(all(k[3:5] == "RR" for k in cat.matches))
         self.assertEqual(len(cat.groups), 1)
 
     def test_groups_creates_group_matches(self):
@@ -144,22 +143,22 @@ class BracketTests(unittest.TestCase):
 
     def test_bracket_maps_to_final(self):
         cat = self._elim4()
-        self.assertEqual(cat.bracket["002FP001"], "001FP001")
-        self.assertEqual(cat.bracket["002FP002"], "001FP001")
-        self.assertIsNone(cat.bracket["001FP001"])
+        self.assertEqual(cat.bracket["002SE001"], "001SE001")
+        self.assertEqual(cat.bracket["002SE002"], "001SE001")
+        self.assertIsNone(cat.bracket["001SE001"])
 
     def test_complete_matches_fills_future_rounds(self):
         cat = self._elim4()
-        self.assertIn("001FP001", cat.matches)
+        self.assertIn("001SE001", cat.matches)
 
     def test_update_bracket_promotes_winner(self):
         cat = self._elim4()
-        first = cat.matches["002FP001"]
+        first = cat.matches["002SE001"]
         winner = first.team1
         first.SetScore([(6, 0)], ScoreTypes.Normal)
         self.assertEqual(first.matchWinner, MatchWinnerTypes.Team1)
         cat.UpdateBracket()
-        self.assertIs(cat.matches["001FP001"].team1, winner)
+        self.assertIs(cat.matches["001SE001"].team1, winner)
 
 
 class GroupsToEliminationTests(unittest.TestCase):
@@ -177,11 +176,31 @@ class GroupsToEliminationTests(unittest.TestCase):
         # 3 grupos -> 6 classificados -> chave de 8 (com byes), todos posicionados
         placed = set()
         for k, m in cat.matches.items():
-            if k[3:5] == "FP":
+            if k[3:5] == "SE":
                 for t in (m.team1, m.team2):
                     if t is not None:
                         placed.add(t.name)
         self.assertEqual(len(placed), 6)
+
+
+class GetFirstEliminationStageTests(unittest.TestCase):
+    def test_single_elimination(self):
+        c = single(ctype=CategoryTypes.SingleElimination, n=5)
+        c.GetFirstRound()
+        c.GetBracket()
+        c.CompleteMatches()
+        c.SortMatches()
+        c.isInitialized = True
+        self.assertEqual(c.GetFirstEliminationStage(), 4)
+
+    def test_round_robin(self):
+        c = single(ctype=CategoryTypes.RoundRobin, n=4)
+        c.GetFirstRound()
+        c.GetBracket()
+        c.CompleteMatches()
+        c.SortMatches()
+        c.isInitialized = True
+        self.assertIsNone(c.GetFirstEliminationStage())
 
 
 class DoublesDrawTests(unittest.TestCase):
@@ -205,7 +224,7 @@ class MiscTests(unittest.TestCase):
         cat = single(n=4, ctype=CategoryTypes.RoundRobin)
         cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
         self.assertEqual(cat.GetMatches(), cat.matches)
-        self.assertEqual(len(cat.GetMatches("006GU")), 6)
+        self.assertEqual(len(cat.GetMatches("006RR")), 6)
         self.assertEqual(len(cat.GetMatches("ZZZ")), 0)
 
     def test_teams_summary(self):

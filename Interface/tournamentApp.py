@@ -6,6 +6,7 @@ from tkinter import messagebox, filedialog
 from tennisEnums import MatchTypes, CategoryTypes
 from tournament import Tournament
 from category import Category
+from matchKey import MatchKeyType
 from fileReader import ReadInputFile
 from fileSave import SaveFile
 from pdfExporter import ExportGroupCategoryToPdf
@@ -19,7 +20,6 @@ from playersImportWindow import OpenImportPlayersWindow
 from exportTournamentWindow import OpenExportTournamentWindow
 from matchesTable import CreateMatchesTable
 from classificationTables import CreateGroupClassificationTable
-from tennisHelper import GetMaximumStage
 
 
 class TournamentApp(tk.Tk):
@@ -390,15 +390,15 @@ class TournamentApp(tk.Tk):
     if (category.categoryType == CategoryTypes.Groups and category.groups is not None) or (category.categoryType == CategoryTypes.SingleElimination):
       if category.categoryType == CategoryTypes.Groups:
         for i in range(len(category.groups)):
-          key = str(i+1).zfill(3) + 'GR'
+          key = str(i+1).zfill(3) + MatchKeyType.Groups.value
           matches = category.GetMatches(key)
           CreateMatchesTable(self, category, matches, teamStr, f"Grupo {i+1}:")
 
-      stage = GetMaximumStage(list(category.matches.keys()))
+      stage = category.GetFirstEliminationStage()
       if stage is None:
         stage = 0
       while stage >= 1:
-        key = str(stage).zfill(3) + "FP"
+        key = str(stage).zfill(3) + MatchKeyType.SingleElimination.value
         matches = category.GetMatches(key)
         CreateMatchesTable(self, category, matches, teamStr, eliminationTitles.get(stage, 'Fase Eliminatória:'))
         stage = int(stage/2)

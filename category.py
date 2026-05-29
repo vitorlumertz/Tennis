@@ -2,7 +2,9 @@ import tennisHelper as tnh
 from tennisEnums import *
 from matchTeams import Team, Player, Double
 from match import Match
+from matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
 from tennisExceptions import *
+
 import itertools
 import random
 import math
@@ -99,7 +101,8 @@ class Category:
 
   def SortMatches(self):
     if self.categoryType is CategoryTypes.Groups:
-      self.matches = {k: self.matches[k] for k in sorted(self.matches.keys(), key=lambda x: tnh.GetMatchSortCriteria(x))}
+      matchKeys = [m.matchKey for m in self.matches.values()]
+      self.matches = {mk.name: self.matches[mk.name] for mk in sorted(matchKeys, key=lambda x: x.GetMatchSortCriteria())}
 
 
   def UpdateCategoryType(self) -> None:
@@ -189,12 +192,12 @@ class Category:
   def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
     matches = list(itertools.combinations(teams, 2))
     if self.categoryType == CategoryTypes.RoundRobin:
-      keyPrefix = str(len(matches)).zfill(3) + 'GU'
+      keyPrefix = str(len(matches)).zfill(3) + MatchKeyType.RoundRobin.value
     else:
-      keyPrefix = str(groupNumber).zfill(3) + 'GR'
+      keyPrefix = str(groupNumber).zfill(3) + MatchKeyType.Groups.value
     for matchNum, matchTeams in enumerate(matches):
-      matchId = keyPrefix + str(matchNum+1).zfill(3)
-      self.matches[matchId] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
+      matchKey = keyPrefix + str(matchNum+1).zfill(3)
+      self.matches[matchKey] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, matchKey=MatchKey(matchKey))
 
 
   def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
@@ -208,7 +211,7 @@ class Category:
       seeds = self.GetSeeds()
       nonSeeds = self.GetNonSeeds()
       numByesWithSeeds, numByesWithoutSeeds = self.GetByes(len(seeds))
-      matchesKeys = tnh.GetMatchesKeys(len(self.teams))
+      matchesKeys = GetStageMatchKeys(len(self.teams))
       firstRound_aux = tnh.GetSeedsPositions(len(self.teams), len(seeds))
       byesWithoutSeedsCount = 0
       for i, match in enumerate(firstRound_aux):
@@ -227,7 +230,7 @@ class Category:
           else:
             team2 = nonSeeds.pop()
 
-        self.matches[matchKey] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True)
+        self.matches[matchKey.name] = Match(team1, team2, sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, matchKey=matchKey)
 
     elif self.categoryType == CategoryTypes.Groups:
       if not self.groups:
@@ -259,37 +262,36 @@ class Category:
       n = numClassified * len(self.groups)
     else:
       return
-    firstRoundKeys = tnh.GetMatchesKeys(n)
+    firstRoundKeys = GetStageMatchKeys(n)
     for key in firstRoundKeys:
-      stage = int(key[:3])
+      stage = key.firstInfo
       while stage > 1:
-        nextKey, _ = tnh.GetNextMatchKey(key)
-        bracket[key] = nextKey
-        if nextKey in bracket:
+        nextKey, _ = key.NextKey()
+        bracket[key.name] = nextKey.name
+        if nextKey.name in bracket:
           break
         key = nextKey
-        stage = int(key[:3])
+        stage = key.firstInfo
 
-    bracket['001FP001'] = None
+    bracket[f'001{MatchKeyType.SingleElimination.value}001'] = None
     self.bracket = bracket
 
 
   def CompleteMatches(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
     for key in self.bracket:
       if key not in self.matches:
-        self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType)
+        self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType, matchKey=MatchKey(key))
 
 
   def GetGroupMatches(self, groupNumber:int) -> list[Match]:
     if self.categoryType == CategoryTypes.RoundRobin:
       return list(self.matches.values())
 
-    matchKeyPrefix = str(groupNumber + 1).zfill(3) + 'GR'
-    matches = []
-    for matchKey, match in self.matches.items():
-      if (matchKey[:5] == matchKeyPrefix):
-        matches.append(match)
-    return matches
+    return [
+      m for m in self.matches.values()
+      if m.matchKey.IsGroups()
+      and m.matchKey.firstInfo == groupNumber + 1
+    ]
 
 
   def GetGroupClassification(self, groupNumber:int):
@@ -303,20 +305,20 @@ class Category:
       return matchNum / stage <= 0.5
 
 
-    for matchKey, match in self.matches.items():
-      if matchKey[3:5] != 'FP':
+    for m in self.matches.values():
+      if not m.matchKey.IsSingleElimination():
         continue
-      if match.matchWinner is MatchWinnerTypes.Team1:
-        winner = match.team1
-      elif match.matchWinner is MatchWinnerTypes.Team2:
-        winner = match.team2
-      elif match.matchWinner is MatchWinnerTypes.kNone:
+      if m.matchWinner is MatchWinnerTypes.Team1:
+        winner = m.team1
+      elif m.matchWinner is MatchWinnerTypes.Team2:
+        winner = m.team2
+      elif m.matchWinner is MatchWinnerTypes.kNone:
         winner = None
       else:
         continue
-      nextMatchKey, position = tnh.GetNextMatchKey(matchKey)
+      nextMatchKey, position = m.matchKey.NextKey()
       if nextMatchKey is not None:
-        nextMatch = self.matches[nextMatchKey]
+        nextMatch = self.matches[nextMatchKey.name]
         if position == 0:
           nextMatch.SetTeam(1, winner)
         else:
@@ -385,25 +387,25 @@ class Category:
         numByesWithoutSeedsDown = numMatchesWithoutSeedsDown * 2 - len(secondsDown)
 
         numByesWithSeeds, _ = self.GetByes(numSeeds, numTeams)
-        matchesKeys = tnh.GetMatchesKeys(numTeams)
+        matchKeys = GetStageMatchKeys(numTeams)
         byesWithoutSeedsUpCount = 0
         byesWithoutSeedsDownCount = 0
         for i, match_aux in enumerate(seedsPosition):
-          matchKey = matchesKeys[i]
-          match = self.matches[matchKey]
+          matchKey = matchKeys[i]
+          m = self.matches[matchKey.name]
           seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
           isMatchWithSeed = False if seedNumber is None else True
           if isMatchWithSeed:
-            match.SetTeam(1, seeds[seedNumber - 1])
+            m.SetTeam(1, seeds[seedNumber - 1])
             if seedNumber <= numByesWithSeeds:
-              match.SetTeam(2, None)
-              match.SetScore()
+              m.SetTeam(2, None)
+              m.SetScore()
               continue
           else:
             if IsUpInBracket(i+1, stage):
-              match.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
+              m.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
             else:
-              match.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+              m.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
 
           if not isMatchWithSeed:
             isBye = False
@@ -416,16 +418,23 @@ class Category:
                 byesWithoutSeedsDownCount += 1
                 isBye = True
             if isBye:
-              match.SetTeam(2, None)
-              match.SetScore()
+              m.SetTeam(2, None)
+              m.SetScore()
               continue
 
           if IsUpInBracket(i+1, stage):
-            match.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
+            m.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
           else:
-            match.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+            m.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
 
         self.UpdateBracket()
+
+
+  def GetFirstEliminationStage(self) -> int|None:
+    stages = [m.matchKey.firstInfo for m in self.matches.values() if m.matchKey.IsSingleElimination()]
+    if len(stages) == 0:
+      return None
+    return max(stages)
 
 
   def DrawDubles(self, oldDoubles: list[tuple[str,str]]):

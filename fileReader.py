@@ -2,6 +2,7 @@ from tournament import Tournament
 from matchTeams import Player, Double
 from category import Category
 from match import Match
+from matchKey import MatchKey
 from tennisEnums import MatchTypes, CategoryTypes, SetTypes, ScoreTypes, FileSections
 
 
@@ -247,7 +248,7 @@ def ReadMatch(string, tournament: Tournament):
   if (len(info) > 10) and (info[10] != ''):
     isTeam2Set = GetBoolean(info[10])
 
-  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeam1Set, isTeam2Set)
+  category.matches[matchKey] = Match(player1, player2, score, scoreType, sets, setType, lastSetType, isTeam1Set, isTeam2Set, MatchKey(matchKey))
 
 
 def ReadInputFile(filePath) -> Tournament:

@@ -1,6 +1,8 @@
+from typing import Literal
 import tennisHelper as tnh
 from tennisEnums import *
 from matchTeams import Double, Team
+from matchKey import MatchKey
 
 
 class Match:
@@ -10,19 +12,26 @@ class Match:
     team2: Team|None,
     score: list[tuple[int, int]] | None = None,
     scoreType = ScoreTypes.NotDefined,
-    sets = 3,
+    sets: Literal[1, 3, 5] = 3,
     setType = SetTypes.NormalSet,
     lastSetType = SetTypes.MatchTieBreak,
     isTeam1Set = False,
-    isTeam2Set = False
+    isTeam2Set = False,
+    matchKey: MatchKey|None = None,
   ):
     self.team1 = team1
     self.team2 = team2
+
+    if sets not in [1, 3, 5]:
+      raise ValueError(f"Sets must be 1, 3 or 5. {sets} was given.")
+
     self.sets = sets
     self.setType = setType
     self.lastSetType = lastSetType
     self.isTeam1Set = isTeam1Set if team1 is None else True
     self.isTeam2Set = isTeam2Set if team2 is None else True
+    self.matchKey = matchKey or MatchKey("000ND000")
+
     if (isinstance(self.team1, Double)) or (isinstance(self.team2, Double)):
       self.matchType = MatchTypes.Double
     else:
