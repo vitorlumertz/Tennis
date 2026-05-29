@@ -41,6 +41,7 @@ LumertzTennis/
 ├── tournament.py        # Classe Tournament — orquestra categorias e o fluxo do torneio
 ├── category.py          # Classe Category — coração da lógica de chaveamento (511 linhas)
 ├── match.py             # Classe Match — um jogo, seu placar e vencedor
+├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
 ├── matchTeams.py        # Team / Player / Double — os competidores
 ├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
 ├── tennisEnums.py       # Enums: tipos de categoria, set, placar, vencedor, seções de arquivo
@@ -125,18 +126,18 @@ Além disso, uma categoria `Groups` com menos de 6 inscritos é rebaixada para `
 
 ## Lógica de chaveamento (o "cérebro", em `category.py` + `tennisHelper.py`)
 
-### Chaves dos jogos (match keys)
+### Chaves dos jogos (MatchKey)
 
 Cada jogo tem uma chave-string de 8 caracteres que codifica fase + tipo + número, o que
 permite ordenar e navegar a chave:
 
-- `001FP001` — **F**ase **P**rincipal (mata-mata). Os 3 primeiros dígitos são o "stage"
+- `001SE001` — **S**ingle **E**limination (mata-mata). Os 3 primeiros dígitos são o "stage"
   (jogos restantes naquela fase): `001`=Final, `002`=Semifinais, `004`=Quartas,
   `008`=Oitavas, `016`=R32. Os 3 últimos são o número do jogo dentro da fase.
 - `001GR001` — jogo da fase de **GR**upos (1º grupo, jogo 1).
-- `006GU001` — jogo de **G**rupo **Ú**nico (round-robin); o prefixo guarda o total de jogos.
+- `006RR001` — jogo de grupo único (**R**ound-**R**obin); o prefixo guarda o total de jogos.
 
-`GetNextMatchKey()` calcula, a partir da chave de um jogo eliminatório, qual é o próximo
+`MatchKey.NextKey()` calcula, a partir da chave de um jogo eliminatório, qual é o próximo
 jogo e se o vencedor entra como time 1 ou time 2 — é isso que faz a chave "subir".
 
 ### Cabeças de chave e posicionamento (seeding)
@@ -164,7 +165,7 @@ não-cabeças.
 ### Montagem e avanço da chave (`GetBracket`, `CompleteMatches`, `UpdateBracket`)
 
 - `GetBracket` cria o **mapa de avanço** (`bracket`): cada jogo → próximo jogo, até a final
-  (`001FP001 → None`).
+  (`001SE001 → None`).
 - `CompleteMatches` cria os jogos "vazios" das fases futuras.
 - `UpdateBracket` é chamada a cada placar lançado:
   - promove o vencedor de cada jogo eliminatório para o jogo seguinte;

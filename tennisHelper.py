@@ -96,31 +96,6 @@ def GetTournamentStage(numPlayers):
   return int(maxPlayersStage/2)
 
 
-def MatchKeysConversion(stage, list):
-  prefix = str(stage).zfill(3) + 'FP'
-  return [prefix + str(n).zfill(3) for n in list]
-
-
-def GetMatchesKeys(numPlayers):
-  stage = GetTournamentStage(numPlayers)
-  return MatchKeysConversion(stage, range(1, stage+1))
-
-
-def GetNextMatchKey(key):
-  stage = int(key[:3])
-  if stage == 1:
-    return (None, None)
-  n = int(key[5:])
-  newStage = int(stage / 2)
-  position = 1
-  if n % 2 == 1:
-    n += 1
-    position = 0
-  newN = int(n / 2)
-  nextMatchKey = str(newStage).zfill(3) + 'FP' + str(newN).zfill(3)
-  return nextMatchKey, position
-
-
 def DeleteExtraSeeds(seedsPositions, numSeeds):
   newSeedsPositions = []
   for match in seedsPositions:
@@ -172,10 +147,8 @@ def GetSetGames(setType: SetTypes):
 def GetTeamsFromMatches(matches:list[Match]) -> set[Team]:
   teams = set()
   for match in matches:
-    if match.team1 not in teams:
-      teams.add(match.team1)
-    if match.team2 not in teams:
-      teams.add(match.team2)
+    teams.add(match.team1)
+    teams.add(match.team2)
   return teams
 
 
@@ -244,27 +217,3 @@ def GetClassification(matches:list[Match]):
   classification = SortClassification(classification)
 
   return classification, isFinalClassification
-
-
-def GetMatchSortCriteria(matchKey):
-  firstNum = int(matchKey[:3])
-  typeStr = matchKey[3:5]
-  secondNum = int(matchKey[5:])
-
-  if typeStr == 'GR':
-    firstCriteria = 0
-    secondCriteria = firstNum
-  else:
-    firstCriteria = 1
-    secondCriteria = 1 / firstNum
-
-  thirdCriteria = secondNum
-
-  return((firstCriteria, secondCriteria, thirdCriteria))
-
-
-def GetMaximumStage(matchesKeys:list[str]) -> int|None:
-  stages = [int(matchKey[:3]) for matchKey in matchesKeys if "FP" in matchKey]
-  if len(stages) == 0:
-    return None
-  return max(stages)

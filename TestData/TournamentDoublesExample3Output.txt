@@ -32,6 +32,6 @@ Player F,Player D,1a Classe Duplas,0,False
 
 [MATCHES]
 //Category, Key, Player 1, Player 2, Score, Score Type, Sets, Set Type, Last Set Type, Is Team 1 Set, Is Team 2 Set
-1a Classe Duplas,002FP001,Player A/Player H,Player F/Player D,,,,,,True
-1a Classe Duplas,002FP002,Player E/Player C,Player B/Player G,,,,,,True
-1a Classe Duplas,001FP001,None,None,,,,,,
+1a Classe Duplas,002SE001,Player A/Player H,Player F/Player D,,,,,,True
+1a Classe Duplas,002SE002,Player E/Player C,Player B/Player G,,,,,,True
+1a Classe Duplas,001SE001,None,None,,,,,,

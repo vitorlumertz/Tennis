@@ -1,3 +1,5 @@
+from typing import Literal
+
 from tennisEnums import *
 from tennisExceptions import *
 from category import Category
@@ -7,7 +9,18 @@ from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
 
 
 class Tournament:
-  def __init__(self, name, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak, categories: dict[str,Category]|None=None, oldDoubles:list[tuple[str,str]]|None=None):
+  def __init__(
+    self,
+    name: str,
+    sets: Literal[1,3,5] = 3,
+    setType: SetTypes = SetTypes.NormalSet,
+    lastSetType: SetTypes = SetTypes.MatchTieBreak,
+    categories: dict[str, Category] | None = None,
+    oldDoubles: list[tuple[str, str]] | None = None,
+  ):
+    if sets not in [1, 3, 5]:
+      raise ValueError(f"Sets must be 1, 3 or 5. {sets} was given.")
+
     self.name = name
     self.sets = sets
     self.setType = setType

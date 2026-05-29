@@ -2,7 +2,6 @@ from fileReader import ReadInputFile
 from fileSave import SaveFile
 from tournament import Tournament
 
-from tennisHelper import GetMaximumStage
 
 def PrintBrackets(tournament: Tournament):
   for category in tournament.categories.values():
