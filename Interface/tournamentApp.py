@@ -6,7 +6,7 @@ from tkinter import messagebox, filedialog
 from tennisEnums import MatchTypes, CategoryTypes
 from tournament import Tournament
 from category import Category
-from matchKey import MatchKeyType
+from matchKey import MatchKey, MatchKeyType
 from fileReader import ReadInputFile
 from fileSave import SaveFile
 from pdfExporter import ExportGroupCategoryToPdf
@@ -390,7 +390,7 @@ class TournamentApp(tk.Tk):
     if (category.categoryType == CategoryTypes.Groups and category.groups is not None) or (category.categoryType == CategoryTypes.SingleElimination):
       if category.categoryType == CategoryTypes.Groups:
         for i in range(len(category.groups)):
-          key = str(i+1).zfill(3) + MatchKeyType.Groups.value
+          key = MatchKey(firstInfo = i + 1, stageType = MatchKeyType.Groups)
           matches = category.GetMatches(key)
           CreateMatchesTable(self, category, matches, teamStr, f"Grupo {i+1}:")
 
@@ -398,7 +398,7 @@ class TournamentApp(tk.Tk):
       if stage is None:
         stage = 0
       while stage >= 1:
-        key = str(stage).zfill(3) + MatchKeyType.SingleElimination.value
+        key = MatchKey(firstInfo = stage, stageType = MatchKeyType.SingleElimination)
         matches = category.GetMatches(key)
         CreateMatchesTable(self, category, matches, teamStr, eliminationTitles.get(stage, 'Fase Eliminatória:'))
         stage = int(stage/2)

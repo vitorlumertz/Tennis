@@ -2,6 +2,7 @@ import random
 import unittest
 
 from category import Category
+from matchKey import MatchKey, MatchKeyType
 from matchTeams import Player, Double
 from tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes
 from tennisExceptions import (
@@ -224,8 +225,8 @@ class MiscTests(unittest.TestCase):
         cat = single(n=4, ctype=CategoryTypes.RoundRobin)
         cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
         self.assertEqual(cat.GetMatches(), cat.matches)
-        self.assertEqual(len(cat.GetMatches("006RR")), 6)
-        self.assertEqual(len(cat.GetMatches("ZZZ")), 0)
+        self.assertEqual(len(cat.GetMatches(MatchKey(firstInfo=6, stageType=MatchKeyType.RoundRobin))), 6)
+        self.assertEqual(len(cat.GetMatches(MatchKey())), 0)
 
     def test_teams_summary(self):
         cat = single(n=3, ctype=CategoryTypes.RoundRobin)

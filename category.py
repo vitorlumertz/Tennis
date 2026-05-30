@@ -74,13 +74,13 @@ class Category:
     return summary
 
 
-  def GetMatches(self, key:str='') -> dict[str,Match]:
-    if key == '':
+  def GetMatches(self, key:MatchKey|None=None) -> dict[str,Match]:
+    if key is None:
       return self.matches
     matches = {}
-    for matchKey, match in self.matches.items():
-      if key in matchKey:
-        matches[matchKey] = match
+    for m in self.matches.values():
+      if m.matchKey.IsSameStage(key):
+        matches[m.matchKey.name] = m
     return matches
 
 
@@ -192,12 +192,15 @@ class Category:
   def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
     matches = list(itertools.combinations(teams, 2))
     if self.categoryType == CategoryTypes.RoundRobin:
-      keyPrefix = str(len(matches)).zfill(3) + MatchKeyType.RoundRobin.value
+      fi = len(matches)
+      stage = MatchKeyType.RoundRobin
     else:
-      keyPrefix = str(groupNumber).zfill(3) + MatchKeyType.Groups.value
+      fi = groupNumber
+      stage = MatchKeyType.Groups
     for matchNum, matchTeams in enumerate(matches):
-      matchKey = keyPrefix + str(matchNum+1).zfill(3)
-      self.matches[matchKey] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, matchKey=MatchKey(matchKey))
+      ti = matchNum + 1
+      matchKey = MatchKey(firstInfo=fi, stageType=stage, thirdInfo=ti)
+      self.matches[matchKey.name] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, matchKey=matchKey)
 
 
   def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
