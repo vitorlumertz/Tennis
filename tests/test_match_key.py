@@ -4,7 +4,7 @@ from typing import Literal
 from matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
 
 
-class CreationTests(unittest.TestCase):
+class CreationByStrTests(unittest.TestCase):
   def Test(self, key:str, firstInfo:int, thirdInfo:int, type:MatchKeyType):
     mk = MatchKey(key)
     self.assertEqual(mk.firstInfo, firstInfo)
@@ -26,6 +26,34 @@ class CreationTests(unittest.TestCase):
   def test_length_error(self):
     with self.assertRaises(ValueError):
       MatchKey("abc")
+
+
+class CreationByInfosTests(unittest.TestCase):
+  def Test(self, firstInfo:int|None, thirdInfo:int|None, type:MatchKeyType|None, expectedName:str):
+    mk = MatchKey(
+      firstInfo = firstInfo,
+      stageType = type,
+      thirdInfo = thirdInfo,
+    )
+    self.assertEqual(mk.name, expectedName)
+
+  def test_round_robin(self):
+    self.Test(6, 3, MatchKeyType.RoundRobin, "006RR003")
+
+  def test_groups(self):
+    self.Test(999, 1, MatchKeyType.Groups, "999GR001")
+
+  def test_single_elimination(self):
+    self.Test(16, 5, MatchKeyType.SingleElimination, "016SE005")
+
+  def test_empty_init(self):
+    self.Test(None, None, None, "000ND000")
+
+  def test_num_error(self):
+    with self.assertRaises(ValueError):
+      MatchKey(firstInfo = -1)
+    with self.assertRaises(ValueError):
+      MatchKey(thirdInfo = 1000)
 
 
 class StageTests(unittest.TestCase):

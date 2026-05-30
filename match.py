@@ -30,7 +30,7 @@ class Match:
     self.lastSetType = lastSetType
     self.isTeam1Set = isTeam1Set if team1 is None else True
     self.isTeam2Set = isTeam2Set if team2 is None else True
-    self.matchKey = matchKey or MatchKey("000ND000")
+    self.matchKey = matchKey or MatchKey()
 
     if (isinstance(self.team1, Double)) or (isinstance(self.team2, Double)):
       self.matchType = MatchTypes.Double
