@@ -100,7 +100,7 @@ def GetInteger(string) -> int:
 
 
 def GetScore(string):
-  string = CleanString(string,cleanSpaces=False, toUper=False)
+  string = CleanString(string, cleanSpaces=False, toUper=False)
   if string == '':
     return None
   sets = string.split(' ')
