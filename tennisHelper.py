@@ -96,26 +96,44 @@ def GetTournamentStage(numPlayers):
   return int(maxPlayersStage/2)
 
 
+def GetNumberOfByes(numTeams:int) -> int:
+  maxTeams = CeilPowerOfTwo(numTeams)
+  return maxTeams - numTeams
+
+
+def GetByes(numSeeds:int, numTeams:int) -> tuple[int, int]:
+  numByes = GetNumberOfByes(numTeams)
+  if numByes <= numSeeds:
+    numByesWithSeeds = numByes
+    numByesWithoutSeeds = 0
+  else:
+    numByesWithSeeds = numSeeds
+    numByesWithoutSeeds = numByes - numByesWithSeeds
+  return numByesWithSeeds, numByesWithoutSeeds
+
+
 def DeleteExtraSeeds(seedsPositions, numSeeds):
+  def ProcessPlayer(player:int|None) -> int|None:
+    if (player is not None) and (player > numSeeds):
+      return None
+    return player
+
   newSeedsPositions = []
   for match in seedsPositions:
-    p1 = match[0]
-    p2 = match[1]
-    if (p1 is not None) and (p1 > numSeeds):
-      p1 = None
-    if (p2 is not None) and (p2 > numSeeds):
-      p2 = None
+    p1 = ProcessPlayer(match[0])
+    p2 = ProcessPlayer(match[1])
     newSeedsPositions.append((p1, p2))
 
   return newSeedsPositions
 
 
-def GetSeedsPositions(numPlayers, numSeeds):
+def GetSeedsPositions(numPlayers:int, numSeeds:int, numMatches:int|None=None) -> list[tuple[int|None, int|None]]:
   draw = {}
   actualStage = 1
   draw[actualStage] = [(1, 2)]
   actualSeedsSum = 3
-  while actualStage < numPlayers/2:
+  limit = numMatches or numPlayers/2
+  while actualStage < limit:
     stageMatches = []
     actualStage *= 2
     actualSeedsSum += actualStage
@@ -145,75 +163,13 @@ def GetSetGames(setType: SetTypes):
 
 
 def GetTeamsFromMatches(matches:list[Match]) -> set[Team]:
+  def Add(team:Team|None) -> None:
+    nonlocal teams
+    if team is not None:
+      teams.add(team)
+
   teams = set()
   for match in matches:
-    teams.add(match.team1)
-    teams.add(match.team2)
+    Add(match.team1)
+    Add(match.team2)
   return teams
-
-
-def GetMatchBalances(match:Match) -> tuple[int,int]:
-  setBalance = 0
-  gameBalance = 0
-  if (match.matchWinner is MatchWinnerTypes.kNone) or (match.matchWinner is MatchWinnerTypes.NotDefined):
-    return setBalance, gameBalance
-
-  for i, set in enumerate(match.score):
-    if set[0] > set[1]:
-      setBalance += 1
-    else:
-      setBalance -= 1
-
-    if match.GetSetType(i) is not SetTypes.MatchTieBreak:
-      gameBalance += set[0] - set[1]
-
-  return setBalance, gameBalance
-
-
-def GetTiebreakerCriteria(classificationPlayer):
-  return (
-    classificationPlayer['Victories'],
-    classificationPlayer['SetBalance'],
-    classificationPlayer['GameBalance'],
-  )
-
-
-def SortClassification(classification):
-  playersCriteria = [(player, GetTiebreakerCriteria(criteria)) for player, criteria in classification.items()]
-  playersCriteria = sorted(playersCriteria, key=lambda x: x[1], reverse=True)
-  finalClassification = {}
-  for player, _ in playersCriteria:
-    finalClassification.update({player: classification[player]})
-
-  return finalClassification
-
-
-def GetClassification(matches:list[Match]):
-  teams = GetTeamsFromMatches(matches)
-  classification = {}
-  for team in teams:
-    classification[team.name] = {
-      'Victories': 0,
-      'SetBalance': 0,
-      'GameBalance': 0,
-    }
-
-  isFinalClassification = True
-  for m in matches:
-    setBalance, gameBalance = GetMatchBalances(m)
-
-    if m.matchWinner is MatchWinnerTypes.Team1:
-      classification[m.team1.name]['Victories'] += 1
-    elif m.matchWinner is MatchWinnerTypes.Team2:
-      classification[m.team2.name]['Victories'] += 1
-    elif m.matchWinner is MatchWinnerTypes.NotDefined:
-      isFinalClassification = False
-
-    classification[m.team1.name]['SetBalance'] += setBalance
-    classification[m.team1.name]['GameBalance'] += gameBalance
-    classification[m.team2.name]['SetBalance'] -= setBalance
-    classification[m.team2.name]['GameBalance'] -= gameBalance
-
-  classification = SortClassification(classification)
-
-  return classification, isFinalClassification
