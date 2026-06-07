@@ -3,7 +3,7 @@ from matchTeams import Player, Double
 from category import Category
 from match import Match
 from matchKey import MatchKey
-from tennisEnums import MatchTypes, CategoryTypes, SetTypes, ScoreTypes, FileSections
+from tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, SetTypes, ScoreTypes, FileSections
 
 
 def CleanString(string:str, cleanSpaces=True, toUper=True):
@@ -58,6 +58,16 @@ def GetCategoryType(string):
   }.get(string)
 
 
+def GetGroupClassificationType(string):
+  string = CleanString(string)
+  return {
+    'TWOPERGROUP': GroupClassificationTypes.TwoPerGroup,
+    'ONEPERGROUP': GroupClassificationTypes.OnePerGroup,
+    'TWOG4_ONEG3': GroupClassificationTypes.TwoG4_OneG3,
+    'TOTALNUMBER': GroupClassificationTypes.TotalNumber,
+  }.get(string)
+
+
 def GetMatchType(string):
   string = CleanString(string)
   return {
@@ -83,6 +93,10 @@ def GetScoreType(string):
 def GetBoolean(string):
   string = CleanString(string)
   return string == 'TRUE'
+
+
+def GetInteger(string) -> int:
+  return int(CleanString(string, toUper=False))
 
 
 def GetScore(string):
@@ -119,7 +133,7 @@ def ReadRanking(string):
 def ReadTournament(string):
   info = GetInfo(string)
   name = CleanString(info[0], cleanSpaces=False, toUper=False)
-  sets = int(CleanString(info[1], toUper=False))
+  sets = GetInteger(info[1])
   setType = GetSetType(info[2])
   lastSetType = GetSetType(info[3])
   return Tournament(name, sets, setType, lastSetType)
@@ -133,13 +147,19 @@ def ReadCategory(string, tournament: Tournament):
   isGroupsfinished = False
   randomDoubles = False
   isInitialized = False
+  groupClassification = None
+  numOfclassifiedsInGroups = 0
   if len(info) > 3:
     isGroupsfinished = GetBoolean(info[3])
   if len(info) > 4:
     randomDoubles = GetBoolean(info[4])
   if len(info) > 5:
     isInitialized = GetBoolean(info[5])
-  category = Category(name, categoryType, matchType, isGroupsfinished, randomDoubles, isInitialized)
+  if len(info) > 6:
+    groupClassification = GetGroupClassificationType(info[6])
+  if len(info) > 7:
+    numOfclassifiedsInGroups = GetInteger(info[7])
+  category = Category(name, categoryType, matchType, isGroupsfinished, randomDoubles, isInitialized, groupClassificationType=groupClassification, numOfclassifiedsInGroups=numOfclassifiedsInGroups)
   tournament.AddCategory(category)
 
 
@@ -151,7 +171,7 @@ def ReadPlayer(string, tournament: Tournament):
   isSeed = None
   isPresent = False
   if len(info) > 2:
-    seedNumber = int(CleanString(info[2], toUper=False))
+    seedNumber = GetInteger(info[2])
   if len(info) > 3:
     isSeed = GetBoolean(info[3])
   if len(info) > 4:
@@ -181,7 +201,7 @@ def ReadDouble(string, tournament: Tournament):
   seedNumber = 0
   isSeed = None
   if len(info) > 3:
-    seedNumber = int(CleanString(info[3], toUper=False))
+    seedNumber = GetInteger(info[3])
   if len(info) > 4:
     isSeed = GetBoolean(info[4])
   category = tournament.GetCategory(categoryName)
@@ -194,7 +214,7 @@ def ReadDouble(string, tournament: Tournament):
 def ReadGroup(string, tournament: Tournament):
   info = GetInfo(string)
   categoryName = CleanString(info[0], cleanSpaces=False, toUper=False)
-  groupNumber = int(CleanString(info[1], toUper=False))
+  groupNumber = GetInteger(info[1])
   playerName = CleanString(info[2], cleanSpaces=False, toUper=False)
   category = tournament.categories[categoryName]
   player = category.teams[playerName]

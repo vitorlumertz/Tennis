@@ -15,6 +15,13 @@ class CategoryTypes(Enum):
   Automatic = 5
 
 
+class GroupClassificationTypes(Enum):
+  TwoPerGroup = 0
+  OnePerGroup = 1
+  TwoG4_OneG3 = 2 # classify two teams in groups of 4 and one in groups of 3
+  TotalNumber = 3 # define total number of teams to be classified to single elimination stage
+
+
 class SetTypes(Enum):
   NormalSet = 0
   ShortSet = 1

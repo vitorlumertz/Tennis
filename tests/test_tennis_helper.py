@@ -125,65 +125,18 @@ class BracketMathTests(unittest.TestCase):
         self.assertEqual(tnh.GetSetGames(SetTypes.MatchTieBreak), 10)
 
 
-class ClassificationTests(unittest.TestCase):
-    def _match(self, n1, n2, score, sets=1, lastSetType=SetTypes.NormalSet):
-        return Match(
-            Player(n1), Player(n2), score=score, scoreType=ScoreTypes.Normal,
-            sets=sets, setType=SetTypes.NormalSet, lastSetType=lastSetType,
-            isTeam1Set=True, isTeam2Set=True,
-        )
+class ByeTests(unittest.TestCase):
+    def test_GetNumberOfByes(self):
+        self.assertEqual(tnh.GetNumberOfByes(6), 2)
+        self.assertEqual(tnh.GetNumberOfByes(8), 0)
+        self.assertEqual(tnh.GetNumberOfByes(5), 3)
 
-    def test_get_teams_from_matches(self):
-        matches = [self._match("A", "B", [(6, 0)]), self._match("A", "C", [(6, 1)])]
-        names = {t.name for t in tnh.GetTeamsFromMatches(matches)}
-        self.assertEqual(names, {"A", "B", "C"})
-
-    def test_get_match_balances(self):
-        def test(score, sets, setBalanceResult, gameBalanceResult, lastSetType=SetTypes.NormalSet):
-            m = self._match("A", "B", score, sets, lastSetType)
-            self.assertEqual(tnh.GetMatchBalances(m), (setBalanceResult, gameBalanceResult))
-
-        test([(6,4)], 1,  1,  2)
-        test([(1,6)], 1, -1, -5)
-        test([(6,3), (6,4)], 3,  2,  5)
-        test([(0,6), (6,7)], 3, -2, -7)
-        test([(0,6), (6,0), (10,5)],  3,  1, 0, SetTypes.MatchTieBreak)
-        test([(7,5), (6,7), (10,12)], 3, -1, 1, SetTypes.MatchTieBreak)
-        test([(7,5), (6,7), (6,1)], 3,  1,  6)
-        test([(6,1), (1,6), (3,6)], 3, -1, -3)
-
-    def test_match_balances_zero_when_no_winner(self):
-        m = Match(Player("A"), Player("B"), sets=1)  # sem placar
-        self.assertEqual(tnh.GetMatchBalances(m), (0, 0))
-
-    def test_get_classification_orders_and_detects_completion(self):
-        matches = [
-            self._match("A", "B", [(6, 0)]),
-            self._match("A", "C", [(6, 1)]),
-            self._match("B", "C", [(6, 2)]),
-        ]
-        classification, isFinal = tnh.GetClassification(matches)
-        self.assertTrue(isFinal)
-        self.assertEqual(list(classification.keys())[0], "A")  # 2 vitórias
-        self.assertEqual(classification["A"]["Victories"], 2)
-
-    def test_classification_incomplete(self):
-        matches = [
-            self._match("A", "B", [(6, 0)]),
-            Match(Player("A"), Player("C"), sets=1, isTeam1Set=True, isTeam2Set=True),
-        ]
-        _, isFinal = tnh.GetClassification(matches)
-        self.assertFalse(isFinal)
-
-
-class SortingTests(unittest.TestCase):
-    def test_sort_classification(self):
-        data = {
-            "A": {"Victories": 1, "SetBalance": 0, "GameBalance": 0},
-            "B": {"Victories": 2, "SetBalance": 0, "GameBalance": 0},
-            "C": {"Victories": 1, "SetBalance": 1, "GameBalance": 0},
-        }
-        self.assertEqual(list(tnh.SortClassification(data).keys()), ["B", "C", "A"])
+    def test_GetByes(self):
+        self.assertEqual(tnh.GetByes(3, 6), (2, 0))
+        self.assertEqual(tnh.GetByes(1, 6), (1, 1))
+        self.assertEqual(tnh.GetByes(2, 4), (0, 0))
+        self.assertEqual(tnh.GetByes(2, 8), (0, 0))
+        self.assertEqual(tnh.GetByes(5, 10), (5, 1))
 
 
 if __name__ == "__main__":

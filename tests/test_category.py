@@ -83,11 +83,6 @@ class GroupAndByeMathTests(unittest.TestCase):
         self.assertEqual(single(n=9).GetNumberOfGroups(), (3, 0))
         self.assertEqual(single(n=11).GetNumberOfGroups(), (1, 2))
 
-    def test_get_number_of_byes(self):
-        self.assertEqual(single(n=6).GetNumberOfByes(), 2)
-        self.assertEqual(single(n=8).GetNumberOfByes(), 0)
-        self.assertEqual(single(n=5).GetNumberOfByes(), 3)
-
     def test_get_byes_distribution(self):
         cat = single(n=6)
         self.assertEqual(cat.GetByes(3), (2, 0))  # 2 byes, todos com cabeças
@@ -169,15 +164,15 @@ class GroupsToEliminationTests(unittest.TestCase):
         cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
         cat.GetBracket()
         cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        for k, m in cat.matches.items():
-            if k[3:5] == "GR":
+        for m in cat.matches.values():
+            if m.matchKey.IsGroups():
                 m.SetScore([(6, 0)], ScoreTypes.Normal)
         cat.UpdateBracket()
         self.assertTrue(cat.isGroupsFinished)
         # 3 grupos -> 6 classificados -> chave de 8 (com byes), todos posicionados
         placed = set()
-        for k, m in cat.matches.items():
-            if k[3:5] == "SE":
+        for m in cat.matches.values():
+            if m.matchKey.IsSingleElimination():
                 for t in (m.team1, m.team2):
                     if t is not None:
                         placed.add(t.name)

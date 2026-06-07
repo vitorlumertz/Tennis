@@ -1,8 +1,11 @@
 import tennisHelper as tnh
-from tennisEnums import *
+from classification import Classification
+from classification import Columns as ClassificationCols
+from groupClassification import GetBracketWithTeams, GetTeams
 from matchTeams import Team, Player, Double
 from match import Match
 from matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
+from tennisEnums import *
 from tennisExceptions import *
 
 import itertools
@@ -25,6 +28,8 @@ class Category:
     players: dict[str, Player] | None = None,
     teams: dict[str, Team] | None = None,
     groups: list[list[Team]] | None = None,
+    groupClassificationType: GroupClassificationTypes | None = None,
+    numOfclassifiedsInGroups: int = 0,
   ):
     self.name = name
     self.categoryType = categoryType
@@ -35,6 +40,8 @@ class Category:
     self.teams = {} if teams is None else teams
     self.players = {} if players is None else players
     self.groups = groups
+    self.groupClassificationtype = groupClassificationType
+    self.numOfclassifiedsInGroups = numOfclassifiedsInGroups
     self.matches: dict[str, Match] = {}
     self.bracket: dict[str, str] = {}
 
@@ -172,21 +179,9 @@ class Category:
     return seeds
 
 
-  def GetNumberOfByes(self, numTeams=None):
+  def GetByes(self, numSeeds:int, numTeams:int|None=None) -> tuple[int, int]:
     numTeams = len(self.teams) if numTeams is None else numTeams
-    maxTeams = tnh.CeilPowerOfTwo(numTeams)
-    return maxTeams - numTeams
-
-
-  def GetByes(self, numSeeds, numTeams=None):
-    numByes = self.GetNumberOfByes(numTeams)
-    if numByes <= numSeeds:
-      numByesWithSeeds = numByes
-      numByesWithoutSeeds = 0
-    else:
-      numByesWithSeeds = numSeeds
-      numByesWithoutSeeds = numByes - numByesWithSeeds
-    return numByesWithSeeds, numByesWithoutSeeds
+    return tnh.GetByes(numSeeds, numTeams)
 
 
   def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
@@ -256,13 +251,35 @@ class Category:
         self.AddGroupMatches(group, sets, setType, lastSetType, i+1)
 
 
-  def GetBracket(self):
+  def __GetNumberOfClassifiedsInGroups(self) -> int:
+    if self.groupClassificationtype is None:
+      self.groupClassificationtype = GroupClassificationTypes.TwoPerGroup
+
+    if self.groupClassificationtype == GroupClassificationTypes.TwoPerGroup:
+      return 2 * len(self.groups)
+
+    if self.groupClassificationtype == GroupClassificationTypes.OnePerGroup:
+      return len(self.groups)
+
+    if self.groupClassificationtype == GroupClassificationTypes.TwoG4_OneG3:
+      if self.groups is None:
+        raise ValueError(f"Expected a list[list[Team]] for groups in category {self.name}, got None.")
+
+      groupsOf3, groupsOf4 = self.GetNumberOfGroups()
+      return 2 * groupsOf4 + groupsOf3
+
+    if self.numOfclassifiedsInGroups < len(self.groups):
+      raise Exception(f"Number of classified teams in groups is less than the number of groups in category {self.name}.")
+
+    return self.numOfclassifiedsInGroups
+
+
+  def GetBracket(self) -> None:
     bracket = {}
     if self.categoryType == CategoryTypes.SingleElimination:
       n = len(self.teams)
     elif self.categoryType == CategoryTypes.Groups:
-      numClassified = 2
-      n = numClassified * len(self.groups)
+      n = self.__GetNumberOfClassifiedsInGroups()
     else:
       return
     firstRoundKeys = GetStageMatchKeys(n)
@@ -280,37 +297,39 @@ class Category:
     self.bracket = bracket
 
 
-  def CompleteMatches(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
+  def CompleteMatches(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak) -> None:
     for key in self.bracket:
       if key not in self.matches:
         self.matches[key] = Match(None, None, sets=sets, setType=setType, lastSetType=lastSetType, matchKey=MatchKey(key))
 
 
-  def GetGroupMatches(self, groupNumber:int) -> list[Match]:
+  def GetGroupMatches(self, groupNumber:int|None=None) -> list[Match]:
     if self.categoryType == CategoryTypes.RoundRobin:
       return list(self.matches.values())
 
-    return [
+    matches = [
       m for m in self.matches.values()
       if m.matchKey.IsGroups()
-      and m.matchKey.firstInfo == groupNumber + 1
     ]
 
+    if groupNumber is not None:
+      matches = [m for m in matches if m.matchKey.firstInfo == groupNumber + 1]
 
-  def GetGroupClassification(self, groupNumber:int):
+    return matches
+
+
+  def GetClassification(self, groupNumber:int|None=None) -> Classification:
     matches = self.GetGroupMatches(groupNumber)
-    return tnh.GetClassification(matches)
+    kSortColumns = [ClassificationCols.Victories, ClassificationCols.SetBalance, ClassificationCols.GameBalance, ClassificationCols.GamesWon]
+    groups = self.groups if self.categoryType is CategoryTypes.Groups else None
+    return Classification(matches, kSortColumns, groups)
 
 
   def UpdateBracket(self) -> None:
-
-    def IsUpInBracket(matchNum, stage):
-      return matchNum / stage <= 0.5
-
-
     for m in self.matches.values():
       if not m.matchKey.IsSingleElimination():
         continue
+
       if m.matchWinner is MatchWinnerTypes.Team1:
         winner = m.team1
       elif m.matchWinner is MatchWinnerTypes.Team2:
@@ -331,104 +350,24 @@ class Category:
           nextMatch.SetScore()
 
     if (self.categoryType is CategoryTypes.RoundRobin) and (self.groups is not None) and (not self.isGroupsFinished):
-      _, isFinalClassification = self.GetGroupClassification(0)
-      if isFinalClassification:
-        self.isGroupsFinished = True
+      self.isGroupsFinished = self.GetClassification().isFinalized
 
     if (self.categoryType is CategoryTypes.Groups) and (self.groups is not None) and (not self.isGroupsFinished):
-      classified = {}
-      for i, group in enumerate(self.groups):
-        groupClassification, isFinalClassification = self.GetGroupClassification(i)
-        if isFinalClassification:
-          classifiedNames = list(groupClassification.keys())[:2]
-          first = {classifiedNames[0]: groupClassification[classifiedNames[0]]}
-          second = {classifiedNames[1]: groupClassification[classifiedNames[1]]}
-          classified.update({i+1: (first, second)})
-        else:
-          break
-      else:
-        self.isGroupsFinished = True
-        firstClassified = {}
-        firstGroupDict = {}
-        for group, clf in classified.items():
-          firstGroupDict.update({next(iter(clf[0].keys())): group})
-          firstClassified.update(clf[0])
-        firstClassified = tnh.SortClassification(firstClassified)
-        finalClassification = []
-        for playerName in firstClassified.keys():
-          group = firstGroupDict[playerName]
-          first = self.teams[playerName]
-          second = self.teams[next(iter(classified[group][1].keys()))]
-          finalClassification.append((first, second))
+      classification = self.GetClassification()
+      self.isGroupsFinished = classification.isFinalized
 
-        seeds = [i[0] for i in finalClassification]
-        numSeeds = len(seeds)
-        numTeams = numSeeds * 2
-        seedsPosition = tnh.GetSeedsPositions(numTeams, numSeeds)
-        secondsUp = []
-        secondsDown = []
-        stage = len(seedsPosition)
-        for i, match_aux in enumerate(seedsPosition):
-          seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
-          if seedNumber is not None:
-            second = finalClassification[seedNumber-1][1]
-            if IsUpInBracket(i+1, stage):
-              secondsDown.append(second)
-            else:
-              secondsUp.append(second)
-
-        numMatchesWithoutSeedsUp = 0
-        numMatchesWithoutSeedsDown = 0
-        for i, match_aux in enumerate(seedsPosition):
-          if match_aux == (None, None):
-            if IsUpInBracket(i+1, stage):
-              numMatchesWithoutSeedsUp += 1
-            else:
-              numMatchesWithoutSeedsDown += 1
-
-        numByesWithoutSeedsUp = numMatchesWithoutSeedsUp * 2 - len(secondsUp)
-        numByesWithoutSeedsDown = numMatchesWithoutSeedsDown * 2 - len(secondsDown)
-
-        numByesWithSeeds, _ = self.GetByes(numSeeds, numTeams)
-        matchKeys = GetStageMatchKeys(numTeams)
-        byesWithoutSeedsUpCount = 0
-        byesWithoutSeedsDownCount = 0
-        for i, match_aux in enumerate(seedsPosition):
-          matchKey = matchKeys[i]
-          m = self.matches[matchKey.name]
-          seedNumber = match_aux[0] if match_aux[1] is None else match_aux[1]
-          isMatchWithSeed = False if seedNumber is None else True
-          if isMatchWithSeed:
-            m.SetTeam(1, seeds[seedNumber - 1])
-            if seedNumber <= numByesWithSeeds:
-              m.SetTeam(2, None)
-              m.SetScore()
-              continue
-          else:
-            if IsUpInBracket(i+1, stage):
-              m.SetTeam(1, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
-            else:
-              m.SetTeam(1, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
-
-          if not isMatchWithSeed:
-            isBye = False
-            if IsUpInBracket(i+1, stage):
-              if byesWithoutSeedsUpCount < numByesWithoutSeedsUp:
-                byesWithoutSeedsUpCount += 1
-                isBye = True
-            else:
-              if byesWithoutSeedsDownCount < numByesWithoutSeedsDown:
-                byesWithoutSeedsDownCount += 1
-                isBye = True
-            if isBye:
-              m.SetTeam(2, None)
-              m.SetScore()
-              continue
-
-          if IsUpInBracket(i+1, stage):
-            m.SetTeam(2, secondsUp.pop(random.randint(0, len(secondsUp)-1)))
-          else:
-            m.SetTeam(2, secondsDown.pop(random.randint(0, len(secondsDown)-1)))
+      if classification.isFinalized:
+        bracket = GetBracketWithTeams(GetTeams(classification, self.__GetNumberOfClassifiedsInGroups()))
+        stage = len(bracket)
+        for i, match_aux in enumerate(bracket, start=1):
+          matchKey = MatchKey(firstInfo=stage, stageType=MatchKeyType.SingleElimination, thirdInfo=i)
+          match = self.matches[matchKey.name]
+          t1 = self.teams[match_aux[0]] if match_aux[0] else None
+          t2 = self.teams[match_aux[1]] if match_aux[1] else None
+          match.SetTeam(1, t1)
+          match.SetTeam(2, t2)
+          if (t1 is None) or (t2 is None):
+            match.SetScore()
 
         self.UpdateBracket()
 

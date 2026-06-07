@@ -3,13 +3,18 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from tournamentApp import TournamentApp
 
+import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 
-from match import Match
+from classification import Classification, Columns
 
 
-def CreateGroupClassificationTable(app:"TournamentApp", classification:dict[str, Match], labelTitle:str=''):
+def ToInt(v):
+  return 0 if pd.isna(v) else int(v)
+
+
+def CreateGroupClassificationTable(app:"TournamentApp", classification:Classification, labelTitle:str=''):
   style = ttk.Style()
   style.configure("Classification.Treeview", font=("Arial", 12))
   style.configure("Classification.Treeview.Heading", font=("Arial", 12, "bold"))
@@ -18,7 +23,7 @@ def CreateGroupClassificationTable(app:"TournamentApp", classification:dict[str,
   frame.pack(anchor="w", padx=10, pady=10)
   if labelTitle != '':
     tk.Label(frame, text=labelTitle, font=("Arial", 12), bg="white").pack(pady=(0,2), anchor="w")
-  table = ttk.Treeview(frame, columns=('teamName', 'victories', 'setBalance', 'gameBalance'), show="headings", height=len(classification), style="Classification.Treeview")
+  table = ttk.Treeview(frame, columns=('teamName', 'victories', 'setBalance', 'gameBalance'), show="headings", height=len(classification.classification), style="Classification.Treeview")
   table.heading('teamName', text="Nome")
   table.heading('victories', text="Vitórias")
   table.heading('setBalance', text="Saldo Sets")
@@ -31,12 +36,12 @@ def CreateGroupClassificationTable(app:"TournamentApp", classification:dict[str,
   table.tag_configure('evenrow', background="#e0e0e0")
   table.pack(anchor="w", pady=(0,5))
 
-  for i, (teamName, values) in enumerate(classification.items()):
+  for i, (teamName, row) in enumerate(classification.classification.iterrows()):
     data = (
       teamName,
-      values["Victories"],
-      values["SetBalance"],
-      values["GameBalance"],
+      ToInt(row[Columns.Victories.name]),
+      ToInt(row[Columns.SetBalance.name]),
+      ToInt(row[Columns.GameBalance.name]),
     )
     if i % 2 == 0:
       tags = ('evenrow',)

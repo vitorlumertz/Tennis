@@ -424,9 +424,9 @@ class TournamentApp(tk.Tk):
       return
 
     for groupNumber in range(len(category.groups)):
-      classification, isFinal = category.GetGroupClassification(groupNumber)
-      isFinalText = 'finalizado' if isFinal else "em andamento"
-      title = f"Grupo {groupNumber+1} ({isFinalText}):"
+      classification = category.GetClassification(groupNumber)
+      status = 'finalizado' if classification.isFinalized else "em andamento"
+      title = f"Grupo {groupNumber+1} ({status}):"
       CreateGroupClassificationTable(self, classification, title)
 
 
