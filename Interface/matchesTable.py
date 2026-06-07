@@ -14,8 +14,12 @@ from fileReader import GetScore
 
 
 def UpdateScore(app:"TournamentApp", window:tk.Toplevel, category:Category, match:Match, scoreStr:str, scoreType:ScoreTypes):
+  try:
+    score = GetScore(scoreStr)
+  except Exception:
+    messagebox.showerror("Erro", "Não foi possível ler o placar.")
+    return
   window.destroy()
-  score = GetScore(scoreStr)
   match.SetScore(score, scoreType)
   app.tournament.UpdateBrackets()
   app.UpdateMatchesContent(category.name)
