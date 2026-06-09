@@ -5,8 +5,6 @@ from tennisEnums import *
 from matchTeams import Team
 
 if TYPE_CHECKING:
-  # Apenas para type hints. Importar Match em runtime cria um import circular
-  # (match.py importa tennisHelper), que quebra dependendo da ordem de import.
   from match import Match
 
 
