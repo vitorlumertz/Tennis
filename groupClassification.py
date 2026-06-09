@@ -19,9 +19,6 @@ class Team_aux:
   position: int
   group: int
 
-  def IsBye(self) -> bool:
-    return self.group < 0
-
 
 @dataclass
 class TeamChoice:
@@ -51,10 +48,6 @@ class TeamChoice:
 
   def ChosenNoTeam(self) -> bool:
     return self.chosen == 3
-
-
-  def IsBye(self) -> bool:
-    return self.group < 0
 
 
   def IsT1Alone(self) -> bool:
