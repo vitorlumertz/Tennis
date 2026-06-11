@@ -26,7 +26,8 @@ memória e é persistido em um **arquivo de texto `.txt`** próprio (formato des
   (WO, desistência, bye).
 - **Avança a chave** automaticamente: ao registrar o vencedor de um jogo, ele é promovido
   para o jogo seguinte; ao fechar a fase de grupos, monta a chave eliminatória entre os
-  classificados.
+  classificados, com regras configuráveis por categoria (dois por grupo, um por grupo,
+  dois nos grupos de 4 e um nos de 3, ou número total livre).
 - **Calcula a classificação** dos grupos por vitórias, saldo de sets e saldo de games.
 - **Exporta** a categoria (grupos e jogos) para **PDF** e o torneio inteiro para o
   **Google Sheets** (com fórmulas que recalculam classificação e mata-mata sozinhas).
@@ -39,12 +40,13 @@ memória e é persistido em um **arquivo de texto `.txt`** próprio (formato des
 ```
 LumertzTennis/
 ├── tournament.py        # Classe Tournament — orquestra categorias e o fluxo do torneio
-├── category.py          # Classe Category — coração da lógica de chaveamento (511 linhas)
+├── category.py          # Classe Category — coração da lógica de chaveamento
+├── groupClassification.py # Montagem da chave eliminatória a partir dos classificados dos grupos
 ├── match.py             # Classe Match — um jogo, seu placar e vencedor
 ├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
 ├── matchTeams.py        # Team / Player / Double — os competidores
 ├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
-├── tennisEnums.py       # Enums: tipos de categoria, set, placar, vencedor, seções de arquivo
+├── tennisEnums.py       # Enums: tipos de categoria, classificação de grupos, set, placar, vencedor, seções de arquivo
 ├── tennisExceptions.py  # Exceções de domínio (categoria/duplas/jogador duplicado etc.)
 ├── tennisHelper.py      # Funções puras: validação de placar, seeding, byes, classificação
 ├── fileReader.py        # Lê o arquivo .txt do torneio → objeto Tournament
@@ -62,6 +64,7 @@ LumertzTennis/
 │   ├── interfaceUtils.py      # Helpers de UI (combobox de categorias, limpar frame)
 │   ├── newTournamentWindow.py # Diálogo "Novo Torneio"
 │   ├── newCategoryWindow.py   # Diálogo "Nova Categoria"
+│   ├── updateGroupClassificationWindow.py # Diálogo "Atualizar Classificação dos Grupos"
 │   ├── newTeamWindow.py       # Diálogo "Adicionar/Editar Jogador ou Dupla"
 │   ├── changeCategoryWindow.py# Diálogo "Trocar de Categoria"
 │   ├── matchesTable.py        # Tabela de jogos + janela de lançamento de placar
@@ -83,6 +86,7 @@ Tournament  (o torneio)
  └── Category  (categoria; várias por torneio)
       ├── teams / players  (inscritos: Player ou Double)
       ├── groups           (grupos, quando aplicável)
+      ├── groupClassificationType / numOfclassifiedsInGroups  (regra de classificação p/ mata-mata)
       ├── matches          (todos os jogos, indexados por "chave de jogo")
       └── bracket          (mapa de avanço: cada jogo aponta para o próximo)
 ```
@@ -99,7 +103,7 @@ Tournament  (o torneio)
 | Tipo                | Comportamento |
 |---------------------|---------------|
 | `RoundRobin`        | Todos contra todos (grupo único). Usado para poucos inscritos. |
-| `Groups`            | Fase de grupos (de 3 e 4) → classificam os 2 primeiros de cada grupo → mata-mata. |
+| `Groups`            | Fase de grupos (de 3 e 4) → classificados conforme `GroupClassificationTypes` → mata-mata. |
 | `SingleElimination` | Eliminatória simples (chave de mata-mata desde o início). |
 | `Automatic`         | Escolhe sozinho conforme o nº de inscritos (ver abaixo). |
 | `DoubleElimination`, `Teams` | Declarados no enum, **não implementados**. |
@@ -110,6 +114,27 @@ Tournament  (o torneio)
 - 10 ou mais → `SingleElimination`
 
 Além disso, uma categoria `Groups` com menos de 6 inscritos é rebaixada para `RoundRobin`.
+
+### Classificação da fase de grupos (`GroupClassificationTypes`)
+
+Propriedades da categoria (persistidas no arquivo `.txt`):
+
+- **`groupClassificationType`** — regra de quantos times avançam do(s) grupo(s) para o mata-mata.
+  Se omitido ao criar/ler, o padrão é `TwoPerGroup`.
+- **`numOfclassifiedsInGroups`** — usado apenas quando o tipo é `TotalNumber`; indica o
+  **número total** de classificados (deve ser ≥ nº de grupos).
+
+| Tipo            | Comportamento |
+|-----------------|---------------|
+| `TwoPerGroup`   | Os 2 primeiros de **cada** grupo avançam (comportamento clássico). |
+| `OnePerGroup`   | Apenas o 1º de cada grupo avança. |
+| `TwoG4_OneG3`   | 2 classificados em grupos de 4 e 1 classificado em grupos de 3. |
+| `TotalNumber`   | N classificados no total, escolhidos entre os melhores colocados de todos os grupos (`numOfclassifiedsInGroups`). |
+
+O nº de vagas na chave eliminatória é calculado em `Category.__GetNumberOfClassifiedsInGroups()`
+e usado em `GetBracket` e em `UpdateBracket` (via `groupClassification.GetTeams` /
+`GetBracketWithTeams`) para montar o mata-mata respeitando cabeças de chave por grupo e
+evitando reencontros precoce entre integrantes do mesmo grupo.
 
 ### Tipos de set (`SetTypes`)
 
@@ -169,9 +194,10 @@ não-cabeças.
 - `CompleteMatches` cria os jogos "vazios" das fases futuras.
 - `UpdateBracket` é chamada a cada placar lançado:
   - promove o vencedor de cada jogo eliminatório para o jogo seguinte;
-  - quando a fase de grupos termina (todos os jogos definidos), calcula os classificados e
-    **monta automaticamente o mata-mata** entre eles (1ºs como cabeças, 2ºs sorteados nos
-    lados opostos da chave para evitar reencontro precoce).
+  - quando a fase de grupos termina (todos os jogos definidos), calcula os classificados
+    conforme `groupClassificationType` / `numOfclassifiedsInGroups` e **monta automaticamente
+    o mata-mata** entre eles (`groupClassification.py`: 1ºs como cabeças, demais posições
+    sorteadas nos lados opostos da chave para evitar reencontro precoce).
 
 ### Classificação dos grupos (`tennisHelper.GetClassification`)
 
@@ -214,9 +240,10 @@ Exemplo (de `TestData/`):
 Torneio Exemplo,1,Normal Set,MatchTieBreak
 
 [CATEGORIES]
-//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized
+//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Num Of Classifieds In Groups
 1a Classe Simples,SingleElimination,Single
-2a Classe Simples,Groups,Single
+2a Classe Simples,Groups,Single,,,True,TwoPerGroup
+3a Classe Simples,Groups,Single,,,True,TotalNumber,8
 
 [PLAYERS]
 //Name, Category Name, Seed Number
@@ -271,7 +298,7 @@ conteúdo rolável. Itens do menu:
 | Menu            | O que faz |
 |-----------------|-----------|
 | **Torneio**     | Mostra dados do torneio; botões: criar, abrir, importar do Sheets, exportar p/ Sheets. |
-| **Categorias**  | Detalhes da categoria; iniciar categoria, exportar PDF, criar e excluir categoria. |
+| **Categorias**  | Detalhes da categoria (incl. tipo de classificação dos grupos e nº de classificados); iniciar categoria, exportar PDF, criar, atualizar classificação dos grupos e excluir categoria. |
 | **Jogadores**   | Tabela de jogadores + resumo (contagem por cabeça de chave). |
 | **Presença**    | Listas de presentes/ausentes. |
 | **Duplas**      | Tabela de duplas da categoria. |
