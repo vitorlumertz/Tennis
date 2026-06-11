@@ -14,6 +14,7 @@ from pdfExporter import ExportGroupCategoryToPdf
 from interfaceUtils import CreateCategoriesComboBox, ClearFrame
 from newTournamentWindow import OpenNewTournamentWindow
 from newCategoryWindow import OpenNewCategoryWindow
+from updateGroupClassificationWindow import OpenUpdateGroupClassificationWindow, GetGroupClassificationTypeDisplay
 from newTeamWindow import OpenTeamWindow
 from changeCategoryWindow import OpenChangeCategoryWindow
 from playersImportWindow import OpenImportPlayersWindow
@@ -505,6 +506,18 @@ class TournamentApp(tk.Tk):
         tk.Label(self.contentFrame, text=f"Categoria inicializada? {category.isInitialized}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
         tk.Label(self.contentFrame, text=f"Grupos finalizados? {category.isGroupsFinished}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
         tk.Label(self.contentFrame, text=f"Duplas sorteadas? {category.isRandomDoubles}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
+        tk.Label(
+          self.contentFrame,
+          text=f"Tipo de classificação dos grupos: {GetGroupClassificationTypeDisplay(category)}",
+          font=('Arial', 12),
+          bg='white',
+        ).pack(anchor="w", padx=10, pady=5)
+        tk.Label(
+          self.contentFrame,
+          text=f"Número de classificados nos grupos: {category.numOfclassifiedsInGroups}",
+          font=('Arial', 12),
+          bg='white',
+        ).pack(anchor="w", padx=10, pady=5)
 
     if category is not None:
       button = tk.Button(
@@ -530,6 +543,16 @@ class TournamentApp(tk.Tk):
         text="Criar categoria",
         command=lambda: OpenNewCategoryWindow(self),
         font=('Arial', 12),
+      )
+      button.pack(anchor="w", padx=10, pady=(20,5))
+
+    if category is not None and category.categoryType == CategoryTypes.Groups:
+      button = tk.Button(
+        self.contentFrame,
+        text="Atualizar classificação dos grupos",
+        command=lambda: OpenUpdateGroupClassificationWindow(self, category),
+        font=('Arial', 12),
+        state="normal" if not category.isGroupsFinished else "disabled",
       )
       button.pack(anchor="w", padx=10, pady=(20,5))
 

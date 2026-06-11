@@ -40,7 +40,7 @@ class Category:
     self.teams = {} if teams is None else teams
     self.players = {} if players is None else players
     self.groups = groups
-    self.groupClassificationtype = groupClassificationType
+    self.groupClassificationType = groupClassificationType
     self.numOfclassifiedsInGroups = numOfclassifiedsInGroups
     self.matches: dict[str, Match] = {}
     self.bracket: dict[str, str] = {}
@@ -252,16 +252,16 @@ class Category:
 
 
   def __GetNumberOfClassifiedsInGroups(self) -> int:
-    if self.groupClassificationtype is None:
-      self.groupClassificationtype = GroupClassificationTypes.TwoPerGroup
+    if self.groupClassificationType is None:
+      self.groupClassificationType = GroupClassificationTypes.TwoPerGroup
 
-    if self.groupClassificationtype == GroupClassificationTypes.TwoPerGroup:
+    if self.groupClassificationType == GroupClassificationTypes.TwoPerGroup:
       return 2 * len(self.groups)
 
-    if self.groupClassificationtype == GroupClassificationTypes.OnePerGroup:
+    if self.groupClassificationType == GroupClassificationTypes.OnePerGroup:
       return len(self.groups)
 
-    if self.groupClassificationtype == GroupClassificationTypes.TwoG4_OneG3:
+    if self.groupClassificationType == GroupClassificationTypes.TwoG4_OneG3:
       if self.groups is None:
         raise ValueError(f"Expected a list[list[Team]] for groups in category {self.name}, got None.")
 

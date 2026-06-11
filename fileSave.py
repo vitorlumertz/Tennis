@@ -67,8 +67,8 @@ def WriteCategoriesSection(file, tournament: Tournament):
     if category.isInitialized:
       text += str(category.isInitialized)
     text += ','
-    if category.groupClassificationtype:
-      text += category.groupClassificationtype.name
+    if category.groupClassificationType:
+      text += category.groupClassificationType.name
     text += ','
     if category.numOfclassifiedsInGroups != 0:
       text += str(category.numOfclassifiedsInGroups)
