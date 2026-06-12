@@ -21,7 +21,7 @@ def UpdateScore(app:"TournamentApp", window:tk.Toplevel, category:Category, matc
     return
   window.destroy()
   match.SetScore(score, scoreType)
-  category.UpdateBracket()
+  category.UpdateBracket(app.tournament.classificationCriteria)
   app.UpdateMatchesContent(category.name)
 
 

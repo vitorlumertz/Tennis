@@ -6,6 +6,9 @@ from classification import (
   Columns,
   MatchScoreData,
   OrderDf,
+  ClassificationCriteriaToString,
+  ParseClassificationCriteria,
+  DEFAULT_CLASSIFICATION_CRITERIA,
 )
 
 from matchTeams import Team
@@ -237,6 +240,21 @@ class ClassificationTests(unittest.TestCase):
     tieDraw = c.classification[Columns.TieDraw.name].tolist()
     self.assertGreater(tieDraw[1], tieDraw[2])
     self.assertGreater(tieDraw[2], tieDraw[4])
+
+
+class ClassificationCriteriaTests(unittest.TestCase):
+  def test_default_criteria_round_trip(self):
+    text = ClassificationCriteriaToString(DEFAULT_CLASSIFICATION_CRITERIA)
+    self.assertEqual(text, "Victories/SetBalance/GameBalance/GamesWon")
+    self.assertEqual(ParseClassificationCriteria(text), DEFAULT_CLASSIFICATION_CRITERIA)
+
+  def test_parse_rejects_duplicate(self):
+    with self.assertRaises(ValueError):
+      ParseClassificationCriteria("Victories/Victories")
+
+  def test_parse_rejects_invalid(self):
+    with self.assertRaises(ValueError):
+      ParseClassificationCriteria("InvalidColumn")
 
 
 if __name__ == "__main__":

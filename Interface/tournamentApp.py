@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from tkinter import messagebox, filedialog
 
+from classification import ClassificationCriteriaToString
 from tennisEnums import MatchTypes, CategoryTypes
 from tournament import Tournament
 from category import Category
@@ -15,6 +16,7 @@ from interfaceUtils import CreateCategoriesComboBox, ClearFrame
 from newTournamentWindow import OpenNewTournamentWindow
 from newCategoryWindow import OpenNewCategoryWindow
 from updateGroupClassificationWindow import OpenUpdateGroupClassificationWindow, GetGroupClassificationTypeDisplay
+from updateClassificationCriteriaWindow import OpenUpdateClassificationCriteriaWindow
 from newTeamWindow import OpenTeamWindow
 from changeCategoryWindow import OpenChangeCategoryWindow
 from playersImportWindow import OpenImportPlayersWindow
@@ -165,11 +167,20 @@ class TournamentApp(tk.Tk):
       numberOfSets = str(self.tournament.sets)
       setType = self.tournament.setType.name
       lastSetType = self.tournament.lastSetType.name
+      classificationCriteria = ClassificationCriteriaToString(self.tournament.classificationCriteria)
 
       tk.Label(self.contentFrame, text=f"Nome do Torneio: {tournamentName}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=5)
       tk.Label(self.contentFrame, text=f"Quantidade de Sets: {numberOfSets}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
       tk.Label(self.contentFrame, text=f"Tipo de Set: {setType}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
       tk.Label(self.contentFrame, text=f"Tipo do último Set: {lastSetType}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+      tk.Label(self.contentFrame, text=f"Critérios de desempate: {classificationCriteria}", font=('Arial', 12), bg='white').pack(anchor="w", padx=10, pady=(20,5))
+
+      tk.Button(
+        self.contentFrame,
+        text="Atualizar Critérios de Desempate",
+        command=self.OpenUpdateClassificationCriteriaWindow,
+        font=('Arial', 12),
+      ).pack(anchor="w", padx=10, pady=(5, 5))
 
     button = tk.Button(
       self.contentFrame,
@@ -425,7 +436,7 @@ class TournamentApp(tk.Tk):
       return
 
     for groupNumber in range(len(category.groups)):
-      classification = category.GetClassification(groupNumber)
+      classification = category.GetClassification(groupNumber, self.tournament.classificationCriteria)
       status = 'finalizado' if classification.isFinalized else "em andamento"
       title = f"Grupo {groupNumber+1} ({status}):"
       CreateGroupClassificationTable(self, classification, title)
@@ -433,6 +444,10 @@ class TournamentApp(tk.Tk):
 
   def OpenNewTournamentWindow(self):
     OpenNewTournamentWindow(self)
+
+
+  def OpenUpdateClassificationCriteriaWindow(self):
+    OpenUpdateClassificationCriteriaWindow(self)
 
 
   def OpenImportPlayersWindow(self):

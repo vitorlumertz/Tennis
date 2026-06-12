@@ -1,3 +1,4 @@
+from classification import ClassificationCriteriaToString
 from tournament import *
 from tennisEnums import *
 from matchTeams import *
@@ -10,7 +11,7 @@ def GetSectionTitle(section: FileSections):
 def GetSectionComments(section: FileSections):
   comments = '//'
   if section is FileSections.Tournament:
-    comments += 'Name, Number of Sets, Set Type, Last Set Type\n'
+    comments += 'Name, Number of Sets, Set Type, Last Set Type, Classification Criteria\n'
   elif section is FileSections.Categories:
     comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Number Ofclassifieds In Groups\n'
   elif section is FileSections.Players:
@@ -47,7 +48,8 @@ def WriteTournamentSection(file, tournament: Tournament):
   text = tournament.name + ','
   text += str(tournament.sets) + ','
   text += tournament.setType.name + ','
-  text += tournament.lastSetType.name + '\n\n'
+  text += tournament.lastSetType.name + ','
+  text += ClassificationCriteriaToString(tournament.classificationCriteria) + '\n\n'
   file.write(text)
 
 
