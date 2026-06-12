@@ -4,6 +4,7 @@ import unittest
 
 import fileReader as fr
 from fileSave import SaveFile
+from classification import DEFAULT_CLASSIFICATION_CRITERIA
 from tennisEnums import SetTypes, CategoryTypes, MatchTypes, ScoreTypes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,6 +47,7 @@ class ReadExampleTests(unittest.TestCase):
         self.assertEqual(self.tournament.sets, 1)
         self.assertEqual(self.tournament.setType, SetTypes.NormalSet)
         self.assertEqual(self.tournament.lastSetType, SetTypes.MatchTieBreak)
+        self.assertEqual(self.tournament.classificationCriteria, DEFAULT_CLASSIFICATION_CRITERIA)
 
     def test_categories_loaded(self):
         self.assertEqual(len(self.tournament.categories), 4)
@@ -73,6 +75,7 @@ class RoundTripTests(unittest.TestCase):
             os.remove(path)
 
         self.assertEqual(reloaded.name, original.name)
+        self.assertEqual(reloaded.classificationCriteria, original.classificationCriteria)
         self.assertEqual(
             sorted(reloaded.categories), sorted(original.categories)
         )

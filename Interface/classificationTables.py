@@ -7,7 +7,7 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 
-from classification import Classification, Columns
+from classification import Classification
 
 
 def ToInt(v):
@@ -23,26 +23,28 @@ def CreateGroupClassificationTable(app:"TournamentApp", classification:Classific
   frame.pack(anchor="w", padx=10, pady=10)
   if labelTitle != '':
     tk.Label(frame, text=labelTitle, font=("Arial", 12), bg="white").pack(pady=(0,2), anchor="w")
-  table = ttk.Treeview(frame, columns=('teamName', 'victories', 'setBalance', 'gameBalance'), show="headings", height=len(classification.classification), style="Classification.Treeview")
+
+  columns = ["teamName"]
+  for criteria in app.tournament.classificationCriteria:
+    columns.append(criteria.name)
+
+  table = ttk.Treeview(frame, columns=columns, show="headings", height=len(classification.classification), style="Classification.Treeview")
   table.heading('teamName', text="Nome")
-  table.heading('victories', text="Vitórias")
-  table.heading('setBalance', text="Saldo Sets")
-  table.heading('gameBalance', text="Saldo Games")
   table.column('teamName', width=300, anchor="center")
-  table.column('victories', width=150, anchor="center")
-  table.column('setBalance', width=150, anchor="center")
-  table.column('gameBalance', width=150, anchor="center")
+
+  for criteria in app.tournament.classificationCriteria:
+    table.heading(criteria.name, text=criteria.name)
+    table.column(criteria.name, width=150, anchor="center")
+
   table.tag_configure('oddrow', background="white")
   table.tag_configure('evenrow', background="#e0e0e0")
   table.pack(anchor="w", pady=(0,5))
 
   for i, (teamName, row) in enumerate(classification.classification.iterrows()):
-    data = (
-      teamName,
-      ToInt(row[Columns.Victories.name]),
-      ToInt(row[Columns.SetBalance.name]),
-      ToInt(row[Columns.GameBalance.name]),
-    )
+    data = [teamName]
+    for criteria in app.tournament.classificationCriteria:
+      data.append(ToInt(row[criteria.name]))
+
     if i % 2 == 0:
       tags = ('evenrow',)
     else:

@@ -1,5 +1,6 @@
 from typing import Literal
 
+from classification import Columns, DEFAULT_CLASSIFICATION_CRITERIA
 from tennisEnums import *
 from tennisExceptions import *
 from category import Category
@@ -17,6 +18,7 @@ class Tournament:
     lastSetType: SetTypes = SetTypes.MatchTieBreak,
     categories: dict[str, Category] | None = None,
     oldDoubles: list[tuple[str, str]] | None = None,
+    classificationCriteria: list[Columns] | None = None,
   ):
     if sets not in [1, 3, 5]:
       raise ValueError(f"Sets must be 1, 3 or 5. {sets} was given.")
@@ -27,6 +29,7 @@ class Tournament:
     self.lastSetType = lastSetType
     self.categories = {} if categories is None else categories
     self.oldDoubles = [] if oldDoubles is None else oldDoubles
+    self.classificationCriteria = (classificationCriteria if classificationCriteria is not None else DEFAULT_CLASSIFICATION_CRITERIA).copy()
 
 
   def __repr__(self):
@@ -99,4 +102,4 @@ class Tournament:
 
   def UpdateBrackets(self):
     for category in self.categories.values():
-      category.UpdateBracket()
+      category.UpdateBracket(self.classificationCriteria)

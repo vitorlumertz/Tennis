@@ -26,6 +26,50 @@ class Columns(Enum):
   TieDraw = 13
 
 
+CLASSIFICATION_CRITERIA_OPTIONS = [
+  Columns.Victories,
+  Columns.SetBalance,
+  Columns.GameBalance,
+  Columns.SetsWon,
+  Columns.GamesWon,
+  Columns.PlayedMatches,
+]
+
+DEFAULT_CLASSIFICATION_CRITERIA = [
+  Columns.Victories,
+  Columns.SetBalance,
+  Columns.GameBalance,
+  Columns.GamesWon,
+]
+
+
+def ClassificationCriteriaToString(criteria: list[Columns]) -> str:
+  return '/'.join(column.name for column in criteria)
+
+
+def ParseClassificationCriteria(string: str) -> list[Columns]:
+  normalized = string.strip()
+  if normalized == '':
+    return list(DEFAULT_CLASSIFICATION_CRITERIA)
+
+  criteria = []
+  for part in normalized.split('/'):
+    name = part.strip().replace(' ', '')
+    if name == '':
+      continue
+    column = next((c for c in CLASSIFICATION_CRITERIA_OPTIONS if c.name.upper() == name.upper()), None)
+    if column is None:
+      raise ValueError(f"Critério de classificação inválido: {part.strip()}")
+    if column in criteria:
+      raise ValueError(f"Critério de classificação repetido: {column.name}")
+    criteria.append(column)
+
+  if len(criteria) == 0:
+    return list(DEFAULT_CLASSIFICATION_CRITERIA)
+
+  return criteria
+
+
 @dataclass
 class MatchScoreData:
   setsT1: int = 0

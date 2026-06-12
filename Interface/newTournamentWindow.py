@@ -7,11 +7,21 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
+from classification import Columns
 from tournament import Tournament
 from tennisEnums import SetTypes
+from classificationCriteriaSelector import ClassificationCriteriaSelector
 
 
-def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str, numberOfSets:int, setType:SetTypes, lastSetType:SetTypes):
+def CreateTournament(
+  app:"TournamentApp",
+  window:tk.Toplevel,
+  tournamentName:str,
+  numberOfSets:int,
+  setType:SetTypes,
+  lastSetType:SetTypes,
+  classificationCriteria:list[Columns],
+):
   if tournamentName.replace(' ', '') == '':
     messagebox.showerror("Erro", "Não é possível criar um torneio com nome vazio.")
     window.destroy()
@@ -19,12 +29,17 @@ def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str
 
   isConfirmed = messagebox.askyesno("Confirmação", "Deseja realmente criar um novo torneio?\nO torneio atual será perdido.")
 
+  if len(classificationCriteria) == 0:
+    messagebox.showerror("Erro", "Selecione ao menos um critério de desempate.")
+    return
+
   if isConfirmed:
     app.tournament = Tournament(
       name = tournamentName,
       sets = numberOfSets,
       setType = setType,
       lastSetType = lastSetType,
+      classificationCriteria = classificationCriteria,
     )
     app.UpdateTournamentContent()
   else:
@@ -36,7 +51,7 @@ def CreateTournament(app:"TournamentApp", window:tk.Toplevel, tournamentName:str
 def OpenNewTournamentWindow(app:"TournamentApp"):
   window = tk.Toplevel(app)
   window.title("Novo Torneio")
-  window.geometry("600x500")
+  window.geometry("600x650")
 
   tk.Label(window, text="Configure o Novo Torneio", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
 
@@ -82,9 +97,19 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
+  criteriaSelector = ClassificationCriteriaSelector(window)
+
   tk.Button(
     window,
     text="Criar Torneio",
-    command=lambda: CreateTournament(app, window, nameEntry.get(), int(numberOfSets.get()), SetTypes[setType.get()], SetTypes[lastSetType.get()]),
+    command=lambda: CreateTournament(
+      app,
+      window,
+      nameEntry.get(),
+      int(numberOfSets.get()),
+      SetTypes[setType.get()],
+      SetTypes[lastSetType.get()],
+      criteriaSelector.GetCriteria(),
+    ),
     font=('Arial', 12),
   ).pack(anchor="w", padx=10, pady=(20,5))
