@@ -1,6 +1,7 @@
 from typing import Literal
 import tennisHelper as tnh
 from tennisEnums import *
+from tennisExceptions import ForfeitWithNoResultError
 from matchTeams import Double, Team
 from matchKey import MatchKey
 
@@ -83,8 +84,12 @@ class Match:
           matchWinner = MatchWinnerTypes.kNone
           score = None
         elif scoreType is ScoreTypes.T1Forfeit:
+          if score is None:
+            raise ForfeitWithNoResultError()
           matchWinner = MatchWinnerTypes.Team2
         elif scoreType is ScoreTypes.T2Forfeit:
+          if score is None:
+            raise ForfeitWithNoResultError()
           matchWinner = MatchWinnerTypes.Team1
         elif score is None:
           scoreType = ScoreTypes.NotDefined

@@ -3,6 +3,7 @@ import unittest
 from match import Match
 from matchTeams import Player, Double
 from tennisEnums import SetTypes, ScoreTypes, MatchWinnerTypes, MatchTypes
+from tennisExceptions import ForfeitWithNoResultError
 
 
 def make(team1, team2, **kw):
@@ -53,10 +54,13 @@ class WalkoverAndForfeitTests(unittest.TestCase):
         self.assertEqual(m.matchWinner, MatchWinnerTypes.kNone)
 
     def test_forfeits(self):
-        m1 = make(Player("A"), Player("B"), scoreType=ScoreTypes.T1Forfeit)
+        m1 = make(Player("A"), Player("B"), scoreType=ScoreTypes.T1Forfeit, score=[(3,3)])
         self.assertEqual(m1.matchWinner, MatchWinnerTypes.Team2)
-        m2 = make(Player("A"), Player("B"), scoreType=ScoreTypes.T2Forfeit)
+        m2 = make(Player("A"), Player("B"), scoreType=ScoreTypes.T2Forfeit, score=[(6,2)])
         self.assertEqual(m2.matchWinner, MatchWinnerTypes.Team1)
+
+        with self.assertRaises(ForfeitWithNoResultError):
+            m3 = make(Player("A"), Player("B"), scoreType=ScoreTypes.T1Forfeit)
 
 
 class ByeTests(unittest.TestCase):

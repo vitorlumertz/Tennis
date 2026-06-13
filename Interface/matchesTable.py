@@ -19,9 +19,16 @@ def UpdateScore(app:"TournamentApp", window:tk.Toplevel, category:Category, matc
   except Exception:
     messagebox.showerror("Erro", "Não foi possível ler o placar.")
     return
+
   window.destroy()
-  match.SetScore(score, scoreType)
-  category.UpdateBracket(app.tournament.classificationCriteria)
+
+  try:
+    match.SetScore(score, scoreType)
+    category.UpdateBracket(app.tournament.classificationCriteria)
+  except Exception as e:
+    messagebox.showerror("Erro", f"Não foi possível atualizar o torneio:\n\n{e}")
+    return
+
   app.UpdateMatchesContent(category.name)
 
 

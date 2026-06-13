@@ -47,3 +47,8 @@ class DrawingDoublesError(Exception):
 
   def __str__(self):
     return f"Error drawing doubles in category ({self.categoryName})."
+
+
+class ForfeitWithNoResultError(Exception):
+  def __str__(self):
+    return "Forfeit given with no result. Forfeit must define the score when the match ended. If the match did not start, the result must be WO."
