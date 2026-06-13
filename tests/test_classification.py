@@ -242,10 +242,41 @@ class ClassificationTests(unittest.TestCase):
     self.assertGreater(tieDraw[2], tieDraw[4])
 
 
+  def test_direct_match_breaks_tie_after_previous_criteria(self):
+    teams = create_teams(4)
+    matches = [
+      Match(
+        teams[0], teams[1],
+        [(6,0), (6,0)],
+      ),
+      Match(
+        teams[0], teams[2],
+        [(0,6), (0,6)],
+      ),
+      Match(
+        teams[1], teams[3],
+        [(6,0), (6,0)],
+      ),
+      Match(
+        teams[2], teams[3],
+        [(6,0), (6,0)],
+      ),
+    ]
+
+    sortColumns = [Columns.Victories, Columns.SetBalance, Columns.GameBalance, Columns.DirectMatch]
+    c = Classification(matches, sortColumns)
+
+    self.assertColumn(c.classification, Columns.Name, ["T3", "T1", "T2", "T4"])
+    self.assertColumn(c.classification, Columns.Victories, [2, 1, 1, 0])
+    self.assertColumn(c.classification, Columns.SetBalance, [4, 0, 0, -4])
+    self.assertColumn(c.classification, Columns.GameBalance, [24, 0, 0, -24])
+    self.assertColumn(c.classification, Columns.DirectMatch, [0, 2, 1, 0])
+
+
 class ClassificationCriteriaTests(unittest.TestCase):
   def test_default_criteria_round_trip(self):
     text = ClassificationCriteriaToString(DEFAULT_CLASSIFICATION_CRITERIA)
-    self.assertEqual(text, "Victories/SetBalance/GameBalance/GamesWon")
+    self.assertEqual(text, "Victories/SetBalance/GameBalance/DirectMatch")
     self.assertEqual(ParseClassificationCriteria(text), DEFAULT_CLASSIFICATION_CRITERIA)
 
   def test_parse_rejects_duplicate(self):

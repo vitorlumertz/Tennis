@@ -21,7 +21,7 @@ class Columns(Enum):
   GameBalance = 8
   SetsWon = 9
   GamesWon = 10
-  DirectMatch = 11 # not implemented yet
+  DirectMatch = 11
   PlayedMatches = 12
   TieDraw = 13
 
@@ -30,6 +30,7 @@ CLASSIFICATION_CRITERIA_OPTIONS = [
   Columns.Victories,
   Columns.SetBalance,
   Columns.GameBalance,
+  Columns.DirectMatch,
   Columns.SetsWon,
   Columns.GamesWon,
   Columns.PlayedMatches,
@@ -39,7 +40,7 @@ DEFAULT_CLASSIFICATION_CRITERIA = [
   Columns.Victories,
   Columns.SetBalance,
   Columns.GameBalance,
-  Columns.GamesWon,
+  Columns.DirectMatch,
 ]
 
 
@@ -128,6 +129,7 @@ class Classification:
     if self.hasGroups:
       self.__UpdateGroups(groups)
 
+    self.__UpdateDirectMatch(sortColumns)
     self.__UpdatePositions(sortColumns)
 
 
@@ -192,6 +194,72 @@ class Classification:
       for team in group:
         if team.name in self.classification.index:
           self.classification.at[team.name, Columns.Group.name] = i + 1
+
+
+  def __GetDirectMatchMatches(self, teamNames:set[str]) -> list[Match]:
+    return [
+      match for match in self.matches
+      if (
+        match.team1 is not None
+        and match.team2 is not None
+        and match.team1.name in teamNames
+        and match.team2.name in teamNames
+      )
+    ]
+
+
+  def __GetDirectMatchScore(self, tiedTeamNames:list[str], directMatchSortColumns:list[Columns]) -> dict[str, int]:
+    directMatches = self.__GetDirectMatchMatches(set(tiedTeamNames))
+    if len(directMatches) == 0:
+      return {teamName: 0 for teamName in tiedTeamNames}
+
+    directClassification = Classification(directMatches, list(directMatchSortColumns))
+    directDf = directClassification.classification
+
+    ordered = OrderDf(directDf, directMatchSortColumns)
+    scores = {}
+    score = len(tiedTeamNames)
+    lastValues = None
+    lastScore = score
+
+    for _, (teamName, row) in enumerate(ordered.iterrows()):
+      values = tuple(row[col.name] for col in directMatchSortColumns)
+      if lastValues is not None and values != lastValues:
+        score -= 1
+        lastScore = score
+
+      scores[teamName] = lastScore
+      lastValues = values
+
+    return {teamName: scores.get(teamName, 0) for teamName in tiedTeamNames}
+
+
+  def __UpdateDirectMatch(self, sortColumns:list[Columns]) -> None:
+    if Columns.DirectMatch not in sortColumns:
+      return
+
+    directMatchIndex = sortColumns.index(Columns.DirectMatch)
+    previousSortColumns = sortColumns[:directMatchIndex]
+    if len(previousSortColumns) == 0:
+      return
+
+    directMatchSortColumns = [
+      column for column in sortColumns
+      if column is not Columns.DirectMatch
+    ]
+
+    groupByColumns = [column.name for column in previousSortColumns]
+    if self.hasGroups:
+      groupByColumns.insert(0, Columns.Group.name)
+
+    for _, tiedDf in self.classification.groupby(groupByColumns, dropna=False):
+      if len(tiedDf) <= 1:
+        continue
+
+      tiedTeamNames = tiedDf.index.tolist()
+      directMatchScores = self.__GetDirectMatchScore(tiedTeamNames, directMatchSortColumns)
+      for teamName, score in directMatchScores.items():
+        self.classification.at[teamName, Columns.DirectMatch.name] = score
 
 
   def __UpdatePositionColumn(self, orderedDf:pd.DataFrame, postionCol:Literal[Columns.GroupPosition, Columns.Position], sortColumns:list[Columns]) -> None:
