@@ -24,7 +24,7 @@ def UpdateScore(app:"TournamentApp", window:tk.Toplevel, category:Category, matc
 
   try:
     match.SetScore(score, scoreType)
-    category.UpdateBracket(app.tournament.classificationCriteria)
+    category.UpdateBracket(app.tournament.classificationCriteria, app.tournament.resultPoints)
   except Exception as e:
     messagebox.showerror("Erro", f"Não foi possível atualizar o torneio:\n\n{e}")
     return

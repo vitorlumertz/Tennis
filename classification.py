@@ -15,7 +15,7 @@ class Columns(Enum):
   Name = 2
   Group = 3
   GroupPosition = 4
-  Points = 5 # not implemented yet
+  Points = 5
   Victories = 6
   SetBalance = 7
   GameBalance = 8
@@ -27,6 +27,7 @@ class Columns(Enum):
 
 
 CLASSIFICATION_CRITERIA_OPTIONS = [
+  Columns.Points,
   Columns.Victories,
   Columns.SetBalance,
   Columns.GameBalance,
@@ -42,6 +43,64 @@ DEFAULT_CLASSIFICATION_CRITERIA = [
   Columns.GameBalance,
   Columns.DirectMatch,
 ]
+
+
+ResultPoints = dict[tuple[int, int], int]
+
+
+def GetPossibleSetResults(sets:int) -> list[tuple[int, int]]:
+  setsToWin = int((sets + 1) / 2)
+  results = []
+  for loserSets in range(setsToWin):
+    results.append((setsToWin, loserSets))
+    results.append((loserSets, setsToWin))
+  return results
+
+
+def GetDefaultResultPoints(sets:int) -> ResultPoints:
+  resultPoints = {}
+  for setsT1, setsT2 in GetPossibleSetResults(sets):
+    if setsT1 > setsT2:
+      points = 3 if setsT2 == 0 else 2
+    else:
+      points = 0 if setsT1 == 0 else 1
+
+    resultPoints[(setsT1, setsT2)] = points
+
+  return resultPoints
+
+
+def NormalizeResultPoints(sets:int, resultPoints:ResultPoints|None=None) -> ResultPoints:
+  normalized = GetDefaultResultPoints(sets)
+  if resultPoints is not None:
+    for result in GetPossibleSetResults(sets):
+      if result in resultPoints:
+        normalized[result] = resultPoints[result]
+  return normalized
+
+
+def ResultPointsToString(resultPoints:ResultPoints, separator:str='/') -> str:
+  return separator.join(
+    f"{setsT1}x{setsT2}={points}"
+    for (setsT1, setsT2), points in sorted(resultPoints.items(), key=lambda item: item[1], reverse=True)
+  )
+
+
+def ParseResultPoints(string:str, separator:str='/') -> ResultPoints:
+  resultPoints = {}
+  normalized = string.strip()
+  if normalized == '':
+    return resultPoints
+
+  for part in normalized.split(separator):
+    resultStr, pointsStr = part.split('=')
+    setsT1Str, setsT2Str = resultStr.lower().split('x')
+    points = int(pointsStr)
+    if points < 0 or points > 10:
+      raise ValueError("Points value must be between 0 and 10.")
+    resultPoints[(int(setsT1Str), int(setsT2Str))] = points
+
+  return resultPoints
 
 
 def ClassificationCriteriaToString(criteria: list[Columns]) -> str:
@@ -73,6 +132,8 @@ def ParseClassificationCriteria(string: str) -> list[Columns]:
 
 @dataclass
 class MatchScoreData:
+  pointsT1: int = 0
+  pointsT2: int = 0
   setsT1: int = 0
   setsT2: int = 0
   gamesT1: int = 0
@@ -92,8 +153,15 @@ def OrderDf(df:pd.DataFrame, sortColumns:list[Columns]=[Columns.Position]) -> pd
 
 
 class Classification:
-  def __init__(self, matches:list[Match], sortColumns:list[Columns], groups:list[list[Team]]|None=None):
+  def __init__(
+    self,
+    matches:list[Match],
+    sortColumns:list[Columns],
+    groups:list[list[Team]]|None=None,
+    resultPoints:ResultPoints|None=None,
+  ):
     self.matches = matches
+    self.resultPoints = resultPoints
     self.isFinalized = True # updated in self.__UpdateScores()
 
     teams = tnh.GetTeamsFromMatches(matches)
@@ -133,8 +201,7 @@ class Classification:
     self.__UpdatePositions(sortColumns)
 
 
-  @staticmethod
-  def __GetMatchScoreData(match:Match) -> MatchScoreData:
+  def __GetMatchScoreData(self, match:Match) -> MatchScoreData:
     data = MatchScoreData()
     if (match.matchWinner is MatchWinnerTypes.kNone) or (match.matchWinner is MatchWinnerTypes.NotDefined):
       return data
@@ -154,6 +221,10 @@ class Classification:
 
     data.gameBalanceT1 = data.gamesT1 - data.gamesT2
     data.gameBalanceT2 = - data.gameBalanceT1
+
+    resultPoints = NormalizeResultPoints(match.sets, self.resultPoints)
+    data.pointsT1 = resultPoints.get((data.setsT1, data.setsT2), 0)
+    data.pointsT2 = resultPoints.get((data.setsT2, data.setsT1), 0)
 
     return data
 
@@ -176,7 +247,10 @@ class Classification:
       self.__UpdateScore(m.team1, Columns.PlayedMatches, 1)
       self.__UpdateScore(m.team2, Columns.PlayedMatches, 1)
 
-      d = Classification.__GetMatchScoreData(m)
+      d = self.__GetMatchScoreData(m)
+
+      self.__UpdateScore(m.team1, Columns.Points, d.pointsT1)
+      self.__UpdateScore(m.team2, Columns.Points, d.pointsT2)
 
       self.__UpdateScore(m.team1, Columns.SetBalance, d.setBalanceT1)
       self.__UpdateScore(m.team1, Columns.GameBalance, d.gameBalanceT1)
@@ -213,7 +287,7 @@ class Classification:
     if len(directMatches) == 0:
       return {teamName: 0 for teamName in tiedTeamNames}
 
-    directClassification = Classification(directMatches, list(directMatchSortColumns))
+    directClassification = Classification(directMatches, list(directMatchSortColumns), resultPoints=self.resultPoints)
     directDf = directClassification.classification
 
     ordered = OrderDf(directDf, directMatchSortColumns)
