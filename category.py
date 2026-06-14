@@ -1,5 +1,5 @@
 import tennisHelper as tnh
-from classification import Classification, DEFAULT_CLASSIFICATION_CRITERIA
+from classification import Classification, DEFAULT_CLASSIFICATION_CRITERIA, ResultPoints
 from classification import Columns as ClassificationCols
 from groupClassification import GetBracketWithTeams, GetTeams
 from matchTeams import Team, Player, Double
@@ -322,14 +322,19 @@ class Category:
     self,
     groupNumber:int|None=None,
     classificationCriteria:list[ClassificationCols]|None=None,
+    resultPoints:ResultPoints|None=None,
   ) -> Classification:
     matches = self.GetGroupMatches(groupNumber)
     sortColumns = (classificationCriteria if classificationCriteria is not None else DEFAULT_CLASSIFICATION_CRITERIA).copy()
     groups = self.groups if self.categoryType is CategoryTypes.Groups else None
-    return Classification(matches, sortColumns, groups)
+    return Classification(matches, sortColumns, groups, resultPoints)
 
 
-  def UpdateBracket(self, classificationCriteria:list[ClassificationCols]|None=None) -> None:
+  def UpdateBracket(
+    self,
+    classificationCriteria:list[ClassificationCols]|None=None,
+    resultPoints:ResultPoints|None=None,
+  ) -> None:
     for m in self.matches.values():
       if not m.matchKey.IsSingleElimination():
         continue
@@ -354,10 +359,10 @@ class Category:
           nextMatch.SetScore()
 
     if (self.categoryType is CategoryTypes.RoundRobin) and (self.groups is not None) and (not self.isGroupsFinished):
-      self.isGroupsFinished = self.GetClassification(classificationCriteria=classificationCriteria).isFinalized
+      self.isGroupsFinished = self.GetClassification(classificationCriteria=classificationCriteria, resultPoints=resultPoints).isFinalized
 
     if (self.categoryType is CategoryTypes.Groups) and (self.groups is not None) and (not self.isGroupsFinished):
-      classification = self.GetClassification(classificationCriteria=classificationCriteria)
+      classification = self.GetClassification(classificationCriteria=classificationCriteria, resultPoints=resultPoints)
       self.isGroupsFinished = classification.isFinalized
 
       if classification.isFinalized:
@@ -373,7 +378,7 @@ class Category:
           if (t1 is None) or (t2 is None):
             match.SetScore()
 
-        self.UpdateBracket(classificationCriteria)
+        self.UpdateBracket(classificationCriteria, resultPoints)
 
 
   def GetFirstEliminationStage(self) -> int|None:

@@ -1,6 +1,6 @@
 from typing import Literal
 
-from classification import Columns, DEFAULT_CLASSIFICATION_CRITERIA
+from classification import Columns, DEFAULT_CLASSIFICATION_CRITERIA, GetDefaultResultPoints, ResultPoints
 from tennisEnums import *
 from tennisExceptions import *
 from category import Category
@@ -19,6 +19,7 @@ class Tournament:
     categories: dict[str, Category] | None = None,
     oldDoubles: list[tuple[str, str]] | None = None,
     classificationCriteria: list[Columns] | None = None,
+    resultPoints: ResultPoints | None = None,
   ):
     if sets not in [1, 3, 5]:
       raise ValueError(f"Sets must be 1, 3 or 5. {sets} was given.")
@@ -30,6 +31,7 @@ class Tournament:
     self.categories = {} if categories is None else categories
     self.oldDoubles = [] if oldDoubles is None else oldDoubles
     self.classificationCriteria = (classificationCriteria if classificationCriteria is not None else DEFAULT_CLASSIFICATION_CRITERIA).copy()
+    self.resultPoints = resultPoints.copy() if resultPoints is not None else GetDefaultResultPoints(sets)
 
 
   def __repr__(self):
@@ -102,4 +104,4 @@ class Tournament:
 
   def UpdateBrackets(self):
     for category in self.categories.values():
-      category.UpdateBracket(self.classificationCriteria)
+      category.UpdateBracket(self.classificationCriteria, self.resultPoints)

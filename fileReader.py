@@ -3,7 +3,7 @@ from matchTeams import Player, Double
 from category import Category
 from match import Match
 from matchKey import MatchKey
-from classification import ParseClassificationCriteria
+from classification import ParseClassificationCriteria, ParseResultPoints
 from tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, SetTypes, ScoreTypes, FileSections
 
 
@@ -138,9 +138,12 @@ def ReadTournament(string):
   setType = GetSetType(info[2])
   lastSetType = GetSetType(info[3])
   classificationCriteria = None
+  resultPoints = None
   if len(info) > 4 and info[4] != '':
     classificationCriteria = ParseClassificationCriteria(CleanString(info[4], cleanSpaces=False, toUper=False))
-  return Tournament(name, sets, setType, lastSetType, classificationCriteria=classificationCriteria)
+  if len(info) > 5 and info[5] != '':
+    resultPoints = ParseResultPoints(CleanString(info[5], cleanSpaces=False, toUper=False))
+  return Tournament(name, sets, setType, lastSetType, classificationCriteria=classificationCriteria, resultPoints=resultPoints)
 
 
 def ReadCategory(string, tournament: Tournament):
