@@ -4,8 +4,8 @@ from enum import Enum
 from itertools import combinations, product
 from typing import Literal
 
-from classification import Classification, Columns
-import tennisHelper as tnh
+from tennis_manager.classification import Classification, Columns
+import tennis_manager.tennisHelper as tnh
 
 
 class BracketSide(Enum):

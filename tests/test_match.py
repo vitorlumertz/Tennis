@@ -1,9 +1,9 @@
 import unittest
 
-from match import Match
-from matchTeams import Player, Double
-from tennisEnums import SetTypes, ScoreTypes, MatchWinnerTypes, MatchTypes
-from tennisExceptions import ForfeitWithNoResultError
+from tennis_manager.match import Match
+from tennis_manager.matchTeams import Player, Double
+from tennis_manager.tennisEnums import SetTypes, ScoreTypes, MatchWinnerTypes, MatchTypes
+from tennis_manager.tennisExceptions import ForfeitWithNoResultError
 
 
 def make(team1, team2, **kw):

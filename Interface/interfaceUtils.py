@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from tournament import Tournament
+from tennis_manager.tournament import Tournament
 
 
 def ClearFrame(frame:tk.Frame):

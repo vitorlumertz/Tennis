@@ -1,8 +1,8 @@
 import unittest
 
-from tournament import Tournament
-from category import Category
-from tennisEnums import CategoryTypes
+from tennis_manager.tournament import Tournament
+from tennis_manager.category import Category
+from tennis_manager.tennisEnums import CategoryTypes
 
 from GoogleSheets.tournamentExport import GetStageName, GetRange, rowcol_to_fixed_a1, ExportEliminatoryStage
 

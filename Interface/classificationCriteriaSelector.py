@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from classification import (
+from tennis_manager.classification import (
   Columns,
   CLASSIFICATION_CRITERIA_OPTIONS,
   DEFAULT_CLASSIFICATION_CRITERIA,

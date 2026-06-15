@@ -1,6 +1,6 @@
 import unittest
 
-from tennisExceptions import (
+from tennis_manager.tennisExceptions import (
     CategoryNotFound,
     PlayerNotFound,
     AddingDoubleInSingleCategory,

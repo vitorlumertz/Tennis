@@ -1,9 +1,9 @@
 import unittest
 
-import tennisHelper as tnh
-from match import Match
-from matchTeams import Team
-from tennisEnums import SetTypes, MatchWinnerTypes
+import tennis_manager.tennisHelper as tnh
+from tennis_manager.match import Match
+from tennis_manager.matchTeams import Team
+from tennis_manager.tennisEnums import SetTypes, MatchWinnerTypes
 
 
 class IsValidSetScoreTests(unittest.TestCase):

@@ -1,12 +1,12 @@
-import tennisHelper as tnh
-from classification import Classification, DEFAULT_CLASSIFICATION_CRITERIA, ResultPoints
-from classification import Columns as ClassificationCols
-from groupClassification import GetBracketWithTeams, GetTeams
-from matchTeams import Team, Player, Double
-from match import Match
-from matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
-from tennisEnums import *
-from tennisExceptions import *
+import tennis_manager.tennisHelper as tnh
+from tennis_manager.classification import Classification, DEFAULT_CLASSIFICATION_CRITERIA, ResultPoints
+from tennis_manager.classification import Columns as ClassificationCols
+from tennis_manager.groupClassification import GetBracketWithTeams, GetTeams
+from tennis_manager.matchTeams import Team, Player, Double
+from tennis_manager.match import Match
+from tennis_manager.matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
+from tennis_manager.tennisEnums import *
+from tennis_manager.tennisExceptions import *
 
 import itertools
 import random

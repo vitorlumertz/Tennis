@@ -1,9 +1,9 @@
 from typing import Literal
-import tennisHelper as tnh
-from tennisEnums import *
-from tennisExceptions import ForfeitWithNoResultError
-from matchTeams import Double, Team
-from matchKey import MatchKey
+import tennis_manager.tennisHelper as tnh
+from tennis_manager.tennisEnums import *
+from tennis_manager.tennisExceptions import ForfeitWithNoResultError
+from tennis_manager.matchTeams import Double, Team
+from tennis_manager.matchKey import MatchKey
 
 
 class Match:

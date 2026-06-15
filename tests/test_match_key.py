@@ -1,7 +1,7 @@
 import unittest
 from typing import Literal
 
-from matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
+from tennis_manager.matchKey import MatchKey, MatchKeyType, GetStageMatchKeys
 
 
 class CreationByStrTests(unittest.TestCase):

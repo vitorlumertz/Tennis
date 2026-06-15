@@ -7,7 +7,7 @@ import pandas as pd
 import tkinter as tk
 from tkinter import ttk
 
-from classification import Classification
+from tennis_manager.classification import Classification
 
 
 def ToInt(v):

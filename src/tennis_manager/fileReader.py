@@ -1,10 +1,10 @@
-from tournament import Tournament
-from matchTeams import Player, Double
-from category import Category
-from match import Match
-from matchKey import MatchKey
-from classification import ParseClassificationCriteria, ParseResultPoints
-from tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, SetTypes, ScoreTypes, FileSections
+from tennis_manager.tournament import Tournament
+from tennis_manager.matchTeams import Player, Double
+from tennis_manager.category import Category
+from tennis_manager.match import Match
+from tennis_manager.matchKey import MatchKey
+from tennis_manager.classification import ParseClassificationCriteria, ParseResultPoints
+from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, SetTypes, ScoreTypes, FileSections
 
 
 def CleanString(string:str, cleanSpaces=True, toUper=True):

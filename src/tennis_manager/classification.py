@@ -4,10 +4,10 @@ from typing import Literal
 import pandas as pd
 import random
 
-from match import Match
-from matchTeams import Team
-from tennisEnums import MatchWinnerTypes, SetTypes
-import tennisHelper as tnh
+from tennis_manager.match import Match
+from tennis_manager.matchTeams import Team
+from tennis_manager.tennisEnums import MatchWinnerTypes, SetTypes
+import tennis_manager.tennisHelper as tnh
 
 
 class Columns(Enum):

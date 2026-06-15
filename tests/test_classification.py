@@ -1,7 +1,7 @@
 import pandas as pd
 import unittest
 
-from classification import (
+from tennis_manager.classification import (
   Classification,
   Columns,
   MatchScoreData,
@@ -11,9 +11,9 @@ from classification import (
   DEFAULT_CLASSIFICATION_CRITERIA,
 )
 
-from matchTeams import Team
-from match import Match
-from tennisEnums import SetTypes
+from tennis_manager.matchTeams import Team
+from tennis_manager.match import Match
+from tennis_manager.tennisEnums import SetTypes
 
 
 class OrderDfTests(unittest.TestCase):
