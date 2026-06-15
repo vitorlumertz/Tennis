@@ -1,7 +1,7 @@
-from classification import ClassificationCriteriaToString, ResultPointsToString
-from tournament import *
-from tennisEnums import *
-from matchTeams import *
+from tennis_manager.classification import ClassificationCriteriaToString, ResultPointsToString
+from tennis_manager.tournament import *
+from tennis_manager.tennisEnums import *
+from tennis_manager.matchTeams import *
 
 
 def GetSectionTitle(section: FileSections):

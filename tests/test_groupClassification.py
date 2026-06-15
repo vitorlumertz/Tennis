@@ -1,5 +1,5 @@
 import unittest
-from groupClassification import Team_aux, GetBracketWithTeams
+from tennis_manager.groupClassification import Team_aux, GetBracketWithTeams
 
 # Legends:
 # nG: there are n groups

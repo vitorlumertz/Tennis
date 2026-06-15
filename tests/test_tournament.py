@@ -1,10 +1,10 @@
 import unittest
 
-from tournament import Tournament
-from category import Category
-from matchTeams import Player
-from tennisEnums import CategoryTypes, MatchTypes
-from tennisExceptions import CategoryNotFound, DuplicatedCategory
+from tennis_manager.tournament import Tournament
+from tennis_manager.category import Category
+from tennis_manager.matchTeams import Player
+from tennis_manager.tennisEnums import CategoryTypes, MatchTypes
+from tennis_manager.tennisExceptions import CategoryNotFound, DuplicatedCategory
 
 
 def empty_tournament():

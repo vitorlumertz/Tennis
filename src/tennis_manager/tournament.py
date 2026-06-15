@@ -1,10 +1,10 @@
 from typing import Literal
 
-from classification import Columns, DEFAULT_CLASSIFICATION_CRITERIA, GetDefaultResultPoints, ResultPoints
-from tennisEnums import *
-from tennisExceptions import *
-from category import Category
-from matchTeams import Team, Player
+from tennis_manager.classification import Columns, DEFAULT_CLASSIFICATION_CRITERIA, GetDefaultResultPoints, ResultPoints
+from tennis_manager.tennisEnums import *
+from tennis_manager.tennisExceptions import *
+from tennis_manager.category import Category
+from tennis_manager.matchTeams import Team, Player
 from GoogleSheets.playersImport import GetPlayersFromSheet
 from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
 

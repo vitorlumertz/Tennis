@@ -2,10 +2,10 @@ import os
 import tempfile
 import unittest
 
-import fileReader as fr
-from fileSave import SaveFile
-from classification import DEFAULT_CLASSIFICATION_CRITERIA
-from tennisEnums import SetTypes, CategoryTypes, MatchTypes, ScoreTypes
+import tennis_manager.fileReader as fr
+from tennis_manager.fileSave import SaveFile
+from tennis_manager.classification import DEFAULT_CLASSIFICATION_CRITERIA
+from tennis_manager.tennisEnums import SetTypes, CategoryTypes, MatchTypes, ScoreTypes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAMPLE = os.path.join(ROOT, "TestData", "TournamentExample1.txt")

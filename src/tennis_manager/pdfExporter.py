@@ -1,9 +1,9 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 
-from category import Category
-from match import Match
-from tennisEnums import CategoryTypes
+from tennis_manager.category import Category
+from tennis_manager.match import Match
+from tennis_manager.tennisEnums import CategoryTypes
 
 
 def ExportGroupCategoryToPdf(category:Category, filePath:str):

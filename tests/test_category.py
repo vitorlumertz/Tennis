@@ -1,11 +1,11 @@
 import random
 import unittest
 
-from category import Category
-from matchKey import MatchKey, MatchKeyType
-from matchTeams import Player, Double
-from tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes
-from tennisExceptions import (
+from tennis_manager.category import Category
+from tennis_manager.matchKey import MatchKey, MatchKeyType
+from tennis_manager.matchTeams import Player, Double
+from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes
+from tennis_manager.tennisExceptions import (
     AddingDoubleInSingleCategory,
     DuplicatedTeam,
 )

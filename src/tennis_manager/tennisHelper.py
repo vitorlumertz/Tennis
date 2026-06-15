@@ -1,11 +1,11 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from tennisEnums import *
-from matchTeams import Team
+from tennis_manager.tennisEnums import *
+from tennis_manager.matchTeams import Team
 
 if TYPE_CHECKING:
-  from match import Match
+  from tennis_manager.match import Match
 
 
 def IsValidSetScore(setScore: tuple, setType=SetTypes.NormalSet) -> bool:

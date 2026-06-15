@@ -3,14 +3,14 @@ from tkinter import ttk
 
 from tkinter import messagebox, filedialog
 
-from classification import ClassificationCriteriaToString, ResultPointsToString
-from tennisEnums import MatchTypes, CategoryTypes
-from tournament import Tournament
-from category import Category
-from matchKey import MatchKey, MatchKeyType
-from fileReader import ReadInputFile
-from fileSave import SaveFile
-from pdfExporter import ExportGroupCategoryToPdf
+from tennis_manager.classification import ClassificationCriteriaToString, ResultPointsToString
+from tennis_manager.tennisEnums import MatchTypes, CategoryTypes
+from tennis_manager.tournament import Tournament
+from tennis_manager.category import Category
+from tennis_manager.matchKey import MatchKey, MatchKeyType
+from tennis_manager.fileReader import ReadInputFile
+from tennis_manager.fileSave import SaveFile
+from tennis_manager.pdfExporter import ExportGroupCategoryToPdf
 
 from interfaceUtils import CreateCategoriesComboBox, ClearFrame
 from newTournamentWindow import OpenNewTournamentWindow

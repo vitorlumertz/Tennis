@@ -1,6 +1,6 @@
 import tkinter as tk
 
-from classification import GetDefaultResultPoints, GetPossibleSetResults, ResultPoints
+from tennis_manager.classification import GetDefaultResultPoints, GetPossibleSetResults, ResultPoints
 
 
 class ResultPointsSelector:

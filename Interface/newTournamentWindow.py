@@ -7,9 +7,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from classification import Columns, ResultPoints
-from tournament import Tournament
-from tennisEnums import SetTypes
+from tennis_manager.classification import Columns, ResultPoints
+from tennis_manager.tournament import Tournament
+from tennis_manager.tennisEnums import SetTypes
 from classificationCriteriaSelector import ClassificationCriteriaSelector
 from resultPointsSelector import ResultPointsSelector
 

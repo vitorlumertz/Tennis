@@ -9,8 +9,8 @@ class ImportOrderTests(unittest.TestCase):
         # lançava ImportError. Reimporta do zero para validar a ordem.
         for name in ("match", "tennisHelper"):
             sys.modules.pop(name, None)
-        match = importlib.import_module("match")
-        tennisHelper = importlib.import_module("tennisHelper")
+        match = importlib.import_module("tennis_manager.match")
+        tennisHelper = importlib.import_module("tennis_manager.tennisHelper")
         self.assertTrue(hasattr(match, "Match"))
         self.assertTrue(hasattr(tennisHelper, "IsValidScore"))
 

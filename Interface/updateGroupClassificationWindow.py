@@ -7,8 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from category import Category
-from tennisEnums import GroupClassificationTypes, CategoryTypes
+from tennis_manager.category import Category
+from tennis_manager.tennisEnums import GroupClassificationTypes, CategoryTypes
 
 
 def GetGroupClassificationTypeDisplay(category: Category) -> str:

@@ -7,8 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes
-from category import Category
+from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes
+from tennis_manager.category import Category
 
 
 def CreateCategory(

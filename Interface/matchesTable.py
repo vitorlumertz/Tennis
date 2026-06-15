@@ -7,10 +7,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from tennisEnums import ScoreTypes
-from category import Category
-from match import Match
-from fileReader import GetScore
+from tennis_manager.tennisEnums import ScoreTypes
+from tennis_manager.category import Category
+from tennis_manager.match import Match
+from tennis_manager.fileReader import GetScore
 
 
 def UpdateScore(app:"TournamentApp", window:tk.Toplevel, category:Category, match:Match, scoreStr:str, scoreType:ScoreTypes):

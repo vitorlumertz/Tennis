@@ -1,6 +1,6 @@
 import unittest
 
-from matchTeams import Team, Player, Double
+from tennis_manager.matchTeams import Team, Player, Double
 
 
 class TeamTests(unittest.TestCase):

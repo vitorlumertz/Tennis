@@ -8,15 +8,15 @@ try:
 except ImportError:
     HAS_REPORTLAB = False
 
-from category import Category
-from matchTeams import Player
-from tennisEnums import CategoryTypes, MatchTypes, SetTypes
+from tennis_manager.category import Category
+from tennis_manager.matchTeams import Player
+from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes
 
 
 def _export(cat):
     fd, path = tempfile.mkstemp(suffix=".pdf")
     os.close(fd)
-    from pdfExporter import ExportGroupCategoryToPdf
+    from tennis_manager.pdfExporter import ExportGroupCategoryToPdf
 
     ExportGroupCategoryToPdf(cat, path)
     return path

@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Literal, Self
-from tennisHelper import GetTournamentStage
+from tennis_manager.tennisHelper import GetTournamentStage
 
 
 class MatchKeyType(Enum):

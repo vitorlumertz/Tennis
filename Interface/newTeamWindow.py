@@ -7,8 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from matchTeams import Player, Double
-from tennisEnums import MatchTypes
+from tennis_manager.matchTeams import Player, Double
+from tennis_manager.tennisEnums import MatchTypes
 
 
 def CreateTeam(
