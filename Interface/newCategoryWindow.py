@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes
+from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, GroupDrawTypes
 from tennis_manager.category import Category
 
 
@@ -20,6 +20,8 @@ def CreateCategory(
   isRandomDoubles: str,
   groupClassificationType: GroupClassificationTypes,
   numOfclassifiedsInGroups: int,
+  groupDrawType: GroupDrawTypes,
+  groupDrawQuantity: int,
 ):
   if categoryName.replace(' ', '') == '':
     messagebox.showerror("Erro", "Não é possível criar uma categoria com nome vazio.")
@@ -33,6 +35,14 @@ def CreateCategory(
       messagebox.showerror("Erro", "Informe um número válido de classificados para o tipo TotalNumber.")
       return
 
+  if groupDrawType == GroupDrawTypes.ByGroupSize and groupDrawQuantity < 3:
+    messagebox.showerror("Erro", "A quantidade de jogadores por grupo deve ser maior ou igual a 3.")
+    return
+
+  if groupDrawType == GroupDrawTypes.ByNumberOfGroups and groupDrawQuantity < 1:
+    messagebox.showerror("Erro", "A quantidade de grupos deve ser maior ou igual a 1.")
+    return
+
   category = Category(
     name = categoryName,
     categoryType = categoryType,
@@ -40,6 +50,8 @@ def CreateCategory(
     isRandomDoubles = isRandomDoubles,
     groupClassificationType = groupClassificationType,
     numOfclassifiedsInGroups = numOfclassifiedsInGroups if groupClassificationType == GroupClassificationTypes.TotalNumber else 0,
+    groupDrawType = groupDrawType,
+    groupDrawQuantity = groupDrawQuantity,
   )
   try:
     app.tournament.AddCategory(category)
@@ -52,7 +64,7 @@ def CreateCategory(
 def OpenNewCategoryWindow(app:"TournamentApp"):
   window = tk.Toplevel(app)
   window.title("Nova Categoria")
-  window.geometry("600x650")
+  window.geometry("600x780")
 
   tk.Label(window, text="Configure a Nova Categoria", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
 
@@ -116,11 +128,33 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
   numClassifiedsEntry.pack(anchor="w", padx=10)
   numClassifiedsEntry.insert(0, "0")
 
+  tk.Label(window, text="Forma de criacao dos grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  groupDrawOptions = [groupDrawType.name for groupDrawType in GroupDrawTypes]
+  groupDrawType = tk.StringVar(value=GroupDrawTypes.ByGroupSize.name)
+  ttk.Combobox(
+    window,
+    textvariable=groupDrawType,
+    values=groupDrawOptions,
+    state="readonly",
+    width=30,
+    font=('Arial', 12),
+  ).pack(anchor="w", padx=10)
+
+  tk.Label(window, text="Jogadores por grupo ou quantidade de grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  groupDrawQuantityEntry = tk.Entry(window, width=50, font=('Arial', 12))
+  groupDrawQuantityEntry.pack(anchor="w", padx=10)
+  groupDrawQuantityEntry.insert(0, "3")
+
   def OnCreateCategory():
     try:
       numOfclassifiedsInGroups = int(numClassifiedsEntry.get())
     except ValueError:
       messagebox.showerror("Erro", "Informe um número inteiro válido para a quantidade de classificados.")
+      return
+    try:
+      groupDrawQuantity = int(groupDrawQuantityEntry.get())
+    except ValueError:
+      messagebox.showerror("Erro", "Informe um numero inteiro valido para a configuracao dos grupos.")
       return
 
     CreateCategory(
@@ -132,6 +166,8 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
       isRandomDoubles.get(),
       GroupClassificationTypes[groupClassificationType.get()],
       numOfclassifiedsInGroups,
+      GroupDrawTypes[groupDrawType.get()],
+      groupDrawQuantity,
     )
 
   tk.Button(

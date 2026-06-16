@@ -13,7 +13,7 @@ def GetSectionComments(section: FileSections):
   if section is FileSections.Tournament:
     comments += 'Name, Number of Sets, Set Type, Last Set Type, Classification Criteria, Result points\n'
   elif section is FileSections.Categories:
-    comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Number of classifieds in Groups\n'
+    comments += 'Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Number of classifieds in Groups, Group Draw Type, Group Draw Quantity\n'
   elif section is FileSections.Players:
     comments += 'Name, Category, Seed Number, Is Seed, Is Present\n'
   elif section is FileSections.OldDoubles:
@@ -75,6 +75,10 @@ def WriteCategoriesSection(file, tournament: Tournament):
     text += ','
     if category.numOfclassifiedsInGroups != 0:
       text += str(category.numOfclassifiedsInGroups)
+    text += ','
+    text += category.groupDrawType.name
+    text += ','
+    text += str(category.groupDrawQuantity)
     text += '\n'
     file.write(text)
   file.write('\n')

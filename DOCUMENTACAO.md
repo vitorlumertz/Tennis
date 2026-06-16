@@ -1,4 +1,4 @@
-# LumertzTennis — Gerenciador de Torneios de Tênis
+# tzTennis — Gerenciador de Torneios de Tênis
 
 Aplicação desktop (Python + tkinter) para **organizar e gerenciar torneios de tênis amador**:
 inscrições, categorias, sorteio de chaves/grupos, lançamento de placares, classificação
@@ -38,7 +38,7 @@ memória e é persistido em um **arquivo de texto `.txt`** próprio (formato des
 ## Estrutura do projeto
 
 ```
-LumertzTennis/
+Tennis/
 ├── tournament.py        # Classe Tournament — orquestra categorias e o fluxo do torneio
 ├── category.py          # Classe Category — coração da lógica de chaveamento
 ├── groupClassification.py # Montagem da chave eliminatória a partir dos classificados dos grupos
@@ -46,7 +46,7 @@ LumertzTennis/
 ├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
 ├── matchTeams.py        # Team / Player / Double — os competidores
 ├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
-├── tennisEnums.py       # Enums: tipos de categoria, classificação de grupos, set, placar, vencedor, seções de arquivo
+├── tennisEnums.py       # Enums: tipos de categoria, criação/classificação de grupos, set, placar, vencedor, seções de arquivo
 ├── tennisExceptions.py  # Exceções de domínio (categoria/duplas/jogador duplicado etc.)
 ├── tennisHelper.py      # Funções puras: validação de placar, seeding, byes, classificação
 ├── fileReader.py        # Lê o arquivo .txt do torneio → objeto Tournament
@@ -86,6 +86,7 @@ Tournament  (o torneio)
  └── Category  (categoria; várias por torneio)
       ├── teams / players  (inscritos: Player ou Double)
       ├── groups           (grupos, quando aplicável)
+      ├── groupDrawType / groupDrawQuantity  (regra de criação dos grupos)
       ├── groupClassificationType / numOfclassifiedsInGroups  (regra de classificação p/ mata-mata)
       ├── matches          (todos os jogos, indexados por "chave de jogo")
       └── bracket          (mapa de avanço: cada jogo aponta para o próximo)
@@ -103,7 +104,7 @@ Tournament  (o torneio)
 | Tipo                | Comportamento |
 |---------------------|---------------|
 | `RoundRobin`        | Todos contra todos (grupo único). Usado para poucos inscritos. |
-| `Groups`            | Fase de grupos (de 3 e 4) → classificados conforme `GroupClassificationTypes` → mata-mata. |
+| `Groups`            | Fase de grupos configurável → classificados conforme `GroupClassificationTypes` → mata-mata. |
 | `SingleElimination` | Eliminatória simples (chave de mata-mata desde o início). |
 | `Automatic`         | Escolhe sozinho conforme o nº de inscritos (ver abaixo). |
 | `DoubleElimination`, `Teams` | Declarados no enum, **não implementados**. |
@@ -114,6 +115,23 @@ Tournament  (o torneio)
 - 10 ou mais → `SingleElimination`
 
 Além disso, uma categoria `Groups` com menos de 6 inscritos é rebaixada para `RoundRobin`.
+
+### Criação da fase de grupos (`GroupDrawTypes`)
+
+Categorias do tipo `Groups` têm duas propriedades persistidas no arquivo `.txt`:
+
+- **`groupDrawType`** — define como a quantidade/tamanho dos grupos será calculada.
+  O padrão é `ByGroupSize`.
+- **`groupDrawQuantity`** — valor usado pelo tipo acima. O padrão é `3`.
+
+| Tipo                 | Como usa `groupDrawQuantity` |
+|----------------------|-------------------------------|
+| `ByGroupSize`        | Interpreta o valor como tamanho mínimo de cada grupo. O valor deve ser ≥ 3. Ex.1: 14 inscritos com valor 4 → grupos de 4, 5 e 5. Ex.2: 14 inscritos com valor 5 → dois grupos de 7. Normalmente é usado com o valor igual a 3 para dividir os grupos em grupos de 3 e 4. |
+| `ByNumberOfGroups`   | Interpreta o valor como quantidade total de grupos. Os inscritos são distribuídos de forma balanceada entre os grupos. A configuração é inválida se gerar algum grupo com menos de 3 participantes. Ex.: 10 inscritos em 3 grupos → grupos de 3, 3 e 4. |
+
+Para preservar compatibilidade, arquivos antigos que não tenham esses campos são lidos como
+`ByGroupSize` com `groupDrawQuantity = 3`, reproduzindo o comportamento clássico de grupos de
+3 e 4.
 
 ### Classificação da fase de grupos (`GroupClassificationTypes`)
 
@@ -128,7 +146,7 @@ Propriedades da categoria (persistidas no arquivo `.txt`):
 |-----------------|---------------|
 | `TwoPerGroup`   | Os 2 primeiros de **cada** grupo avançam (comportamento clássico). |
 | `OnePerGroup`   | Apenas o 1º de cada grupo avança. |
-| `TwoG4_OneG3`   | 2 classificados em grupos de 4 e 1 classificado em grupos de 3. |
+| `TwoG4_OneG3`   | 2 classificados em grupos com 4 participantes e 1 classificado nos grupos 3. É necessário que todos os grupos possuam ou 3 ou 4 participantes. |
 | `TotalNumber`   | N classificados no total, escolhidos entre os melhores colocados de todos os grupos (`numOfclassifiedsInGroups`). |
 
 O nº de vagas na chave eliminatória é calculado em `Category.__GetNumberOfClassifiedsInGroups()`
@@ -184,8 +202,9 @@ não-cabeças.
 - **RoundRobin**: cria todos os confrontos possíveis (`itertools.combinations`).
 - **SingleElimination**: posiciona seeds, distribui byes e preenche o resto com não-cabeças
   sorteados.
-- **Groups**: monta grupos de 3 e 4 (`GetNumberOfGroups`: `n % 3` grupos de 4, o resto de 3),
-  distribui 1 seed por grupo e espalha os demais, depois cria os jogos de cada grupo.
+- **Groups**: monta os grupos conforme `groupDrawType` / `groupDrawQuantity`
+  (`GetNumberOfGroups`), distribui 1 seed por grupo e espalha os demais, depois cria os jogos
+  de cada grupo.
 
 ### Montagem e avanço da chave (`GetBracket`, `CompleteMatches`, `UpdateBracket`)
 
@@ -240,10 +259,10 @@ Exemplo (de `TestData/`):
 Torneio Exemplo,1,Normal Set,MatchTieBreak
 
 [CATEGORIES]
-//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Num Of Classifieds In Groups
+//Name, Category Type, Match Type, Is Groups Finished, Random Doubles, Initialized, Group Classification Type, Num Of Classifieds In Groups, Group Draw Type, Group Draw Quantity
 1a Classe Simples,SingleElimination,Single
-2a Classe Simples,Groups,Single,,,True,TwoPerGroup
-3a Classe Simples,Groups,Single,,,True,TotalNumber,8
+2a Classe Simples,Groups,Single,,,True,TwoPerGroup,,ByGroupSize,3
+3a Classe Simples,Groups,Single,,,True,TotalNumber,8,ByNumberOfGroups,4
 
 [PLAYERS]
 //Name, Category Name, Seed Number
@@ -298,7 +317,7 @@ conteúdo rolável. Itens do menu:
 | Menu            | O que faz |
 |-----------------|-----------|
 | **Torneio**     | Mostra dados do torneio; botões: criar, abrir, importar do Sheets, exportar p/ Sheets. |
-| **Categorias**  | Detalhes da categoria (incl. tipo de classificação dos grupos e nº de classificados); iniciar categoria, exportar PDF, criar, atualizar classificação dos grupos e excluir categoria. |
+| **Categorias**  | Detalhes da categoria (incl. criação dos grupos, tipo de classificação dos grupos e nº de classificados); iniciar categoria, exportar PDF, criar, atualizar classificação dos grupos e excluir categoria. |
 | **Jogadores**   | Tabela de jogadores + resumo (contagem por cabeça de chave). |
 | **Presença**    | Listas de presentes/ausentes. |
 | **Duplas**      | Tabela de duplas da categoria. |

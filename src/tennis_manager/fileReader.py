@@ -4,7 +4,7 @@ from tennis_manager.category import Category
 from tennis_manager.match import Match
 from tennis_manager.matchKey import MatchKey
 from tennis_manager.classification import ParseClassificationCriteria, ParseResultPoints
-from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, SetTypes, ScoreTypes, FileSections
+from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, GroupDrawTypes, SetTypes, ScoreTypes, FileSections
 
 
 def CleanString(string:str, cleanSpaces=True, toUper=True):
@@ -66,6 +66,14 @@ def GetGroupClassificationType(string):
     'ONEPERGROUP': GroupClassificationTypes.OnePerGroup,
     'TWOG4_ONEG3': GroupClassificationTypes.TwoG4_OneG3,
     'TOTALNUMBER': GroupClassificationTypes.TotalNumber,
+  }.get(string)
+
+
+def GetGroupDrawType(string):
+  string = CleanString(string)
+  return {
+    'BYGROUPSIZE': GroupDrawTypes.ByGroupSize,
+    'BYNUMBEROFGROUPS': GroupDrawTypes.ByNumberOfGroups,
   }.get(string)
 
 
@@ -156,18 +164,37 @@ def ReadCategory(string, tournament: Tournament):
   isInitialized = False
   groupClassification = None
   numOfclassifiedsInGroups = 0
+  groupDrawType = GroupDrawTypes.ByGroupSize
+  groupDrawQuantity = 3
   if len(info) > 3:
     isGroupsfinished = GetBoolean(info[3])
   if len(info) > 4:
     randomDoubles = GetBoolean(info[4])
   if len(info) > 5:
     isInitialized = GetBoolean(info[5])
-  if len(info) > 6:
+  if len(info) > 6 and info[6] != '':
     groupClassification = GetGroupClassificationType(info[6])
-  if len(info) > 7:
+  if len(info) > 7 and info[7] != '':
     numOfclassifiedsInGroups = GetInteger(info[7])
-  category = Category(name, categoryType, matchType, isGroupsfinished, randomDoubles, isInitialized, groupClassificationType=groupClassification, numOfclassifiedsInGroups=numOfclassifiedsInGroups)
-  tournament.AddCategory(category)
+  if len(info) > 8 and info[8] != '':
+    groupDrawType = GetGroupDrawType(info[8])
+  if len(info) > 9 and info[9] != '':
+    groupDrawQuantity = GetInteger(info[9])
+
+  tournament.AddCategory(
+    Category(
+      name,
+      categoryType,
+      matchType,
+      isGroupsfinished,
+      randomDoubles,
+      isInitialized,
+      groupClassificationType=groupClassification,
+      numOfclassifiedsInGroups=numOfclassifiedsInGroups,
+      groupDrawType=groupDrawType,
+      groupDrawQuantity=groupDrawQuantity,
+    )
+  )
 
 
 def ReadPlayer(string, tournament: Tournament):

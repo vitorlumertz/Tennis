@@ -22,6 +22,11 @@ class GroupClassificationTypes(Enum):
   TotalNumber = 3 # define total number of teams to be classified to single elimination stage
 
 
+class GroupDrawTypes(Enum):
+  ByGroupSize = 0
+  ByNumberOfGroups = 1
+
+
 class SetTypes(Enum):
   NormalSet = 0
   ShortSet = 1
