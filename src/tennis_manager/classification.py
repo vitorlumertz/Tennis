@@ -370,3 +370,17 @@ class Classification:
     self.__UpdatePositionColumn(ordered, Columns.Position, sortColumns)
 
     self.classification = OrderDf(self.classification)
+
+
+  def GetTeamNameByPosition(self, position:int) -> str|None:
+    c = self.classification
+    indexes = c.index[c[Columns.Position.name] == position]
+
+    n = len(indexes)
+    if n > 1:
+      raise ValueError(f"Found {n} teams with position {position}, expected only one.")
+
+    if n == 0:
+      return None
+
+    return indexes[0]

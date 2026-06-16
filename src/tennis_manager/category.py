@@ -10,8 +10,6 @@ from tennis_manager.tennisExceptions import *
 
 import itertools
 import random
-import math
-import random
 from copy import deepcopy
 from collections import defaultdict
 
@@ -30,6 +28,8 @@ class Category:
     groups: list[list[Team]] | None = None,
     groupClassificationType: GroupClassificationTypes | None = None,
     numOfclassifiedsInGroups: int = 0,
+    groupDrawType: GroupDrawTypes = GroupDrawTypes.ByGroupSize,
+    groupDrawQuantity: int = 3,
   ):
     self.name = name
     self.categoryType = categoryType
@@ -42,8 +42,11 @@ class Category:
     self.groups = groups
     self.groupClassificationType = groupClassificationType
     self.numOfclassifiedsInGroups = numOfclassifiedsInGroups
+    self.groupDrawType = groupDrawType
+    self.groupDrawQuantity = groupDrawQuantity
     self.matches: dict[str, Match] = {}
     self.bracket: dict[str, str] = {}
+    self.__ValidateGroupDrawSettings()
 
 
   def AddTeam(self, team:Team):
@@ -117,6 +120,7 @@ class Category:
       return
 
     n = len(self.teams)
+    nGroups = self.GetNumberOfTotalGroups()
 
     if self.categoryType == CategoryTypes.Automatic:
       if n < 6:
@@ -126,7 +130,7 @@ class Category:
       else:
         self.categoryType = CategoryTypes.SingleElimination
 
-    elif (self.categoryType == CategoryTypes.Groups) and (n < 6):
+    elif (self.categoryType == CategoryTypes.Groups) and (self.groupDrawType == GroupDrawTypes.ByGroupSize) and (nGroups == 1):
       self.categoryType = CategoryTypes.RoundRobin
 
 
@@ -134,11 +138,41 @@ class Category:
     return self.categoryType is not CategoryTypes.RoundRobin
 
 
+  def __ValidateGroupDrawSettings(self, numTeams:int|None=None) -> None:
+    if self.groupDrawType is GroupDrawTypes.ByGroupSize:
+      if self.groupDrawQuantity < 3:
+        raise ValueError(f"Group size must be greater than or equal to 3. {self.groupDrawQuantity} was given.")
+      return
+
+    if self.groupDrawQuantity < 1:
+      raise ValueError(f"Number of groups must be greater than or equal to 1. {self.groupDrawQuantity} was given.")
+
+    if numTeams is not None and numTeams // self.groupDrawQuantity < 3:
+      raise ValueError(f"Number of groups ({self.groupDrawQuantity}) creates groups with fewer than 3 teams in category {self.name}.")
+
+
   def GetNumberOfGroups(self):
     n = len(self.teams)
-    groupsOf4 = n % 3
-    groupsOf3 = math.floor(n / 3) - groupsOf4
-    return groupsOf3, groupsOf4
+    self.__ValidateGroupDrawSettings(n)
+
+    if self.groupDrawType is GroupDrawTypes.ByGroupSize:
+      nGroups = n // self.groupDrawQuantity
+    else:
+      nGroups = self.groupDrawQuantity
+
+    largerGroups = n % nGroups
+    smallerGroups = nGroups - largerGroups
+
+    if (largerGroups == 0) and (self.groupDrawType is GroupDrawTypes.ByGroupSize) and (nGroups * self.groupDrawQuantity < n):
+      largerGroups = nGroups
+      smallerGroups = 0
+
+    return smallerGroups, largerGroups
+
+
+  def GetNumberOfTotalGroups(self):
+    smallerGroups, largerGroups = self.GetNumberOfGroups()
+    return smallerGroups + largerGroups
 
 
   def GetNonSeeds(self):
@@ -149,8 +183,7 @@ class Category:
   def GetSeeds(self):
     seeds = []
     if self.categoryType == CategoryTypes.Groups:
-      groupsOf3, groupsOf4 = self.GetNumberOfGroups()
-      maxSeeds = groupsOf3 + groupsOf4
+      maxSeeds = self.GetNumberOfTotalGroups()
     else:
       maxSeeds = tnh.GetTournamentStage(len(self.teams))
     if maxSeeds is None:
@@ -234,8 +267,7 @@ class Category:
       if not self.groups:
         seeds = self.GetSeeds()
         nonSeeds = self.GetNonSeeds()
-        groupsOf3, groupsOf4 = self.GetNumberOfGroups()
-        nGroups = groupsOf3 + groupsOf4
+        nGroups = self.GetNumberOfTotalGroups()
         groups = [[] for _ in range(nGroups)]
         for group in groups:
           group.append(seeds.pop())
@@ -265,11 +297,14 @@ class Category:
       if self.groups is None:
         raise ValueError(f"Expected a list[list[Team]] for groups in category {self.name}, got None.")
 
-      groupsOf3, groupsOf4 = self.GetNumberOfGroups()
-      return 2 * groupsOf4 + groupsOf3
+      groupSizes = [len(group) for group in self.groups]
+      if (max(groupSizes) > 4) or (min(groupSizes) < 3):
+        raise ValueError(f"Category {self.name} has group classification type = TwoG4_OneG3, but not all groups are of these sizes.")
+
+      return sum(2 if s == 4 else 1 for s in groupSizes)
 
     if self.numOfclassifiedsInGroups < len(self.groups):
-      raise Exception(f"Number of classified teams in groups is less than the number of groups in category {self.name}.")
+      raise ValueError(f"Number of classified teams in groups is less than the number of groups in category {self.name}.")
 
     return self.numOfclassifiedsInGroups
 
@@ -366,7 +401,24 @@ class Category:
       self.isGroupsFinished = classification.isFinalized
 
       if classification.isFinalized:
-        bracket = GetBracketWithTeams(GetTeams(classification, self.__GetNumberOfClassifiedsInGroups()))
+        nClassifieds = self.__GetNumberOfClassifiedsInGroups()
+        if nClassifieds <= self.GetNumberOfTotalGroups() * 2:
+          bracket = GetBracketWithTeams(GetTeams(classification, nClassifieds))
+        else:
+          seedsPositions = tnh.GetSeedsPositions(nClassifieds, nClassifieds)
+
+          # logica duplicada com groupClassification.py
+          bracket = []
+          for pos1, pos2 in seedsPositions:
+            team1 = None
+            team2 = None
+            if pos1 is not None:
+              team1 = classification.GetTeamNameByPosition(pos1)
+            if pos2 is not None:
+              team2 = classification.GetTeamNameByPosition(pos2)
+            bracket.append((team1, team2))
+          # fim da logica duplicada
+
         stage = len(bracket)
         for i, match_aux in enumerate(bracket, start=1):
           matchKey = MatchKey(firstInfo=stage, stageType=MatchKeyType.SingleElimination, thirdInfo=i)

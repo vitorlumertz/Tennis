@@ -3,9 +3,12 @@ import tempfile
 import unittest
 
 import tennis_manager.fileReader as fr
+from tennis_manager.category import Category
 from tennis_manager.fileSave import SaveFile
+from tennis_manager.matchTeams import Player
+from tennis_manager.tournament import Tournament
 from tennis_manager.classification import DEFAULT_CLASSIFICATION_CRITERIA
-from tennis_manager.tennisEnums import SetTypes, CategoryTypes, MatchTypes, ScoreTypes
+from tennis_manager.tennisEnums import SetTypes, CategoryTypes, MatchTypes, ScoreTypes, GroupDrawTypes
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAMPLE = os.path.join(ROOT, "TestData", "TournamentExample1.txt")
@@ -28,6 +31,10 @@ class ParserHelpersTests(unittest.TestCase):
     def test_get_match_type(self):
         self.assertEqual(fr.GetMatchType("Single"), MatchTypes.Single)
         self.assertEqual(fr.GetMatchType("Double"), MatchTypes.Double)
+
+    def test_get_group_draw_type(self):
+        self.assertEqual(fr.GetGroupDrawType("ByGroupSize"), GroupDrawTypes.ByGroupSize)
+        self.assertEqual(fr.GetGroupDrawType("ByNumberOfGroups"), GroupDrawTypes.ByNumberOfGroups)
 
     def test_get_score_type(self):
         self.assertEqual(fr.GetScoreType("WO_to_T1"), ScoreTypes.WO_to_T1)
@@ -61,6 +68,8 @@ class ReadExampleTests(unittest.TestCase):
         cat = self.tournament.GetCategory("2a Classe Simples")
         self.assertIsNotNone(cat.groups)
         self.assertEqual(len(cat.groups), 2)
+        self.assertEqual(cat.groupDrawType, GroupDrawTypes.ByGroupSize)
+        self.assertEqual(cat.groupDrawQuantity, 3)
 
 
 class RoundTripTests(unittest.TestCase):
@@ -85,6 +94,39 @@ class RoundTripTests(unittest.TestCase):
                 len(original.GetCategory(name).teams),
                 f"contagem de times diferente em {name}",
             )
+            self.assertEqual(
+                reloaded.GetCategory(name).groupDrawType,
+                original.GetCategory(name).groupDrawType,
+            )
+            self.assertEqual(
+                reloaded.GetCategory(name).groupDrawQuantity,
+                original.GetCategory(name).groupDrawQuantity,
+            )
+
+    def test_save_and_reread_preserves_custom_group_draw_settings(self):
+        tournament = Tournament("T")
+        category = Category(
+            "C",
+            CategoryTypes.Groups,
+            MatchTypes.Single,
+            groupDrawType=GroupDrawTypes.ByNumberOfGroups,
+            groupDrawQuantity=3,
+        )
+        for i in range(1, 11):
+            category.AddTeam(Player(f"P{i:02d}"))
+        tournament.AddCategory(category)
+
+        fd, path = tempfile.mkstemp(suffix=".txt")
+        os.close(fd)
+        try:
+            SaveFile(path, tournament)
+            reloaded = fr.ReadInputFile(path)
+        finally:
+            os.remove(path)
+
+        reloaded_category = reloaded.GetCategory("C")
+        self.assertEqual(reloaded_category.groupDrawType, GroupDrawTypes.ByNumberOfGroups)
+        self.assertEqual(reloaded_category.groupDrawQuantity, 3)
 
 
 if __name__ == "__main__":

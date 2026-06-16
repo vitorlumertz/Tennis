@@ -548,6 +548,18 @@ class TournamentApp(tk.Tk):
           font=('Arial', 12),
           bg='white',
         ).pack(anchor="w", padx=10, pady=5)
+        tk.Label(
+          self.contentFrame,
+          text=f"Forma de criacao dos grupos: {category.groupDrawType.name}",
+          font=('Arial', 12),
+          bg='white',
+        ).pack(anchor="w", padx=10, pady=5)
+        tk.Label(
+          self.contentFrame,
+          text=f"Quantidade para criacao dos grupos: {category.groupDrawQuantity}",
+          font=('Arial', 12),
+          bg='white',
+        ).pack(anchor="w", padx=10, pady=5)
 
     if category is not None:
       button = tk.Button(

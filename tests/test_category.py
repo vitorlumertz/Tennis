@@ -4,7 +4,7 @@ import unittest
 from tennis_manager.category import Category
 from tennis_manager.matchKey import MatchKey, MatchKeyType
 from tennis_manager.matchTeams import Player, Double
-from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes
+from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes, GroupDrawTypes
 from tennis_manager.tennisExceptions import (
     AddingDoubleInSingleCategory,
     DuplicatedTeam,
@@ -83,6 +83,22 @@ class GroupAndByeMathTests(unittest.TestCase):
         self.assertEqual(single(n=9).GetNumberOfGroups(), (3, 0))
         self.assertEqual(single(n=11).GetNumberOfGroups(), (1, 2))
 
+    def test_get_number_of_groups_by_custom_group_size(self):
+        cat = single(n=14)
+        cat.groupDrawType = GroupDrawTypes.ByGroupSize
+        cat.groupDrawQuantity = 4
+        self.assertEqual(cat.GetNumberOfGroups(), (1, 2))
+
+    def test_get_number_of_groups_by_total_groups(self):
+        cat = single(n=10)
+        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+        cat.groupDrawQuantity = 3
+        self.assertEqual(cat.GetNumberOfGroups(), (2, 1))
+
+    def test_group_size_must_be_at_least_three(self):
+        with self.assertRaises(ValueError):
+            Category("C", CategoryTypes.Groups, MatchTypes.Single, groupDrawQuantity=2)
+
     def test_get_byes_distribution(self):
         cat = single(n=6)
         self.assertEqual(cat.GetByes(3), (2, 0))  # 2 byes, todos com cabeças
@@ -115,6 +131,14 @@ class FirstRoundTests(unittest.TestCase):
         self.assertEqual(len(cat.groups), 3)
         gr = [k for k in cat.matches if k[3:5] == "GR"]
         self.assertEqual(len(gr), 9)  # 3 grupos de 3 -> 3 jogos cada
+
+    def test_groups_created_by_total_groups(self):
+        random.seed(0)
+        cat = single(n=10, ctype=CategoryTypes.Groups, seeds=3)
+        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+        cat.groupDrawQuantity = 3
+        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+        self.assertEqual(sorted(len(group) for group in cat.groups), [3, 3, 4])
 
     def test_single_elimination_conserves_all_teams(self):
         random.seed(0)
