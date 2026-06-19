@@ -9,6 +9,7 @@ from tkinter import messagebox
 
 from tennis_manager.tennisEnums import MatchTypes, CategoryTypes, GroupClassificationTypes, GroupDrawTypes
 from tennis_manager.category import Category
+from interfaceUtils import CreateScrollableFrame
 
 
 def CreateCategory(
@@ -64,19 +65,21 @@ def CreateCategory(
 def OpenNewCategoryWindow(app:"TournamentApp"):
   window = tk.Toplevel(app)
   window.title("Nova Categoria")
-  window.geometry("600x780")
+  window.geometry("600x600")
 
-  tk.Label(window, text="Configure a Nova Categoria", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
+  content = CreateScrollableFrame(window)
 
-  tk.Label(window, text="Nome da Categoria:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=5)
-  nameEntry = tk.Entry(window, width=50, font=('Arial', 12))
+  tk.Label(content, text="Configure a Nova Categoria", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
+
+  tk.Label(content, text="Nome da Categoria:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=5)
+  nameEntry = tk.Entry(content, width=50, font=('Arial', 12))
   nameEntry.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(content, text="Tipo:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [categoryType.name for categoryType in CategoryTypes]
   categoryType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
-    window,
+    content,
     textvariable=categoryType,
     values=options,
     state="readonly",
@@ -85,11 +88,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Simples ou Duplas:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(content, text="Simples ou Duplas:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = [matchType.name for matchType in MatchTypes]
   matchType = tk.StringVar(value=options[0])
   combo = ttk.Combobox(
-    window,
+    content,
     textvariable=matchType,
     values=options,
     state="readonly",
@@ -98,11 +101,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Sortear Duplas?", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(content, text="Sortear Duplas?", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   options = ['Sim', 'Não']
   isRandomDoubles = tk.StringVar(value=options[1])
   combo = ttk.Combobox(
-    window,
+    content,
     textvariable=isRandomDoubles,
     values=options,
     state="readonly",
@@ -111,11 +114,11 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
   )
   combo.pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Tipo de classificação dos grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(content, text="Tipo de classificação dos grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   groupClassificationOptions = [groupClassificationType.name for groupClassificationType in GroupClassificationTypes]
   groupClassificationType = tk.StringVar(value=groupClassificationOptions[0])
   ttk.Combobox(
-    window,
+    content,
     textvariable=groupClassificationType,
     values=groupClassificationOptions,
     state="readonly",
@@ -123,16 +126,16 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     font=('Arial', 12),
   ).pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Número de classificados:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
-  numClassifiedsEntry = tk.Entry(window, width=50, font=('Arial', 12))
+  tk.Label(content, text="Número de classificados:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  numClassifiedsEntry = tk.Entry(content, width=50, font=('Arial', 12))
   numClassifiedsEntry.pack(anchor="w", padx=10)
   numClassifiedsEntry.insert(0, "0")
 
-  tk.Label(window, text="Forma de criacao dos grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  tk.Label(content, text="Forma de criacao dos grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
   groupDrawOptions = [groupDrawType.name for groupDrawType in GroupDrawTypes]
   groupDrawType = tk.StringVar(value=GroupDrawTypes.ByGroupSize.name)
   ttk.Combobox(
-    window,
+    content,
     textvariable=groupDrawType,
     values=groupDrawOptions,
     state="readonly",
@@ -140,8 +143,8 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     font=('Arial', 12),
   ).pack(anchor="w", padx=10)
 
-  tk.Label(window, text="Jogadores por grupo ou quantidade de grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
-  groupDrawQuantityEntry = tk.Entry(window, width=50, font=('Arial', 12))
+  tk.Label(content, text="Jogadores por grupo ou quantidade de grupos:", font=('Arial', 12)).pack(anchor="w", padx=10, pady=(20,5))
+  groupDrawQuantityEntry = tk.Entry(content, width=50, font=('Arial', 12))
   groupDrawQuantityEntry.pack(anchor="w", padx=10)
   groupDrawQuantityEntry.insert(0, "3")
 
@@ -171,7 +174,7 @@ def OpenNewCategoryWindow(app:"TournamentApp"):
     )
 
   tk.Button(
-    window,
+    content,
     text="Criar Categoria",
     command=OnCreateCategory,
     font=('Arial', 12),
