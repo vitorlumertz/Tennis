@@ -12,7 +12,7 @@ from tennis_manager.fileReader import ReadInputFile
 from tennis_manager.fileSave import SaveFile
 from tennis_manager.pdfExporter import ExportGroupCategoryToPdf
 
-from interfaceUtils import CreateCategoriesComboBox, ClearFrame
+from interfaceUtils import CreateCategoriesComboBox, ClearFrame, BindMousewheelToCanvas
 from newTournamentWindow import OpenNewTournamentWindow
 from newCategoryWindow import OpenNewCategoryWindow
 from updateGroupClassificationWindow import OpenUpdateGroupClassificationWindow, GetGroupClassificationTypeDisplay
@@ -135,17 +135,7 @@ class TournamentApp(tk.Tk):
       canvas.itemconfig(self.contentFrame_id, width=canvas.winfo_width())
     self.contentFrame.bind("<Configure>", onConfigure)
 
-    def onMousewheel(event):
-      first, last = canvas.yview()
-      if event.num == 4 or event.delta > 0:
-        if first <= 0:
-          return
-        canvas.yview_scroll(-1, "units")
-      elif event.num == 5 or event.delta < 0:
-        if last >= 1:
-          return
-        canvas.yview_scroll(1, "units")
-    canvas.bind_all("<MouseWheel>", onMousewheel)
+    BindMousewheelToCanvas(canvas, self.contentFrame)
 
 
   def ClearContent(self):

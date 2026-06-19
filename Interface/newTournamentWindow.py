@@ -12,6 +12,7 @@ from tennis_manager.tournament import Tournament
 from tennis_manager.tennisEnums import SetTypes
 from classificationCriteriaSelector import ClassificationCriteriaSelector
 from resultPointsSelector import ResultPointsSelector
+from interfaceUtils import CreateScrollableFrame
 
 
 def CreateTournament(
@@ -54,39 +55,9 @@ def CreateTournament(
 def OpenNewTournamentWindow(app:"TournamentApp"):
   window = tk.Toplevel(app)
   window.title("Novo Torneio")
-  window.geometry("600x650")
+  window.geometry("600x600")
 
-  canvas = tk.Canvas(window)
-  canvas.pack(side="left", fill="both", expand=True)
-
-  scrollbar = ttk.Scrollbar(window, orient="vertical", command=canvas.yview)
-  scrollbar.pack(side="right", fill="y")
-
-  canvas.configure(yscrollcommand=scrollbar.set)
-
-  content = ttk.Frame(canvas)
-
-  canvasWindow = canvas.create_window((0, 0), window=content, anchor="nw")
-
-  def onFrameConfigure(event):
-    canvas.configure(scrollregion=canvas.bbox("all"))
-  content.bind("<Configure>", onFrameConfigure)
-
-  def onCanvasConfigure(event):
-    canvas.itemconfigure(canvasWindow, width=event.width)
-  canvas.bind("<Configure>", onCanvasConfigure)
-
-  def onMousewheel(event):
-    first, last = canvas.yview()
-    if event.num == 4 or event.delta > 0:
-      if first <= 0:
-        return
-      canvas.yview_scroll(-1, "units")
-    elif event.num == 5 or event.delta < 0:
-      if last >= 1:
-        return
-      canvas.yview_scroll(1, "units")
-  canvas.bind_all("<MouseWheel>", onMousewheel)
+  content = CreateScrollableFrame(window)
 
   tk.Label(content, text="Configure o Novo Torneio", font=("Arial", 28)).pack(padx=10, pady=20, anchor="w")
 
@@ -146,7 +117,7 @@ def OpenNewTournamentWindow(app:"TournamentApp"):
     text="Criar Torneio",
     command=lambda: CreateTournament(
       app,
-      content,
+      window,
       nameEntry.get(),
       int(numberOfSets.get()),
       SetTypes[setType.get()],
