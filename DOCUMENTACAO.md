@@ -39,20 +39,29 @@ memória e é persistido em um **arquivo de texto `.txt`** próprio (formato des
 
 ```
 Tennis/
-├── tournament.py        # Classe Tournament — orquestra categorias e o fluxo do torneio
-├── category.py          # Classe Category — coração da lógica de chaveamento
-├── groupClassification.py # Montagem da chave eliminatória a partir dos classificados dos grupos
-├── match.py             # Classe Match — um jogo, seu placar e vencedor
-├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
-├── matchTeams.py        # Team / Player / Double — os competidores
-├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
-├── tennisEnums.py       # Enums: tipos de categoria, criação/classificação de grupos, set, placar, vencedor, seções de arquivo
-├── tennisExceptions.py  # Exceções de domínio (categoria/duplas/jogador duplicado etc.)
-├── tennisHelper.py      # Funções puras: validação de placar, seeding, byes, classificação
-├── fileReader.py        # Lê o arquivo .txt do torneio → objeto Tournament
-├── fileSave.py          # Salva o objeto Tournament → arquivo .txt
-├── pdfExporter.py       # Exporta grupos/jogos de uma categoria para PDF (reportlab)
-├── tests.py             # Script de bancada (não é suíte de testes automatizada)
+├── pyproject.toml       # Configuração do pacote Python e dependências de desenvolvimento
+├── run_tests.py         # Atalho para executar a suíte de testes
+├── tests.py             # Script de bancada/manual
+│
+├── src/
+│   ├── tennis_manager/
+│   │   ├── __init__.py
+│   │   ├── tournament.py        # Classe Tournament — orquestra categorias e o fluxo do torneio
+│   │   ├── category.py          # Classe Category — coração da lógica de chaveamento
+│   │   ├── classification.py    # Critérios e cálculo de pontuação/classificação
+│   │   ├── groupClassification.py # Montagem da chave eliminatória a partir dos classificados dos grupos
+│   │   ├── match.py             # Classe Match — um jogo, seu placar e vencedor
+│   │   ├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
+│   │   ├── matchTeams.py        # Team / Player / Double — os competidores
+│   │   ├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
+│   │   ├── tennisEnums.py       # Enums: tipos de categoria, criação/classificação de grupos, set, placar, vencedor, seções de arquivo
+│   │   ├── tennisExceptions.py  # Exceções de domínio (categoria/duplas/jogador duplicado etc.)
+│   │   ├── tennisHelper.py      # Funções puras: validação de placar, seeding, byes, classificação
+│   │   ├── fileReader.py        # Lê o arquivo .txt do torneio → objeto Tournament
+│   │   ├── fileSave.py          # Salva o objeto Tournament → arquivo .txt
+│   │   └── pdfExporter.py       # Exporta grupos/jogos de uma categoria para PDF (reportlab)
+│   │
+│   └── tennis_manager.egg-info/ # Metadados gerados pela instalação em modo editável
 │
 ├── GoogleSheets/
 │   ├── googleSheetsUtils.py   # Conexão com Sheets/Drive (gspread + google-api)
@@ -65,12 +74,24 @@ Tennis/
 │   ├── newTournamentWindow.py # Diálogo "Novo Torneio"
 │   ├── newCategoryWindow.py   # Diálogo "Nova Categoria"
 │   ├── updateGroupClassificationWindow.py # Diálogo "Atualizar Classificação dos Grupos"
-│   ├── newTeamWindow.py       # Diálogo "Adicionar/Editar Jogador ou Dupla"
-│   ├── changeCategoryWindow.py# Diálogo "Trocar de Categoria"
-│   ├── matchesTable.py        # Tabela de jogos + janela de lançamento de placar
-│   ├── classificationTables.py# Tabela de classificação de grupos
-│   ├── playersImportWindow.py # Diálogo de importação do Google Sheets
-│   └── exportTournamentWindow.py # Diálogo de exportação para Google Sheets
+│   ├── newTeamWindow.py        # Diálogo "Adicionar/Editar Jogador ou Dupla"
+│   ├── changeCategoryWindow.py # Diálogo "Trocar de Categoria"
+│   ├── matchesTable.py         # Tabela de jogos + janela de lançamento de placar
+│   ├── classificationTables.py # Tabela de classificação de grupos
+│   ├── classificationCriteriaSelector.py # Seletor de critérios de classificação
+│   ├── resultPointsSelector.py # Seletor de pontuação por resultado
+│   ├── playersImportWindow.py  # Diálogo de importação do Google Sheets
+│   ├── updateClassificationCriteriaWindow.py # Diálogo "Atualizar Critérios de Classificação"
+│   ├── updateResultPointsWindow.py # Diálogo "Atualizar Pontuação por Resultado"
+│   └── exportTournamentWindow.py   # Diálogo de exportação para Google Sheets
+│
+├── tests/                     # Suíte de testes automatizados
+│   ├── test_category.py
+│   ├── test_classification.py
+│   ├── test_file_io.py
+│   ├── test_match.py
+│   ├── test_tennis_helper.py
+│   └── ...
 │
 └── TestData/                  # Torneios de exemplo (entradas e saídas) p/ testes manuais
 ```
