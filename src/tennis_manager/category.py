@@ -120,7 +120,6 @@ class Category:
       return
 
     n = len(self.teams)
-    nGroups = self.GetNumberOfTotalGroups()
 
     if self.categoryType == CategoryTypes.Automatic:
       if n < 6:
@@ -130,7 +129,16 @@ class Category:
       else:
         self.categoryType = CategoryTypes.SingleElimination
 
-    elif (self.categoryType == CategoryTypes.Groups) and (self.groupDrawType == GroupDrawTypes.ByGroupSize) and (nGroups == 1):
+    elif (
+      self.categoryType == CategoryTypes.Groups
+      and (
+        n < 3
+        or (
+          self.groupDrawType == GroupDrawTypes.ByGroupSize
+          and self.GetNumberOfTotalGroups() == 1
+        )
+      )
+    ):
       self.categoryType = CategoryTypes.RoundRobin
 
 
@@ -151,12 +159,12 @@ class Category:
       raise ValueError(f"Number of groups ({self.groupDrawQuantity}) creates groups with fewer than 3 teams in category {self.name}.")
 
 
-  def GetNumberOfGroups(self):
+  def GetNumberOfGroups(self) -> tuple[int, int]:
     n = len(self.teams)
     self.__ValidateGroupDrawSettings(n)
 
     if self.groupDrawType is GroupDrawTypes.ByGroupSize:
-      nGroups = n // self.groupDrawQuantity
+      nGroups = max(1, n // self.groupDrawQuantity)
     else:
       nGroups = self.groupDrawQuantity
 
@@ -170,7 +178,7 @@ class Category:
     return smallerGroups, largerGroups
 
 
-  def GetNumberOfTotalGroups(self):
+  def GetNumberOfTotalGroups(self) -> int:
     smallerGroups, largerGroups = self.GetNumberOfGroups()
     return smallerGroups + largerGroups
 

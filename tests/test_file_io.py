@@ -75,24 +75,24 @@ class ReadExampleTests(unittest.TestCase):
 class NameNormalizationReadTests(unittest.TestCase):
     def test_player_group_and_match_names_are_normalized(self):
         content = """
-          [TOURNAMENT]
-          T,1,NormalSet,MatchTieBreak
+[TOURNAMENT]
+T,1,NormalSet,MatchTieBreak
 
-          [CATEGORIES]
-          C,Groups,Single
+[CATEGORIES]
+C,Groups,Single
 
-          [PLAYERS]
-            Ana   Maria  ,C
-          Joao   Silva,C
+[PLAYERS]
+  Ana   Maria  ,C
+Joao   Silva,C
 
-          [GROUPS]
-          C,1, Ana Maria
-          C,1, Joao Silva
+[GROUPS]
+C,1, Ana Maria
+C,1, Joao Silva
 
-          [MATCHES]
-          C,002GR001, Ana   Maria , Joao  Silva
+[MATCHES]
+C,002GR001, Ana   Maria , Joao  Silva
 
-          [END]
+[END]
         """
         fd, path = tempfile.mkstemp(suffix=".txt")
         os.close(fd)

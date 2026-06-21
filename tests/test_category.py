@@ -70,6 +70,18 @@ class CategoryTypeTests(unittest.TestCase):
         cat.UpdateCategoryType()
         self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
 
+    def test_groups_with_two_teams_downgraded_to_round_robin(self):
+        cat = single(n=2, ctype=CategoryTypes.Groups)
+        cat.UpdateCategoryType()
+        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+
+    def test_one_group_with_eliminatory_stage(self):
+        cat = single(n=5, ctype=CategoryTypes.Groups)
+        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+        cat.groupDrawQuantity = 1
+        cat.UpdateCategoryType()
+        self.assertEqual(cat.categoryType, CategoryTypes.Groups)
+
     def test_has_eliminatory_stage(self):
         cat = single(ctype=CategoryTypes.RoundRobin)
         self.assertFalse(cat.HasEliminatoryStage())
@@ -94,6 +106,10 @@ class GroupAndByeMathTests(unittest.TestCase):
         cat.groupDrawType = GroupDrawTypes.ByGroupSize
         cat.groupDrawQuantity = 4
         self.assertEqual(cat.GetNumberOfGroups(), (1, 2))
+
+    def test_get_number_of_groups_never_returns_zero_groups(self):
+        cat = single(n=2)
+        self.assertEqual(cat.GetNumberOfGroups(), (1, 0))
 
     def test_get_number_of_groups_by_total_groups(self):
         cat = single(n=10)
@@ -130,6 +146,20 @@ class FirstRoundTests(unittest.TestCase):
         self.assertTrue(all(k[3:5] == "RR" for k in cat.matches))
         self.assertEqual(len(cat.groups), 1)
 
+    def test_round_robin_with_two_teams_creates_one_match(self):
+        cat = single(n=2, ctype=CategoryTypes.RoundRobin)
+        cat.GetFirstRound()
+        self.assertEqual(list(cat.matches), ["001RR001"])
+        match = cat.matches["001RR001"]
+        self.assertEqual((match.team1.name, match.team2.name), ("P01", "P02"))
+        self.assertEqual(len(cat.groups), 1)
+
+    def test_groups_with_two_teams_creates_one_round_robin_match(self):
+        cat = single(n=2, ctype=CategoryTypes.Groups)
+        cat.GetFirstRound()
+        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+        self.assertEqual(list(cat.matches), ["001RR001"])
+
     def test_groups_creates_group_matches(self):
         random.seed(0)
         cat = single(n=9, ctype=CategoryTypes.Groups, seeds=3)
@@ -137,6 +167,19 @@ class FirstRoundTests(unittest.TestCase):
         self.assertEqual(len(cat.groups), 3)
         gr = [k for k in cat.matches if k[3:5] == "GR"]
         self.assertEqual(len(gr), 9)  # 3 grupos de 3 -> 3 jogos cada
+
+    def test_one_group_with_eliminatory_stage(self):
+        cat = single(n=5, ctype=CategoryTypes.Groups)
+        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+        cat.groupDrawQuantity = 1
+        cat.GetFirstRound()
+        cat.GetBracket()
+        cat.CompleteMatches()
+        self.assertEqual(len(cat.groups), 1)
+        groupMatches = [m for m in cat.matches.values() if m.matchKey.IsGroups()]
+        eliminationMatches = [m for m in cat.matches.values() if m.matchKey.IsSingleElimination()]
+        self.assertEqual(len(groupMatches), 10)
+        self.assertEqual(len(eliminationMatches), 1)
 
     def test_groups_created_by_total_groups(self):
         random.seed(0)
@@ -156,6 +199,14 @@ class FirstRoundTests(unittest.TestCase):
                 if t is not None:
                     appearing.add(t.name)
         self.assertEqual(appearing, set(cat.teams))
+
+    def test_single_elimination_with_two_teams_creates_final(self):
+        cat = single(n=2, ctype=CategoryTypes.SingleElimination)
+        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+        cat.GetBracket()
+        cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+        self.assertEqual(list(cat.matches), ["001SE001"])
+        self.assertIsNone(cat.bracket["001SE001"])
 
 
 class BracketTests(unittest.TestCase):
