@@ -1,5 +1,5 @@
 from tennis_manager.tournament import Tournament
-from tennis_manager.matchTeams import Player, Double
+from tennis_manager.matchTeams import Player, Double, NormalizeTeamName
 from tennis_manager.category import Category
 from tennis_manager.match import Match
 from tennis_manager.matchKey import MatchKey
@@ -249,7 +249,7 @@ def ReadGroup(string, tournament: Tournament):
   info = GetInfo(string)
   categoryName = CleanString(info[0], cleanSpaces=False, toUper=False)
   groupNumber = GetInteger(info[1])
-  playerName = CleanString(info[2], cleanSpaces=False, toUper=False)
+  playerName = NormalizeTeamName(CleanString(info[2], cleanSpaces=False, toUper=False))
   category = tournament.categories[categoryName]
   player = category.teams[playerName]
   if category.groups is None:
@@ -264,8 +264,8 @@ def ReadMatch(string, tournament: Tournament):
   categoryName = CleanString(info[0], cleanSpaces=False, toUper=False)
   category:Category = tournament.categories[categoryName]
   matchKey = CleanString(info[1])
-  player1Name = CleanString(info[2], cleanSpaces=False, toUper=False)
-  player2Name = CleanString(info[3], cleanSpaces=False, toUper=False)
+  player1Name = NormalizeTeamName(CleanString(info[2], cleanSpaces=False, toUper=False))
+  player2Name = NormalizeTeamName(CleanString(info[3], cleanSpaces=False, toUper=False))
   if player1Name == 'None':
     player1 = None
   else:

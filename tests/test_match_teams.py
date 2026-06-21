@@ -1,6 +1,14 @@
 import unittest
 
-from tennis_manager.matchTeams import Team, Player, Double
+from tennis_manager.matchTeams import Team, Player, Double, NormalizeTeamName
+
+
+class NormalizeTeamNameTests(unittest.TestCase):
+    def test_name_normalization(self):
+        self.assertEqual(NormalizeTeamName("Vitor Lumertz"), "Vitor Lumertz")
+        self.assertEqual(NormalizeTeamName("Vitor\nLumertz"), "Vitor Lumertz")
+        self.assertEqual(NormalizeTeamName("\tVitor   Lumertz\n"), "Vitor Lumertz")
+        self.assertEqual(NormalizeTeamName(" Vitor  Lumertz "), "Vitor Lumertz")
 
 
 class TeamTests(unittest.TestCase):
@@ -17,6 +25,10 @@ class TeamTests(unittest.TestCase):
     def test_explicit_is_seed_overrides_inference(self):
         self.assertTrue(Team("Dan", seedNumber=0, isSeed=True).isSeed)
         self.assertFalse(Team("Eve", seedNumber=5, isSeed=False).isSeed)
+
+    def test_name_extra_spaces_are_normalized(self):
+        t = Team("  Maria   Clara  Silva  ")
+        self.assertEqual(t.name, "Maria Clara Silva")
 
 
 class PlayerTests(unittest.TestCase):
@@ -36,6 +48,10 @@ class DoubleTests(unittest.TestCase):
     def test_name_is_joined(self):
         d = Double(Player("Ana"), Player("Bia"))
         self.assertEqual(d.name, "Ana/Bia")
+
+    def test_joined_name_uses_normalized_player_names(self):
+        d = Double(Player(" Ana   Maria "), Player("  Bia  Souza "))
+        self.assertEqual(d.name, "Ana Maria/Bia Souza")
 
     def test_keeps_players(self):
         p1, p2 = Player("Ana"), Player("Bia")

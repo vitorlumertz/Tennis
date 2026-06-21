@@ -1,6 +1,10 @@
+def NormalizeTeamName(name:str) -> str:
+  return ' '.join(name.split())
+
+
 class Team:
   def __init__(self, name:str, seedNumber=0, isSeed=None):
-    self.name = name
+    self.name = NormalizeTeamName(name)
     self.seedNumber = seedNumber
     if isSeed is None:
       if self.seedNumber > 0:

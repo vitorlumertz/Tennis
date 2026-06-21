@@ -4,7 +4,7 @@ from tennis_manager.classification import Columns, DEFAULT_CLASSIFICATION_CRITER
 from tennis_manager.tennisEnums import *
 from tennis_manager.tennisExceptions import *
 from tennis_manager.category import Category
-from tennis_manager.matchTeams import Team, Player
+from tennis_manager.matchTeams import Team, Player, NormalizeTeamName
 from GoogleSheets.playersImport import GetPlayersFromSheet
 from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
 
@@ -65,7 +65,7 @@ class Tournament:
 
 
   def AddOldDouble(self, player1Name:str, player2Name:str):
-    self.oldDoubles.append((player1Name, player2Name))
+    self.oldDoubles.append((NormalizeTeamName(player1Name), NormalizeTeamName(player2Name)))
 
 
   def ImportPlayersFromGoogleSheet(self, sheetTitle:str, folderId:str, worksheetNumber:int):

@@ -42,6 +42,12 @@ class AddTeamTests(unittest.TestCase):
         with self.assertRaises(DuplicatedTeam):
             cat.AddTeam(Player("A"))
 
+    def test_duplicate_team_with_extra_spaces_raises(self):
+        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+        cat.AddTeam(Player("Ana Maria"))
+        with self.assertRaises(DuplicatedTeam):
+            cat.AddTeam(Player("  Ana   Maria  "))
+
 
 class CategoryTypeTests(unittest.TestCase):
     def test_automatic_round_robin(self):

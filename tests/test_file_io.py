@@ -72,6 +72,44 @@ class ReadExampleTests(unittest.TestCase):
         self.assertEqual(cat.groupDrawQuantity, 3)
 
 
+class NameNormalizationReadTests(unittest.TestCase):
+    def test_player_group_and_match_names_are_normalized(self):
+        content = """
+          [TOURNAMENT]
+          T,1,NormalSet,MatchTieBreak
+
+          [CATEGORIES]
+          C,Groups,Single
+
+          [PLAYERS]
+            Ana   Maria  ,C
+          Joao   Silva,C
+
+          [GROUPS]
+          C,1, Ana Maria
+          C,1, Joao Silva
+
+          [MATCHES]
+          C,002GR001, Ana   Maria , Joao  Silva
+
+          [END]
+        """
+        fd, path = tempfile.mkstemp(suffix=".txt")
+        os.close(fd)
+        try:
+            with open(path, "w") as file:
+                file.write(content)
+            tournament = fr.ReadInputFile(path)
+        finally:
+            os.remove(path)
+
+        category = tournament.GetCategory("C")
+        self.assertIn("Ana Maria", category.teams)
+        self.assertIn("Joao Silva", category.teams)
+        self.assertEqual(category.groups[0][0].name, "Ana Maria")
+        self.assertEqual(category.matches["002GR001"].team1.name, "Ana Maria")
+
+
 class RoundTripTests(unittest.TestCase):
     def test_save_and_reread_preserves_structure(self):
         original = fr.ReadInputFile(EXAMPLE)
