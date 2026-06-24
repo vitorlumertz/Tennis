@@ -4,9 +4,7 @@ from tennis_manager.classification import Columns, DEFAULT_CLASSIFICATION_CRITER
 from tennis_manager.tennisEnums import *
 from tennis_manager.tennisExceptions import *
 from tennis_manager.category import Category
-from tennis_manager.matchTeams import Team, Player, NormalizeTeamName
-from GoogleSheets.playersImport import GetPlayersFromSheet
-from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
+from tennis_manager.matchTeams import Team, NormalizeTeamName
 
 
 class Tournament:
@@ -66,23 +64,6 @@ class Tournament:
 
   def AddOldDouble(self, player1Name:str, player2Name:str):
     self.oldDoubles.append((NormalizeTeamName(player1Name), NormalizeTeamName(player2Name)))
-
-
-  def ImportPlayersFromGoogleSheet(self, sheetTitle:str, folderId:str, worksheetNumber:int):
-    data = GetPlayersFromSheet(sheetTitle, folderId, worksheetNumber)
-    failedRows = []
-    for row in data.itertuples():
-      player = Player(row.Player)
-      try:
-        self.AddTeam(player, row.Category)
-      except Exception:
-        failedRows.append(row)
-
-    return failedRows
-
-
-  def ExportToGoogleSheets(self, sheetTitle:str, folderId:str, categoriesStages:dict[str,int]) -> None:
-    ExportTournamentToGoogleSheets(self, sheetTitle, folderId, categoriesStages)
 
 
   def StartCategory(self, categoryName):

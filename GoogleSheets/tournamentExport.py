@@ -3,7 +3,7 @@ from .googleSheetsUtils import GoogleSheetsConnection
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-  from tournament import Tournament
+  from tennis_manager.tournament import Tournament
 
 
 # Formulas definitions

@@ -1,14 +1,12 @@
 """Pacote de testes.
 
 Faz duas coisas ao ser importado (antes de qualquer teste rodar):
-  1. Garante a raiz do projeto no sys.path, para que `import tennisHelper`,
-     `from tournament import Tournament`, etc. funcionem.
-  2. Instala stubs leves para as dependências externas que não precisam estar
-     instaladas para testar a lógica do projeto (gspread, pandas, oauth2client,
-     googleapiclient). Assim, módulos como tournament/fileReader/fileSave, que
-     importam o pacote GoogleSheets, podem ser importados sem rede nem libs.
+  1. Garante a raiz do projeto no sys.path.
+  2. Instala stubs leves para as dependências externas da integração com
+     Google Sheets (gspread, oauth2client, googleapiclient), permitindo importar
+     o pacote GoogleSheets sem rede nem credenciais.
 
-reportlab, se instalado, é usado de verdade (não é stubado).
+pandas e reportlab são dependências reais de tennis_manager e não são stubadas.
 """
 import os
 import sys
@@ -31,16 +29,6 @@ def _module(name):
     mod = types.ModuleType(name)
     sys.modules[name] = mod
     return mod
-
-
-# pandas -------------------------------------------------------------------
-if _missing("pandas"):
-    pandas = _module("pandas")
-
-    class _DataFrame:  # usado apenas em type hints
-        pass
-
-    pandas.DataFrame = _DataFrame
 
 
 # oauth2client.service_account --------------------------------------------

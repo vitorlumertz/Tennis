@@ -6,6 +6,8 @@ if TYPE_CHECKING:
 import tkinter as tk
 from tkinter import messagebox
 
+from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
+
 
 def Export(app:"TournamentApp", window:tk.Toplevel, sheetName:str, folderId:str, categoriesStagesStr:str) -> None:
   try:
@@ -23,7 +25,7 @@ def Export(app:"TournamentApp", window:tk.Toplevel, sheetName:str, folderId:str,
     return
 
   try:
-    app.tournament.ExportToGoogleSheets(sheetName, folderId, categoriesStages)
+    ExportTournamentToGoogleSheets(app.tournament, sheetName, folderId, categoriesStages)
   except Exception as e:
     messagebox.showerror("Erro", f"Erro na exportação!\n\n{e}.")
     window.destroy()
