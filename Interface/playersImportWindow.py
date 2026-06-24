@@ -6,6 +6,8 @@ if TYPE_CHECKING:
 import tkinter as tk
 from tkinter import messagebox
 
+from GoogleSheets.playersImport import ImportPlayersFromGoogleSheet
+
 
 def ImportPlayers(app:"TournamentApp", window:tk.Toplevel, sheetName:str, folderId:str, worksheetNumberStr:str) -> None:
   try:
@@ -16,7 +18,7 @@ def ImportPlayers(app:"TournamentApp", window:tk.Toplevel, sheetName:str, folder
     return
 
   try:
-    failedImports = app.tournament.ImportPlayersFromGoogleSheet(sheetName, folderId, worksheetNumber)
+    failedImports = ImportPlayersFromGoogleSheet(app.tournament, sheetName, folderId, worksheetNumber)
     if failedImports:
       text = f"{len(failedImports)} importações com erro:\n\n"
       for failedImport in failedImports:

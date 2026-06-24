@@ -6,6 +6,22 @@ build-backend = "setuptools.build_meta"
 name = "tennis-manager"
 version = "0.1.0"
 description = "Tennis tournaments manager."
+dependencies = [
+  "pandas",
+  "reportlab",
+]
+
+[project.optional-dependencies]
+google = [
+  "gspread",
+  "oauth2client",
+  "google-api-python-client",
+]
+dev = [
+  "gspread",
+  "oauth2client",
+  "google-api-python-client",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
