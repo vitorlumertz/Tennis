@@ -2,6 +2,7 @@ import random
 import unittest
 
 from tennis_manager.category import Category
+from tennis_manager.match import Match
 from tennis_manager.matchKey import MatchKey, MatchKeyType
 from tennis_manager.matchTeams import Player, Double
 from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes, GroupDrawTypes
@@ -136,6 +137,43 @@ class SortTests(unittest.TestCase):
         cat.AddTeam(Player("Cid", seedNumber=1))
         cat.SortTeams()
         self.assertEqual(list(cat.teams.keys()), ["Cid", "Bob", "Ana", "Zeca"])
+
+
+class SortMatchesTests(unittest.TestCase):
+    def Test(self, keys: list[str], expectedKeys: list[str]):
+        cat = Category("C", CategoryTypes.Groups)
+        cat.matches = {
+            key: Match(None, None, matchKey=MatchKey(key))
+            for key in keys
+        }
+
+        cat.SortMatches()
+
+        self.assertEqual(list(cat.matches.keys()), expectedKeys)
+
+    def test_group_before_elimination(self):
+        self.Test(
+            ["004SE001", "003GR002", "001SE001", "001GR001"],
+            ["001GR001", "003GR002", "004SE001", "001SE001"],
+        )
+
+    def test_elimination_order(self):
+        self.Test(
+            ["001SE001", "004SE003", "004SE001", "002SE001"],
+            ["004SE001", "004SE003", "002SE001", "001SE001"],
+        )
+
+    def test_group_order(self):
+        self.Test(
+            ["003GR002", "003GR001", "001GR003", "001GR001"],
+            ["001GR001", "001GR003", "003GR001", "003GR002"],
+        )
+
+    def test_round_robin_order(self):
+        self.Test(
+            ["006RR005", "006RR004", "001RR001"],
+            ["006RR004", "006RR005", "001RR001"],
+        )
 
 
 class FirstRoundTests(unittest.TestCase):

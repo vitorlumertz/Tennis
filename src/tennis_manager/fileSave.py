@@ -143,6 +143,7 @@ def WriteGroupsSection(file, tournament: Tournament):
 def WriteMatchesSection(file, tournament: Tournament):
   InitializeSection(file, FileSections.Matches)
   for category in tournament.categories.values():
+    category.SortMatches()
     for key, match in category.matches.items():
       matchProperties = [category.name]
       matchProperties.append(key)

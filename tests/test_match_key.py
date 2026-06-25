@@ -103,9 +103,11 @@ class SortCriteriaTests(unittest.TestCase):
 
   def test_group_before_elimination(self):
     self.Test("001GR001", "004SE001")
+    self.Test("003GR002", "001SE001")
 
   def test_elimination_order(self):
     self.Test("004SE001", "001SE001")
+    self.Test("004SE002", "004SE003")
 
   def test_group(self):
     self.Test("001GR003", "003GR001")

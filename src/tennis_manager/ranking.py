@@ -98,7 +98,8 @@ class Ranking:
 
           AddTeamPoints(teamsPoints, teamName, points)
 
-    for match in category.matches.values(): # ordenado sempre?
+    category.SortMatches()
+    for match in category.matches.values():
       if not match.matchKey.IsSingleElimination():
         continue
 

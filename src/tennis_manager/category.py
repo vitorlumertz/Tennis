@@ -110,9 +110,8 @@ class Category:
 
 
   def SortMatches(self):
-    if self.categoryType is CategoryTypes.Groups:
-      matchKeys = [m.matchKey for m in self.matches.values()]
-      self.matches = {mk.name: self.matches[mk.name] for mk in sorted(matchKeys, key=lambda x: x.GetMatchSortCriteria())}
+    matchKeys = [m.matchKey for m in self.matches.values()]
+    self.matches = {mk.name: self.matches[mk.name] for mk in sorted(matchKeys, key=lambda x: x.GetMatchSortCriteria())}
 
 
   def UpdateCategoryType(self) -> None:
