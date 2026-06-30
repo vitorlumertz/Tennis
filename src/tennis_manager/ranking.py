@@ -145,6 +145,15 @@ class Ranking:
     return [col for col in self.data.columns if col.isdigit()]
 
 
+  def __GetStagePointValues(self) -> list[int]:
+    stageColumns = self.__GetStageColumns()
+    values = []
+    for col in stageColumns:
+      values.extend(self.data[col].dropna().tolist())
+
+    return sorted(set(values), reverse=True)
+
+
   def __UpdateDiscardedValues(self) -> None:
     if not self.discardWorstValue:
       self.data[RankingColumns.DiscardedValue.name] = 0
@@ -162,23 +171,31 @@ class Ranking:
 
 
   def __UpdatePositions(self) -> None:
+    stageColumns = self.__GetStageColumns()
+    stagePointValues = self.__GetStagePointValues()
+    tieBreakerColumns = [f"__TieBreaker_{value}" for value in stagePointValues]
+
     for _, categoryDf in self.data.groupby(RankingColumns.Category.name):
+      categoryDf = categoryDf.copy()
+      for pointValue, tieBreakerColumn in zip(stagePointValues, tieBreakerColumns):
+        categoryDf[tieBreakerColumn] = categoryDf[stageColumns].eq(pointValue).sum(axis=1)
+
       ordered = categoryDf.sort_values(
-        by=RankingColumns.Points.name,
-        ascending=False,
+        by=[RankingColumns.Points.name, *tieBreakerColumns],
+        ascending=[False, *[False for _ in tieBreakerColumns]],
       )
 
       currentPosition = 1
-      lastPoints = None
+      lastCriteria = None
       for i, (index, row) in enumerate(ordered.iterrows(), start=1):
-        points = row[RankingColumns.Points.name]
-        if lastPoints is None:
+        criteria = tuple(row[[RankingColumns.Points.name, *tieBreakerColumns]])
+        if lastCriteria is None:
           currentPosition = 1
-        elif points != lastPoints:
+        elif criteria != lastCriteria:
           currentPosition = i
 
         self.data.at[index, RankingColumns.Position.name] = currentPosition
-        lastPoints = points
+        lastCriteria = criteria
 
     self.data = self.data.sort_values(
       by=[
