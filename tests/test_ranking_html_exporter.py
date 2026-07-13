@@ -7,7 +7,7 @@ import unittest
 from tennis_manager.category import Category
 from tennis_manager.matchTeams import Player
 from tennis_manager.ranking import Ranking, RankingColumns
-from tennis_manager.RankingHtmlExporter import ExportToHtml as ExportRankingToHtml
+from tennis_manager.rankingHtmlExporter import ExportToHtml as ExportRankingToHtml
 from tennis_manager.tennisEnums import CategoryTypes
 from tennis_manager.tournament import Tournament
 
