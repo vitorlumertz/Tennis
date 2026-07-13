@@ -56,7 +56,7 @@ class Ranking:
     ]
     self.data = pd.DataFrame(columns=columns)
 
-    self.tournaments = {}
+    self.tournaments: dict[str, Tournament] = {}
     for t in tournaments:
       self.AddTournament(t)
 
@@ -141,12 +141,12 @@ class Ranking:
       }
 
 
-  def __GetStageColumns(self) -> list[str]:
-    return [col for col in self.data.columns if col.isdigit()]
+  def GetStageColumns(self) -> list[str]:
+    return sorted([col for col in self.data.columns if col.isdigit()], key=int)
 
 
   def __GetStagePointValues(self) -> list[int]:
-    stageColumns = self.__GetStageColumns()
+    stageColumns = self.GetStageColumns()
     values = []
     for col in stageColumns:
       values.extend(self.data[col].dropna().tolist())
@@ -159,19 +159,19 @@ class Ranking:
       self.data[RankingColumns.DiscardedValue.name] = 0
       return
 
-    stageColumns = self.__GetStageColumns()
+    stageColumns = self.GetStageColumns()
     minimumValues = self.data[stageColumns].min(axis=1, skipna=False)
     self.data[RankingColumns.DiscardedValue.name] = minimumValues.fillna(0)
 
 
   def __UpdatePoints(self) -> None:
-    stageColumns = self.__GetStageColumns()
+    stageColumns = self.GetStageColumns()
     points = self.data[stageColumns].sum(axis=1) - self.data[RankingColumns.DiscardedValue.name]
     self.data[RankingColumns.Points.name] = points
 
 
   def __UpdatePositions(self) -> None:
-    stageColumns = self.__GetStageColumns()
+    stageColumns = self.GetStageColumns()
     stagePointValues = self.__GetStagePointValues()
     tieBreakerColumns = [f"__TieBreaker_{value}" for value in stagePointValues]
 
@@ -220,13 +220,3 @@ class Ranking:
     self.__UpdateDiscardedValues()
     self.__UpdatePoints()
     self.__UpdatePositions()
-
-
-if __name__ == '__main__':
-  from tennis_manager.fileReader import ReadInputFile
-  tournaments = [
-    ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\1aEtapa\RankingDeDuplas2026_1aEtapa_5.txt"),
-    ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\2aEtapa\RD_2026_2aEtapa_4.txt"),
-    ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\3aEtapa\RD3aEtapa_8.txt"),
-  ]
-  ranking = Ranking('RankingTest', tournaments, discardWorstValue=False)
