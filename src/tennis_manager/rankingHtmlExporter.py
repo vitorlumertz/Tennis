@@ -1,6 +1,5 @@
 from html import escape
 from typing import Any, TypedDict
-import json
 import pandas as pd
 
 from tennis_manager.category import Category
@@ -17,6 +16,20 @@ class StageRegistration(TypedDict):
   name: str
   total: int
   categories: list[CategoryRegistration]
+
+
+CHART_COLORS = [
+  "#d8aaa3",
+  "#9bb7c8",
+  "#a8bf9d",
+  "#d6bd86",
+  "#b9a7c8",
+  "#c5b8a8",
+  "#c9988f",
+  "#93aaa4",
+]
+
+MAX_BAR_HEIGHT = 210
 
 
 def __GetCategoryRegistrationCount(category:Category) -> int:
@@ -101,18 +114,23 @@ def __GetHtmlRankingSections(ranking:Ranking, stageColumns:list[str]) -> str:
   for categoryName, categoryDf in ranking.data.groupby(RankingColumns.Category.name, sort=False):
     categoryId = f"category-{len(sections)}"
     hasExpandableRows = (categoryDf[RankingColumns.Position.name] > 5).any()
-    button = ""
+    toggleInput = ""
+    toggleButton = ""
     if hasExpandableRows:
-      button = (
-        f"<button class=\"toggle-button\" type=\"button\" data-target=\"{categoryId}\""
-        " aria-expanded=\"false\">Ver classificacao completa</button>"
+      toggleInput = f"<input class=\"category-toggle\" id=\"{categoryId}-toggle\" type=\"checkbox\">"
+      toggleButton = (
+        f"<label class=\"toggle-button\" for=\"{categoryId}-toggle\">"
+        "<span class=\"toggle-show-complete\">Ver classificacao completa</span>"
+        "<span class=\"toggle-show-top\">Ver apenas top 5</span>"
+        "</label>"
       )
 
     sections.append(
       f"<section class=\"category-section\" id=\"{categoryId}\">"
+      f"{toggleInput}"
       "<div class=\"category-header\">"
       f"<h2>{escape(str(categoryName))}</h2>"
-      f"{button}"
+      f"{toggleButton}"
       "</div>"
       "<div class=\"table-wrap\">"
       f"<table style=\"min-width: {tableMinWidth}px;\">"
@@ -145,13 +163,64 @@ def __GetHtmlRankingSections(ranking:Ranking, stageColumns:list[str]) -> str:
 
 def __GetHtmlRegistrationsChart(ranking:Ranking) -> str:
   registrations = __GetRegistrationsByStage(ranking)
-  chartDataJson = json.dumps(registrations, ensure_ascii=True)
+  categoryNames: list[str] = []
+  for stage in registrations:
+    for category in stage["categories"]:
+      if category["name"] not in categoryNames:
+        categoryNames.append(category["name"])
+
+  colorByCategory = {
+    categoryName: CHART_COLORS[index % len(CHART_COLORS)]
+    for index, categoryName in enumerate(categoryNames)
+  }
+  maxTotal = max([stage["total"] for stage in registrations] or [1])
+
+  chartColumns: list[str] = []
+  for stage in registrations:
+    barHeight = (stage["total"] / maxTotal) * MAX_BAR_HEIGHT if stage["total"] > 0 else 0
+    segments: list[str] = []
+    for category in stage["categories"]:
+      segmentHeight = (category["count"] / stage["total"]) * 100 if stage["total"] > 0 else 0
+      categoryName = escape(category["name"])
+      categoryCount = category["count"]
+      categoryColor = colorByCategory[category["name"]]
+      segments.append(
+        "<div"
+        " class=\"bar-segment\""
+        f" style=\"height: {segmentHeight:.6g}%; background: {categoryColor};\""
+        f" title=\"{categoryName}: {categoryCount}\""
+        ">"
+        f"{categoryCount if categoryCount > 0 else ''}"
+        "</div>"
+      )
+
+    chartColumns.append(
+      "<div class=\"chart-column\">"
+      f"<div class=\"chart-total\">{stage['total']}</div>"
+      f"<div class=\"bar\" style=\"height: {barHeight:.6g}px;\">"
+      f"{''.join(segments)}"
+      "</div>"
+      f"<div class=\"chart-label\" title=\"{escape(stage['name'])}\">{escape(stage['name'])}</div>"
+      "</div>"
+    )
+
+  legendItems = "".join(
+    "<span class=\"legend-item\">"
+    f"<span class=\"legend-swatch\" style=\"background: {colorByCategory[categoryName]};\"></span>"
+    f"<span>{escape(categoryName)}</span>"
+    "</span>"
+    for categoryName in categoryNames
+  )
+
   return (
     "<section class=\"chart-section\">"
     "<div class=\"section-title\">"
     "<h2>Inscritos por etapa</h2>"
     "</div>"
-    f"<div class=\"chart\" data-chart='{escape(chartDataJson, quote=True)}'></div>"
+    "<div class=\"chart\">"
+    f"<div class=\"chart-bars\">{''.join(chartColumns)}</div>"
+    f"<div class=\"legend\">{legendItems}</div>"
+    "</div>"
     "</section>"
   )
 
@@ -242,6 +311,25 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
       background: #ead1cc;
     }}
 
+    .category-toggle {{
+      height: 1px;
+      opacity: 0;
+      position: absolute;
+      width: 1px;
+    }}
+
+    .toggle-show-top {{
+      display: none;
+    }}
+
+    .category-toggle:checked ~ .category-header .toggle-show-complete {{
+      display: none;
+    }}
+
+    .category-toggle:checked ~ .category-header .toggle-show-top {{
+      display: inline;
+    }}
+
     .table-wrap {{
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -321,7 +409,7 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
       display: none;
     }}
 
-    .category-section.is-expanded .ranking-row.is-hidden {{
+    .category-toggle:checked ~ .table-wrap .ranking-row.is-hidden {{
       display: table-row;
     }}
 
@@ -367,7 +455,7 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
       display: flex;
       gap: 18px;
       min-height: 280px;
-      min-width: max-content;
+      min-width: 100%;
       padding: 10px 4px 0;
     }}
 
@@ -375,6 +463,7 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
       align-items: center;
       display: flex;
       flex-direction: column;
+      flex: 0 0 76px;
       height: 270px;
       justify-content: flex-end;
       width: 76px;
@@ -468,6 +557,7 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
       }}
 
       .chart-column {{
+        flex-basis: 64px;
         height: 230px;
         width: 64px;
       }}
@@ -490,104 +580,6 @@ def ExportToHtml(ranking:Ranking, filePath:str) -> None:
     {__GetHtmlRankingSections(ranking, stageColumns)}
     {__GetHtmlRegistrationsChart(ranking)}
   </main>
-  <script>
-    var palette = ['#d8aaa3', '#9bb7c8', '#a8bf9d', '#d6bd86', '#b9a7c8', '#c5b8a8', '#c9988f', '#93aaa4'];
-    var toggleButtons = document.querySelectorAll('.toggle-button');
-
-    for (var toggleIndex = 0; toggleIndex < toggleButtons.length; toggleIndex += 1) {{
-      toggleButtons[toggleIndex].addEventListener('click', function () {{
-        var button = this;
-        var section = document.getElementById(button.getAttribute('data-target'));
-        var isExpanded = section.classList.toggle('is-expanded');
-        button.setAttribute('aria-expanded', String(isExpanded));
-        button.textContent = isExpanded ? 'Ver apenas top 5' : 'Ver classificacao completa';
-      }});
-    }}
-
-    var charts = document.querySelectorAll('.chart');
-    for (var chartIndex = 0; chartIndex < charts.length; chartIndex += 1) {{
-      var chart = charts[chartIndex];
-      var stages = JSON.parse(chart.getAttribute('data-chart') || '[]');
-      var categoryNames = [];
-      var colorByCategory = {{}};
-      var maxTotal = 1;
-
-      for (var stageIndexForSetup = 0; stageIndexForSetup < stages.length; stageIndexForSetup += 1) {{
-        var setupStage = stages[stageIndexForSetup];
-        if (setupStage.total > maxTotal) {{
-          maxTotal = setupStage.total;
-        }}
-
-        for (var setupCategoryIndex = 0; setupCategoryIndex < setupStage.categories.length; setupCategoryIndex += 1) {{
-          var setupCategoryName = setupStage.categories[setupCategoryIndex].name;
-          if (categoryNames.indexOf(setupCategoryName) === -1) {{
-            categoryNames.push(setupCategoryName);
-            colorByCategory[setupCategoryName] = palette[(categoryNames.length - 1) % palette.length];
-          }}
-        }}
-      }}
-
-      var maxBarHeight = 210;
-      var bars = document.createElement('div');
-      bars.className = 'chart-bars';
-
-      for (var stageIndex = 0; stageIndex < stages.length; stageIndex += 1) {{
-        var stage = stages[stageIndex];
-        var column = document.createElement('div');
-        column.className = 'chart-column';
-
-        var total = document.createElement('div');
-        total.className = 'chart-total';
-        total.textContent = stage.total;
-
-        var bar = document.createElement('div');
-        bar.className = 'bar';
-        bar.style.height = stage.total > 0 ? ((stage.total / maxTotal) * maxBarHeight) + 'px' : '0';
-
-        var label = document.createElement('div');
-        label.className = 'chart-label';
-        label.textContent = stage.name;
-        label.title = label.textContent;
-
-        for (var categoryIndex = 0; categoryIndex < stage.categories.length; categoryIndex += 1) {{
-          var category = stage.categories[categoryIndex];
-          var segment = document.createElement('div');
-          segment.className = 'bar-segment';
-          segment.style.height = stage.total > 0 ? ((category.count / stage.total) * 100) + '%' : '0';
-          segment.style.background = colorByCategory[category.name];
-          segment.title = category.name + ': ' + category.count;
-          segment.textContent = category.count > 0 ? category.count : '';
-          bar.appendChild(segment);
-        }}
-
-        column.appendChild(total);
-        column.appendChild(bar);
-        column.appendChild(label);
-        bars.appendChild(column);
-      }}
-      chart.appendChild(bars);
-
-      var legend = document.createElement('div');
-      legend.className = 'legend';
-      for (var legendIndex = 0; legendIndex < categoryNames.length; legendIndex += 1) {{
-        var name = categoryNames[legendIndex];
-        var item = document.createElement('span');
-        item.className = 'legend-item';
-
-        var swatch = document.createElement('span');
-        swatch.className = 'legend-swatch';
-        swatch.style.background = colorByCategory[name];
-
-        var text = document.createElement('span');
-        text.textContent = name;
-
-        item.appendChild(swatch);
-        item.appendChild(text);
-        legend.appendChild(item);
-      }}
-      chart.appendChild(legend);
-    }}
-  </script>
 </body>
 </html>
 """

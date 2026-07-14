@@ -1,4 +1,3 @@
-import json
 import os
 import pandas as pd
 import tempfile
@@ -63,6 +62,9 @@ class RankingHtmlExporterTests(unittest.TestCase):
     html = self.ExportRanking()
 
     self.assertIn("Ver classificacao completa", html)
+    self.assertIn('type="checkbox"', html)
+    self.assertIn('class="category-toggle"', html)
+    self.assertIn('class="toggle-button"', html)
     self.assertIn('data-position="6"', html)
     self.assertIn('class="ranking-row is-hidden" data-position="6"', html)
     self.assertIn("Ver apenas top 5", html)
@@ -84,35 +86,24 @@ class RankingHtmlExporterTests(unittest.TestCase):
     self.assertIn("left: 52px", html)
     self.assertIn("overflow-wrap: anywhere", html)
     self.assertIn("Inscritos por etapa", html)
-    self.assertIn("label.textContent = stage.name", html)
-    self.assertNotIn("label.textContent = `Etapa ${stage.stage} - ${stage.name}`", html)
-    self.assertIn("bars.className = 'chart-bars'", html)
-    self.assertIn("column.className = 'chart-column'", html)
-    self.assertIn("var maxTotal = 1", html)
-    self.assertIn("var maxBarHeight = 210", html)
-    self.assertIn("bar.style.height = stage.total > 0", html)
-    self.assertIn("segment.style.height = stage.total > 0", html)
-    self.assertNotIn("segment.style.width = stage.total > 0", html)
+    self.assertIn('class="chart-bars"', html)
+    self.assertIn('class="chart-column"', html)
+    self.assertIn('class="bar"', html)
+    self.assertIn('class="bar-segment"', html)
+    self.assertIn('title="A: 3"', html)
+    self.assertIn('title="B: 2"', html)
+    self.assertIn('Etapa 1', html)
+    self.assertIn("category-toggle:checked ~ .table-wrap .ranking-row.is-hidden", html)
+    self.assertIn("flex: 0 0 76px", html)
+    self.assertNotIn("<script>", html)
+    self.assertNotIn("data-chart", html)
+    self.assertNotIn("JSON.parse", html)
+    self.assertNotIn("classList", html)
     self.assertNotIn("flatMap", html)
     self.assertNotIn("Object.fromEntries", html)
     self.assertNotIn("=>", html)
     self.assertNotIn(".append(", html)
     self.assertNotIn("chart.dataset.chart", html)
-
-    escapedPrefix = "data-chart='"
-    chartData = html.split(escapedPrefix, 1)[1].split("'", 1)[0]
-    chartData = chartData.replace("&quot;", '"')
-    parsedChartData = json.loads(chartData)
-
-    self.assertEqual(parsedChartData[0]["name"], "Etapa 1")
-    self.assertEqual(parsedChartData[0]["total"], 5)
-    self.assertEqual(
-      parsedChartData[0]["categories"],
-      [
-        {"name": "A", "count": 3},
-        {"name": "B", "count": 2},
-      ],
-    )
 
 
 if __name__ == "__main__":
