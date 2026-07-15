@@ -2,7 +2,7 @@
 
 Aplicação desktop (Python + tkinter) para **organizar e gerenciar torneios de tênis amador**:
 inscrições, categorias, sorteio de chaves/grupos, lançamento de placares, classificação
-automática, exportação para PDF e integração com Google Sheets.
+automática, ranking entre etapas, exportação para PDF/HTML e integração com Google Sheets.
 
 O título da janela é "Gerenciador de Torneios de Tênis". Todo o estado de um torneio vive em
 memória e é persistido em um **arquivo de texto `.txt`** próprio (formato descrito abaixo).
@@ -29,8 +29,12 @@ memória e é persistido em um **arquivo de texto `.txt`** próprio (formato des
   classificados, com regras configuráveis por categoria (dois por grupo, um por grupo,
   dois nos grupos de 4 e um nos de 3, ou número total livre).
 - **Calcula a classificação** dos grupos por vitórias, saldo de sets e saldo de games.
+- **Consolida rankings** de várias etapas, com pontuação por fase, desempate e descarte do
+  pior resultado.
 - **Exporta** a categoria (grupos e jogos) para **PDF** e o torneio inteiro para o
   **Google Sheets** (com fórmulas que recalculam classificação e mata-mata sozinhas).
+- **Exporta rankings para HTML**, em uma página responsiva e autocontida, pronta para
+  publicação ou compartilhamento.
 - **Salva/abre** o torneio em arquivo `.txt`.
 
 ---
@@ -53,7 +57,8 @@ Tennis/
 │   │   ├── match.py             # Classe Match — um jogo, seu placar e vencedor
 │   │   ├── matchKey.py          # Classe MatchKey - guarda a informação da chave de um jogo
 │   │   ├── matchTeams.py        # Team / Player / Double — os competidores
-│   │   ├── ranking.py           # Classe Ranking — esqueleto (não implementado ainda)
+│   │   ├── ranking.py           # Consolida resultados de várias etapas em um ranking
+│   │   ├── rankingHtmlExporter.py # Exporta o ranking para uma página HTML responsiva
 │   │   ├── tennisEnums.py       # Enums: tipos de categoria, criação/classificação de grupos, set, placar, vencedor, seções de arquivo
 │   │   ├── tennisExceptions.py  # Exceções de domínio (categoria/duplas/jogador duplicado etc.)
 │   │   ├── tennisHelper.py      # Funções puras: validação de placar, seeding, byes, classificação
@@ -330,6 +335,76 @@ quebrando páginas automaticamente. Útil para imprimir as chaves no dia do torn
 
 ---
 
+## Ranking entre etapas (`ranking.py`)
+
+`Ranking(name, tournaments, ...)` agrega uma sequência ordenada de objetos `Tournament`.
+Cada torneio corresponde a uma etapa e cria uma coluna numérica (`"1"`, `"2"`, ...). Novas
+etapas também podem ser incluídas com `AddTournament(tournament)`; nomes de torneio repetidos
+são rejeitados.
+
+A tabela `Ranking.data` é um `pandas.DataFrame` com categoria, posição, nome, total de pontos,
+valor descartado e pontuação por etapa. As posições são calculadas separadamente por categoria.
+
+### Pontuação padrão
+
+- **Mata-mata:** campeão 10, finalista 8, semifinalista 6 e derrotados nas fases anteriores
+  recebem 4, 3, 2 ou 1 ponto conforme a fase (`4`, `8`, `16` ou `32`). Fases sem valor
+  configurado geram erro.
+- **Round-robin:** os quatro primeiros recebem, respectivamente, 10, 8, 6 e 4 pontos, exceto
+  o último colocado; os demais resultados recebem o número de vitórias mais 1.
+- **Fase de grupos:** cada participante começa com 1 ponto e soma 1 por vitória; quem também
+  disputa o mata-mata passa a receber a pontuação correspondente à fase alcançada.
+
+Os mapas podem ser substituídos por `defaultEliminatoryPoints` e
+`defaultRoundRobinPoints`. Em categorias de duplas, `isIndividual=True` (padrão) atribui os
+mesmos pontos a cada jogador da parceria; com `isIndividual=False`, a dupla permanece como
+uma única entrada.
+
+Por padrão, `discardWorstValue=True` subtrai a menor pontuação de quem participou de todas as
+etapas adicionadas. Quem não disputou alguma etapa não tem descarte. O desempate considera,
+depois do total, a quantidade de resultados com a maior pontuação existente, depois com a
+segunda maior, e assim sucessivamente. Se todos esses critérios forem iguais, a posição é
+compartilhada e a numeração seguinte mantém a lacuna (por exemplo: 1, 1, 3).
+
+Exemplo de uso:
+
+```python
+from tennis_manager.fileReader import ReadInputFile
+from tennis_manager.ranking import Ranking
+from tennis_manager.rankingHtmlExporter import ExportToHtml
+
+etapas = [
+    ReadInputFile("etapa-1.txt"),
+    ReadInputFile("etapa-2.txt"),
+]
+ranking = Ranking("Ranking 2026", etapas, isIndividual=True)
+ExportToHtml(ranking, "ranking-2026.html")
+```
+
+> A seção `[RANKING]` do formato `.txt` continua reservada: `ReadRanking` ainda não
+> desserializa rankings. Eles são montados em memória a partir dos torneios carregados.
+
+---
+
+## Exportação do ranking para HTML (`rankingHtmlExporter.py`)
+
+`ExportToHtml(ranking, filePath)` grava em UTF-8 uma página completa e autocontida, sem
+JavaScript nem arquivos externos. O documento contém:
+
+- uma tabela por categoria, com posição, nome, total, pontos de cada etapa e descarte;
+- apenas o top 5 inicialmente, com controle para exibir a classificação completa quando
+  houver mais colocados;
+- colunas de posição e nome fixas durante a rolagem horizontal, além de adaptação para telas
+  estreitas;
+- gráfico de inscritos por etapa, empilhado por categoria, com totais, legenda e detalhes em
+  cada segmento.
+
+Nomes do ranking, categorias, participantes e títulos exibidos são escapados antes de entrar
+no HTML. A exportação existe na API Python e ainda não possui comando próprio na interface
+tkinter.
+
+---
+
 ## Interface gráfica (`Interface/`)
 
 App tkinter de janela única (`TournamentApp`, abre maximizada) com **menu lateral** e área de
@@ -397,10 +472,11 @@ exportar para o Sheets.
 
 ## Estado atual e limitações
 
-- `RANKING` e a classe `Ranking` são **esqueletos** (sem implementação): a ideia é agregar
-  vários torneios num ranking, mas ainda não foi feito.
+- A classe `Ranking` funciona em memória, mas a seção `[RANKING]` dos arquivos `.txt` ainda
+  não é lida nem salva e a exportação HTML ainda não está exposta na interface tkinter.
 - `CategoryTypes.DoubleElimination` e `CategoryTypes.Teams` estão no enum mas **não são
   tratados** na lógica de chaveamento.
-- Não há testes automatizados nem README/empacotamento; a execução depende de configurar o
-  `PYTHONPATH` manualmente (não há `__init__.py`/launcher).
+- Não há launcher para a interface; sua execução ainda depende da configuração manual do
+  `PYTHONPATH`. O projeto possui testes automatizados com `unittest` e empacotamento via
+  `pyproject.toml`.
 - Persistência apenas em arquivo `.txt` (sem banco de dados).
