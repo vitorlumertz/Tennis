@@ -134,7 +134,7 @@ class Category:
         n < 3
         or (
           self.groupDrawType == GroupDrawTypes.ByGroupSize
-          and self.GetNumberOfTotalGroups() == 1
+          and self.GetTotalNumberOfGroups() == 1
         )
       )
     ):
@@ -177,7 +177,7 @@ class Category:
     return smallerGroups, largerGroups
 
 
-  def GetNumberOfTotalGroups(self) -> int:
+  def GetTotalNumberOfGroups(self) -> int:
     smallerGroups, largerGroups = self.GetNumberOfGroups()
     return smallerGroups + largerGroups
 
@@ -190,7 +190,7 @@ class Category:
   def GetSeeds(self):
     seeds = []
     if self.categoryType == CategoryTypes.Groups:
-      maxSeeds = self.GetNumberOfTotalGroups()
+      maxSeeds = self.GetTotalNumberOfGroups()
     else:
       maxSeeds = tnh.GetTournamentStage(len(self.teams))
     if maxSeeds is None:
@@ -274,7 +274,7 @@ class Category:
       if not self.groups:
         seeds = self.GetSeeds()
         nonSeeds = self.GetNonSeeds()
-        nGroups = self.GetNumberOfTotalGroups()
+        nGroups = self.GetTotalNumberOfGroups()
         groups = [[] for _ in range(nGroups)]
         for group in groups:
           group.append(seeds.pop())
@@ -409,7 +409,7 @@ class Category:
 
       if classification.isFinalized:
         nClassifieds = self.__GetNumberOfClassifiedsInGroups()
-        if nClassifieds <= self.GetNumberOfTotalGroups() * 2:
+        if nClassifieds <= self.GetTotalNumberOfGroups() * 2:
           bracket = GetBracketWithTeams(GetTeams(classification, nClassifieds))
         else:
           seedsPositions = tnh.GetSeedsPositions(nClassifieds, nClassifieds)
