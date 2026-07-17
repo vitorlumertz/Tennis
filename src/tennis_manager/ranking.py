@@ -145,15 +145,6 @@ class Ranking:
     return sorted([col for col in self.data.columns if col.isdigit()], key=int)
 
 
-  def __GetStagePointValues(self) -> list[int]:
-    stageColumns = self.GetStageColumns()
-    values = []
-    for col in stageColumns:
-      values.extend(self.data[col].dropna().tolist())
-
-    return sorted(set(values), reverse=True)
-
-
   def __UpdateDiscardedValues(self) -> None:
     if not self.discardWorstValue:
       self.data[RankingColumns.DiscardedValue.name] = 0
@@ -172,13 +163,17 @@ class Ranking:
 
   def __UpdatePositions(self) -> None:
     stageColumns = self.GetStageColumns()
-    stagePointValues = self.__GetStagePointValues()
-    tieBreakerColumns = [f"__TieBreaker_{value}" for value in stagePointValues]
+    tieBreakerColumns = [f"__TieBreaker_{i}" for i in range(len(stageColumns))]
 
     for _, categoryDf in self.data.groupby(RankingColumns.Category.name):
       categoryDf = categoryDf.copy()
-      for pointValue, tieBreakerColumn in zip(stagePointValues, tieBreakerColumns):
-        categoryDf[tieBreakerColumn] = categoryDf[stageColumns].eq(pointValue).sum(axis=1)
+      sortedStagePoints = categoryDf[stageColumns].fillna(0).apply(
+        lambda row: sorted(row, reverse=True),
+        axis=1,
+        result_type="expand",
+      )
+      sortedStagePoints.columns = tieBreakerColumns
+      categoryDf[tieBreakerColumns] = sortedStagePoints
 
       ordered = categoryDf.sort_values(
         by=[RankingColumns.Points.name, *tieBreakerColumns],

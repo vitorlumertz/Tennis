@@ -591,8 +591,8 @@ if __name__ == '__main__':
   from tennis_manager.fileReader import ReadInputFile
   tournaments = [
     ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\1aEtapa\RankingDeDuplas2026_1aEtapa_5.txt"),
-    ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\2aEtapa\RD_2026_2aEtapa_4.txt"),
+    ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\2aEtapa\RD_2026_2aEtapa_5.txt"),
     ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\3aEtapa\RD3aEtapa_8.txt"),
   ]
-  ranking = Ranking('RankingTest', tournaments, discardWorstValue=False)
-  ExportToHtml(ranking, "ranking.html")
+  ranking = Ranking('Ranking de Duplas 2026', tournaments, discardWorstValue=False)
+  ExportToHtml(ranking, "RD2026.html")
