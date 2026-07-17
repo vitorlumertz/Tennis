@@ -140,6 +140,22 @@ class RankingTests(unittest.TestCase):
     )
 
 
+  def test_position_ignores_the_stage_where_each_score_was_obtained(self):
+    ranking = self.BuildRanking([
+      ["A", None, "Ana", 1, 0, 1, 0, 0],
+      ["A", None, "Bia", 1 , 0, 0, 1, 0],
+      ["A", None, "Clara", 1 , 0, 0, 0, 1],
+      ["A", None, "Daiana", 16, 0, 10, 6, 0],
+      ["A", None, "Elena", 16, 0, 6, 10, 0],
+      ["A", None, "Fabiana", 16, 0, 8, 8, 0],
+    ])
+
+    self.assertEqual(
+      ranking.data[RankingColumns.Position.name].tolist(),
+      [1, 1, 3, 4, 4, 4],
+    )
+
+
   def test_add_complete_elimination_tournament_scores_players_by_stage(self):
     tournament = self.BuildCompleteEliminationTournament()
 
