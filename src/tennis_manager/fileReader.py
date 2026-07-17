@@ -52,9 +52,7 @@ def GetCategoryType(string):
   return {
     'ROUNDROBIN': CategoryTypes.RoundRobin,
     'SINGLEELIMINATION': CategoryTypes.SingleElimination,
-    'DOUBLEELIMINATION': CategoryTypes.DoubleElimination,
     'GROUPS': CategoryTypes.Groups,
-    'TEAMS': CategoryTypes.Teams,
     'AUTOMATIC': CategoryTypes.Automatic,
   }.get(string)
 
@@ -123,7 +121,6 @@ def GetScore(string):
 def GetSection(string, actualSection):
   string = CleanString(string)
   return {
-    '[RANKING]': FileSections.Ranking,
     '[TOURNAMENT]': FileSections.Tournament,
     '[CATEGORIES]': FileSections.Categories,
     '[PLAYERS]': FileSections.Players,
@@ -133,10 +130,6 @@ def GetSection(string, actualSection):
     '[MATCHES]': FileSections.Matches,
     '[END]': FileSections.End,
   }.get(string, actualSection)
-
-
-def ReadRanking(string):
-  pass
 
 
 def ReadTournament(string):
@@ -321,9 +314,7 @@ def ReadInputFile(filePath) -> Tournament:
         else:
           continue
 
-      if section == FileSections.Ranking:
-        ReadRanking(row)
-      elif section == FileSections.Tournament:
+      if section == FileSections.Tournament:
         tournament = ReadTournament(row)
       elif section == FileSections.Categories:
         ReadCategory(row, tournament)

@@ -9,10 +9,8 @@ class MatchTypes(Enum):
 class CategoryTypes(Enum):
   RoundRobin = 0
   SingleElimination = 1
-  DoubleElimination = 2
-  Groups = 3
-  Teams = 4
-  Automatic = 5
+  Groups = 2
+  Automatic = 3
 
 
 class GroupClassificationTypes(Enum):
@@ -57,12 +55,11 @@ class MatchWinnerTypes(Enum):
 
 
 class FileSections(Enum):
-  Ranking = 0
-  Tournament = 1
-  Categories = 2
-  Players = 3
-  OldDoubles = 4
-  Doubles = 5
-  Groups = 6
-  Matches = 7
-  End = 8
+  Tournament = 0
+  Categories = 1
+  Players = 2
+  OldDoubles = 3
+  Doubles = 4
+  Groups = 5
+  Matches = 6
+  End = 7

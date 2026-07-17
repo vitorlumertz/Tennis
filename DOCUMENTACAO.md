@@ -133,7 +133,6 @@ Tournament  (o torneio)
 | `Groups`            | Fase de grupos configurável → classificados conforme `GroupClassificationTypes` → mata-mata. |
 | `SingleElimination` | Eliminatória simples (chave de mata-mata desde o início). |
 | `Automatic`         | Escolhe sozinho conforme o nº de inscritos (ver abaixo). |
-| `DoubleElimination`, `Teams` | Declarados no enum, **não implementados**. |
 
 **Regra do `Automatic`** (em `Category.UpdateCategoryType`):
 - menos de 6 inscritos → `RoundRobin`
@@ -274,7 +273,7 @@ O torneio é salvo/lido como texto dividido em **seções** entre colchetes. Lin
 com `//` são comentários (cabeçalhos de coluna) e linhas em branco são ignoradas. Os campos
 são separados por vírgula.
 
-Seções (`FileSections`): `[RANKING]` (reservado), `[TOURNAMENT]`, `[CATEGORIES]`,
+Seções (`FileSections`): `[TOURNAMENT]`, `[CATEGORIES]`,
 `[PLAYERS]`, `[OLDDOUBLES]`, `[DOUBLES]`, `[GROUPS]`, `[MATCHES]`, `[END]`.
 
 Exemplo (de `TestData/`):
@@ -381,8 +380,8 @@ ranking = Ranking("Ranking 2026", etapas, isIndividual=True)
 ExportToHtml(ranking, "ranking-2026.html")
 ```
 
-> A seção `[RANKING]` do formato `.txt` continua reservada: `ReadRanking` ainda não
-> desserializa rankings. Eles são montados em memória a partir dos torneios carregados.
+O ranking não é persistido no formato `.txt`; ele é sempre calculado em memória a partir
+dos torneios carregados no momento da requisição.
 
 ---
 
@@ -472,10 +471,8 @@ exportar para o Sheets.
 
 ## Estado atual e limitações
 
-- A classe `Ranking` funciona em memória, mas a seção `[RANKING]` dos arquivos `.txt` ainda
-  não é lida nem salva e a exportação HTML ainda não está exposta na interface tkinter.
-- `CategoryTypes.DoubleElimination` e `CategoryTypes.Teams` estão no enum mas **não são
-  tratados** na lógica de chaveamento.
+- A classe `Ranking` funciona em memória, é recalculada a partir dos torneios e não é
+  persistida nos arquivos `.txt`; a exportação HTML ainda não está exposta na interface tkinter.
 - Não há launcher para a interface; sua execução ainda depende da configuração manual do
   `PYTHONPATH`. O projeto possui testes automatizados com `unittest` e empacotamento via
   `pyproject.toml`.
