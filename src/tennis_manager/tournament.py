@@ -75,6 +75,7 @@ class Tournament:
       category.GetBracket()
       category.CompleteMatches(self.sets, self.setType, self.lastSetType)
       category.SortMatches()
+      category.UpdateBracket()
       category.isInitialized = True
 
 
