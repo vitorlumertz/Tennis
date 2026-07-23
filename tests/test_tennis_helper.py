@@ -167,5 +167,21 @@ class GetTeamsFromMatchesTests(unittest.TestCase):
     self.assertEqual(tnh.GetTeamsFromMatches([m1,m2,m3]), {t1,t2,t3})
 
 
+class StageNameTests(unittest.TestCase):
+  def test_known_stages(self):
+    self.assertEqual(tnh.GetStageName(1), "Final")
+    self.assertEqual(tnh.GetStageName(2), "Semifinal")
+    self.assertEqual(tnh.GetStageName(4), "Quartas de Final")
+    self.assertEqual(tnh.GetStageName(8), "Oitavas de Final")
+    self.assertEqual(tnh.GetStageName(16), "R32")
+    self.assertEqual(tnh.GetStageName(32), "R64")
+    self.assertEqual(tnh.GetStageName(64), "R128")
+    self.assertEqual(tnh.GetStageName(128), "R256")
+
+  def test_unknown_stage_raises(self):
+      with self.assertRaises(ValueError):
+        tnh.GetStageName(3)
+
+
 if __name__ == "__main__":
   unittest.main()

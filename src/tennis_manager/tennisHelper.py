@@ -171,3 +171,21 @@ def GetTeamsFromMatches(matches:list[Match]) -> set[Team]:
     Add(match.team1)
     Add(match.team2)
   return teams
+
+
+def GetStageName(stage:int) -> str:
+  stageName = {
+    1: "Final",
+    2: "Semifinal",
+    4: "Quartas de Final",
+    8: "Oitavas de Final",
+    16: "R32",
+    32: "R64",
+    64: "R128",
+    128: "R256",
+  }.get(stage)
+
+  if stageName is None:
+    raise ValueError(f"Error getting stage name for value {stage}.")
+
+  return stageName

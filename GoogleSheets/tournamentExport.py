@@ -1,6 +1,8 @@
 from gspread.utils import rowcol_to_a1
 from .googleSheetsUtils import GoogleSheetsConnection
 
+from tennis_manager.tennisHelper import GetStageName
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
   from tennis_manager.tournament import Tournament
@@ -27,21 +29,6 @@ def GetRange(row1:int, column1:int, row2:int|None=None, column2:int|None=None, i
   if row2 is None:
     return range
   return range + ":" + rowcol_to_fixed_a1(row2, column2, isFixed)
-
-
-def GetStageName(stage:int) -> str:
-  stageName = {
-    1: "Final",
-    2: "Semifinal",
-    4: "Quartas de Final",
-    8: "Oitavas de Final",
-    16: "R32",
-  }.get(stage)
-
-  if stageName is None:
-    raise Exception(f"Não foi possível obter a fase eliminatória para o valor {stage}.")
-
-  return stageName
 
 
 def ExportGroupStage(tournament:"Tournament", gsConnection:GoogleSheetsConnection) -> None:

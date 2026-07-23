@@ -10,7 +10,7 @@ from tennis_manager.category import Category
 from tennis_manager.matchKey import MatchKey, MatchKeyType
 from tennis_manager.fileReader import ReadInputFile
 from tennis_manager.fileSave import SaveFile
-from tennis_manager.pdfExporter import ExportGroupCategoryToPdf
+from tennis_manager.pdfExporter import ExportCategoryToPdf
 
 from interfaceUtils import CreateCategoriesComboBox, ClearFrame, BindMousewheelToCanvas
 from newTournamentWindow import OpenNewTournamentWindow
@@ -489,7 +489,7 @@ class TournamentApp(tk.Tk):
       filetypes=[("Arquivos PDF", "*.pdf"), ("Todos os arquivos", "*.*")],
     )
     if filePath != '':
-      ExportGroupCategoryToPdf(category, filePath)
+      ExportCategoryToPdf(category, filePath)
 
 
   def DeleteCategory(self, category:Category):

@@ -21,19 +21,6 @@ class GoogleSheetsConnMock:
                 self.cells.append(cell)
 
 
-class StageNameTests(unittest.TestCase):
-    def test_known_stages(self):
-        self.assertEqual(GetStageName(1), "Final")
-        self.assertEqual(GetStageName(2), "Semifinal")
-        self.assertEqual(GetStageName(4), "Quartas de Final")
-        self.assertEqual(GetStageName(8), "Oitavas de Final")
-        self.assertEqual(GetStageName(16), "R32")
-
-    def test_unknown_stage_raises(self):
-        with self.assertRaises(Exception):
-            GetStageName(3)
-
-
 class A1NotationTests(unittest.TestCase):
     def test_rowcol_to_fixed_a1(self):
         self.assertEqual(rowcol_to_fixed_a1(1, 1), "A1")
