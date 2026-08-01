@@ -122,6 +122,8 @@ class TournamentApp(tk.Tk):
     container.grid(row=0, column=1, sticky="nsew")
 
     canvas = tk.Canvas(container, bg="white", highlightthickness=0)
+    self.contentCanvas = canvas
+    self.shortcutsFrame = None
     vsb = tk.Scrollbar(container, orient="vertical", command=canvas.yview)
     canvas.configure(yscrollcommand=vsb.set)
 
@@ -136,6 +138,47 @@ class TournamentApp(tk.Tk):
     self.contentFrame.bind("<Configure>", onConfigure)
 
     BindMousewheelToCanvas(canvas, self.contentFrame)
+
+
+  def ShowPlayersShortcuts(self):
+    shortcuts = (
+      ("Delete", "excluir jogador(es) selecionado(s)."),
+      ("F2", "editar jogador."),
+      ("F3", "trocar os números de cabeça de chave entre dois jogadores ou mais."),
+      ("F4", "mover jogador(es) para outra categoria."),
+    )
+
+    self.shortcutsFrame = tk.Frame(self.contentCanvas, bg="white", padx=10, pady=8)
+    self.shortcutsFrame.place(relx=1, rely=1, x=-12, y=-12, anchor="se")
+
+    tk.Label(
+      self.shortcutsFrame,
+      text="Atalhos:",
+      font=("Arial", 10, "bold"),
+      bg="white",
+      fg="#2c3e50",
+    ).pack(anchor="w", padx=12, pady=(0, 2))
+
+    for key, description in shortcuts:
+      shortcut = tk.Frame(self.shortcutsFrame, bg="white")
+      shortcut.pack(anchor="w", padx=(12, 0), pady=2)
+      tk.Label(
+        shortcut,
+        text=key,
+        font=("Arial", 10, "bold"),
+        bg="#2c3e50",
+        fg="white",
+        padx=6,
+        pady=2,
+      ).pack(side="left")
+      tk.Label(
+        shortcut,
+        text=description,
+        font=("Arial", 10),
+        bg="white",
+        fg="#2c3e50",
+        padx=5,
+      ).pack(side="left")
 
 
   def ClearContent(self):
@@ -599,6 +642,10 @@ class TournamentApp(tk.Tk):
 
 
   def ShowContent(self, menuItem):
+    if self.shortcutsFrame is not None:
+      self.shortcutsFrame.destroy()
+      self.shortcutsFrame = None
+
     for widget in self.contentFrame.winfo_children():
       widget.destroy()
 
@@ -623,6 +670,7 @@ class TournamentApp(tk.Tk):
           if menuItem == "Jogadores":
             combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsContent(leftFrame, rightFrame, event.widget.get()))
             self.UpdateTeamsContent(leftFrame, rightFrame, combobox['values'][0])
+            self.ShowPlayersShortcuts()
           else:
             combobox.bind("<<ComboboxSelected>>", lambda event: self.UpdateTeamsContent(leftFrame, rightFrame, event.widget.get(), True))
             self.UpdateTeamsContent(leftFrame, rightFrame, combobox['values'][0], True)
