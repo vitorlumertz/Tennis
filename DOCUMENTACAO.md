@@ -424,7 +424,7 @@ conteúdo rolável. Itens do menu:
 **Atalhos de teclado** (nas tabelas):
 - `Delete` — excluir item(ns) selecionado(s)
 - `F2` — editar jogador/dupla **ou** lançar placar de um jogo
-- `F3` — trocar os números de cabeça de chave entre dois itens
+- `F3` — trocar os números de cabeça de chave entre dois itens ou mais
 - `F4` — mover item(ns) para outra categoria
 - `F5` — alternar presença (presente/ausente)
 
