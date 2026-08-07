@@ -28,6 +28,7 @@ python3 -m unittest tests.test_tennis_helper -v
 | `test_tennis_helper.py` | Validação de placar, seeding, byes, chaves, classificação, ordenação |
 | `test_match.py` | `Match`: placar normal/inválido, W.O., desistência, bye, double bye, estado |
 | `test_category.py` | `Category`: tipos, grupos, byes, primeira rodada, bracket, grupos→mata-mata, sorteio de duplas |
+| `gui/test_new_team_window.py` | Filtros dos seletores de jogadores para duplas sorteadas |
 | `test_tournament.py` | `Tournament`: categorias, inscritos, iniciar categorias, brackets |
 | `test_file_io.py` | `fileReader` / `fileSave`: parse, leitura de exemplo e round-trip |
 | `test_google_sheets_export.py` | Helpers puros da exportação (nomes de fase, notação A1, ranges) |

@@ -70,7 +70,7 @@ class Tournament:
     category = self.GetCategory(categoryName)
     if not category.isInitialized:
       if category.isRandomDoubles:
-        category.DrawDubles(self.oldDoubles)
+        category.DrawDoubles(self.oldDoubles)
       category.GetFirstRound(self.sets, self.setType, self.lastSetType)
       category.GetBracket()
       category.CompleteMatches(self.sets, self.setType, self.lastSetType)

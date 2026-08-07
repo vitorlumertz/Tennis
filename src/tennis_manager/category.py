@@ -49,9 +49,20 @@ class Category:
     self.__ValidateGroupDrawSettings()
 
 
-  def AddTeam(self, team:Team):
+  def GetSeedSumForDrawnDoubles(self) -> int:
+    """Return the seed sum required for every double when `self.isRandomDoubles = True`."""
+
+    seedNumbers = [player.seedNumber for player in self.players.values()]
+    return min(seedNumbers) + max(seedNumbers)
+
+
+  def AddTeam(self, team:Team) -> None:
     if isinstance(team, Double) and self.matchType is MatchTypes.Single:
       raise AddingDoubleInSingleCategory(team.name, self.name)
+
+    if isinstance(team, Double) and self.isRandomDoubles:
+      if team.player1.seedNumber + team.player2.seedNumber != self.GetSeedSumForDrawnDoubles():
+        raise DrawingDoublesError(self.name)
 
     if isinstance(team, Player) and self.matchType is MatchTypes.Double:
       dictToAdd = self.players
@@ -94,7 +105,7 @@ class Category:
     return matches
 
 
-  def SortTeams(self):
+  def SortTeams(self) -> None:
     def GetSortingValues(team:Team):
       return (
         team.seedNumber == 0,
@@ -109,7 +120,7 @@ class Category:
     self.teams = dict(Sort(self.teams))
 
 
-  def SortMatches(self):
+  def SortMatches(self) -> None:
     matchKeys = [m.matchKey for m in self.matches.values()]
     self.matches = {mk.name: self.matches[mk.name] for mk in sorted(matchKeys, key=lambda x: x.GetMatchSortCriteria())}
 
@@ -224,7 +235,7 @@ class Category:
     return tnh.GetByes(numSeeds, numTeams)
 
 
-  def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None):
+  def AddGroupMatches(self, teams, sets, setType, lastSetType, groupNumber=None) -> None:
     matches = list(itertools.combinations(teams, 2))
     if self.categoryType == CategoryTypes.RoundRobin:
       fi = len(matches)
@@ -238,7 +249,7 @@ class Category:
       self.matches[matchKey.name] = Match(matchTeams[0], matchTeams[1], sets=sets, setType=setType, lastSetType=lastSetType, isTeam1Set=True, isTeam2Set=True, matchKey=matchKey)
 
 
-  def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak):
+  def GetFirstRound(self, sets=3, setType=SetTypes.NormalSet, lastSetType=SetTypes.MatchTieBreak) -> None:
     self.UpdateCategoryType()
     if self.categoryType == CategoryTypes.RoundRobin:
       group = list(self.teams.values())
@@ -447,7 +458,7 @@ class Category:
     return max(stages)
 
 
-  def DrawDubles(self, oldDoubles: list[tuple[str,str]]):
+  def DrawDoubles(self, oldDoubles: list[tuple[str,str]]):
 
     def Pop(playersToDraw:dict[str,Player], playerName:str) -> None:
       try:
@@ -468,11 +479,6 @@ class Category:
       return oldDoubles + inverseDoubles
 
 
-    def GetSeedSum(playersToDraw: dict[str,Player]) -> int:
-      seedValues = [player.seedNumber for player in playersToDraw.values()]
-      return min(seedValues) + max(seedValues)
-
-
     def GetSeedGroups(playersToDraw: dict[str,Player]) -> dict[int,list[Player]]:
       seedGroups = {}
       for player in playersToDraw.values():
@@ -480,9 +486,11 @@ class Category:
       return seedGroups
 
 
-    def GetDrawDoubles(seedGroups:dict[int,list[Player]], seedSum:int) -> list[tuple[str,str]]:
+    def GetDrawDoubles(seedGroups:dict[int,list[Player]]) -> list[tuple[str,str]]:
       drawDoubles = []
       drawGroups = []
+      seedSum = self.GetSeedSumForDrawnDoubles()
+
       for seedNum, players in seedGroups.items():
         if seedNum in drawGroups:
           continue
@@ -516,14 +524,16 @@ class Category:
           return True
       return False
 
+
     playersToDraw = RemoveDefinedDoublePlayers()
+    if len(playersToDraw) == 0:
+      return
     duplicatedOldDoubles = DuplicateOldDoubles()
     seedGroups = GetSeedGroups(playersToDraw)
-    seedSum = GetSeedSum(playersToDraw)
 
     maxIter = 10 ** 3
     for _ in range(maxIter):
-      drawDoubles = GetDrawDoubles(seedGroups, seedSum)
+      drawDoubles = GetDrawDoubles(seedGroups)
       if not HasDuplicatedDouble(drawDoubles, duplicatedOldDoubles):
         random.shuffle(drawDoubles)
         for double in drawDoubles:
