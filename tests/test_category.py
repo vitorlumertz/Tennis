@@ -8,6 +8,7 @@ from tennis_manager.matchTeams import Player, Double
 from tennis_manager.tennisEnums import CategoryTypes, MatchTypes, SetTypes, ScoreTypes, MatchWinnerTypes, GroupDrawTypes
 from tennis_manager.tennisExceptions import (
     AddingDoubleInSingleCategory,
+    DrawingDoublesError,
     DuplicatedTeam,
 )
 
@@ -319,12 +320,36 @@ class GetFirstEliminationStageTests(unittest.TestCase):
 
 
 class DoublesDrawTests(unittest.TestCase):
+    def test_seed_sum_uses_all_category_players(self):
+        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+        for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
+            cat.AddTeam(Player(name, seedNumber=seed))
+
+        self.assertEqual(cat.GetSeedSumForDrawnDoubles(), 4)
+
+    def test_predefined_double_must_follow_draw_seed_rule(self):
+        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+        for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
+            cat.AddTeam(Player(name, seedNumber=seed))
+
+        with self.assertRaises(DrawingDoublesError):
+            cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
+
+    def test_draw_accepts_all_players_already_in_defined_doubles(self):
+        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+        cat.AddTeam(Player("A", seedNumber=1))
+        cat.AddTeam(Player("B", seedNumber=2))
+        cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
+
+        cat.DrawDoubles([])
+        self.assertEqual(len(cat.teams), 1)
+
     def test_draw_pairs_by_seed_sum(self):
         random.seed(1)
         cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
         for i, seed in enumerate([1, 1, 2, 2]):
             cat.AddTeam(Player(f"J{i}", seedNumber=seed))
-        cat.DrawDubles([])
+        cat.DrawDoubles([])
         self.assertEqual(len(cat.teams), 2)
         used = []
         for d in cat.teams.values():
