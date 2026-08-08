@@ -4,7 +4,7 @@ from tennis_manager.classification import Columns, DEFAULT_CLASSIFICATION_CRITER
 from tennis_manager.tennisEnums import *
 from tennis_manager.tennisExceptions import *
 from tennis_manager.category import Category
-from tennis_manager.matchTeams import Team, NormalizeTeamName
+from tennis_manager.matchTeams import Double, Team, NormalizeTeamName
 
 
 class Tournament:
@@ -87,3 +87,37 @@ class Tournament:
   def UpdateBrackets(self):
     for category in self.categories.values():
       category.UpdateBracket(self.classificationCriteria, self.resultPoints)
+
+
+  def CleanCopy(self, tournamentName:str) -> "Tournament":
+    categories = {
+      category.name: Category(
+        name = category.name,
+        categoryType = category.categoryType,
+        matchType = category.matchType,
+        isRandomDoubles = category.isRandomDoubles,
+        groupClassificationType = category.groupClassificationType,
+        numOfclassifiedsInGroups = category.numOfclassifiedsInGroups,
+        groupDrawType = category.groupDrawType,
+        groupDrawQuantity = category.groupDrawQuantity,
+      )
+      for category in self.categories.values()
+    }
+
+    currentDoubles = [
+      (team.player1.name, team.player2.name)
+      for category in self.categories.values()
+      for team in category.teams.values()
+      if isinstance(team, Double)
+    ]
+
+    return Tournament(
+      name = tournamentName,
+      sets = self.sets,
+      setType = self.setType,
+      lastSetType = self.lastSetType,
+      categories = categories,
+      oldDoubles = self.oldDoubles.copy() + currentDoubles,
+      classificationCriteria = self.classificationCriteria,
+      resultPoints = self.resultPoints,
+    )
