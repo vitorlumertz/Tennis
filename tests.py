@@ -25,7 +25,6 @@ def PrintMatches(tournament: Tournament):
     print()
 
 
-
 def ExportRankingToHtml():
   tournaments = [
     ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\1aEtapa\RankingDeDuplas2026_1aEtapa_5.txt"),
@@ -35,6 +34,12 @@ def ExportRankingToHtml():
   ]
   ranking = Ranking('Ranking de Duplas 2026', tournaments, discardWorstValue=False)
   ExportToHtml(ranking, "RD2026.html")
+
+
+def RunCleanCopy():
+  t = ReadInputFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\4aEtapa\RD4aEtapa_9.txt")
+  copied = t.CleanCopy("RD5aEtapa")
+  SaveFile(r"C:\Users\vitor\Desktop\Vitor\Dpto Tenis SOGIPA\2026\Ranking de Duplas\5aEtapa\RD5aEtapa_0.txt", copied)
 
 
 if __name__ == '__main__':
@@ -50,4 +55,4 @@ if __name__ == '__main__':
   #from GoogleSheets.tournamentExport import ExportTournamentToGoogleSheets
   #ExportTournamentToGoogleSheets(tournament, "InscricoesTeste1", "1Va2dpkfftGt0RFTnp1rt4x0A23fD6h2K", {"A":8,"B":4})
 
-  ExportRankingToHtml()
+  RunCleanCopy()
