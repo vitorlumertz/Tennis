@@ -179,8 +179,8 @@ class StageNameTests(unittest.TestCase):
     self.assertEqual(tnh.GetStageName(128), "R256")
 
   def test_unknown_stage_raises(self):
-      with self.assertRaises(ValueError):
-        tnh.GetStageName(3)
+    with self.assertRaises(ValueError):
+      tnh.GetStageName(3)
 
 
 if __name__ == "__main__":

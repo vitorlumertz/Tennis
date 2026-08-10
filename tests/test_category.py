@@ -14,363 +14,363 @@ from tennis_manager.tennisExceptions import (
 
 
 def single(name="C", ctype=CategoryTypes.RoundRobin, n=0, seeds=0):
-    cat = Category(name, ctype, MatchTypes.Single)
-    for i in range(1, n + 1):
-        cat.AddTeam(Player(f"P{i:02d}", seedNumber=(i if i <= seeds else 0)))
-    return cat
+  cat = Category(name, ctype, MatchTypes.Single)
+  for i in range(1, n + 1):
+    cat.AddTeam(Player(f"P{i:02d}", seedNumber=(i if i <= seeds else 0)))
+  return cat
 
 
 class AddTeamTests(unittest.TestCase):
-    def test_single_goes_to_teams(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
-        cat.AddTeam(Player("A"))
-        self.assertIn("A", cat.teams)
-        self.assertEqual(len(cat.players), 0)
+  def test_single_goes_to_teams(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+    cat.AddTeam(Player("A"))
+    self.assertIn("A", cat.teams)
+    self.assertEqual(len(cat.players), 0)
 
-    def test_player_in_double_category_goes_to_players(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double)
-        cat.AddTeam(Player("A"))
-        self.assertIn("A", cat.players)
-        self.assertEqual(len(cat.teams), 0)
+  def test_player_in_double_category_goes_to_players(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double)
+    cat.AddTeam(Player("A"))
+    self.assertIn("A", cat.players)
+    self.assertEqual(len(cat.teams), 0)
 
-    def test_double_in_single_category_raises(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
-        with self.assertRaises(AddingDoubleInSingleCategory):
-            cat.AddTeam(Double(Player("A"), Player("B")))
+  def test_double_in_single_category_raises(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+    with self.assertRaises(AddingDoubleInSingleCategory):
+      cat.AddTeam(Double(Player("A"), Player("B")))
 
-    def test_duplicate_team_raises(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
-        cat.AddTeam(Player("A"))
-        with self.assertRaises(DuplicatedTeam):
-            cat.AddTeam(Player("A"))
+  def test_duplicate_team_raises(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+    cat.AddTeam(Player("A"))
+    with self.assertRaises(DuplicatedTeam):
+      cat.AddTeam(Player("A"))
 
-    def test_duplicate_team_with_extra_spaces_raises(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
-        cat.AddTeam(Player("Ana Maria"))
-        with self.assertRaises(DuplicatedTeam):
-            cat.AddTeam(Player("  Ana   Maria  "))
+  def test_duplicate_team_with_extra_spaces_raises(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+    cat.AddTeam(Player("Ana Maria"))
+    with self.assertRaises(DuplicatedTeam):
+      cat.AddTeam(Player("  Ana   Maria  "))
 
 
 class CategoryTypeTests(unittest.TestCase):
-    def test_automatic_round_robin(self):
-        cat = single(n=5, ctype=CategoryTypes.Automatic)
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+  def test_automatic_round_robin(self):
+    cat = single(n=5, ctype=CategoryTypes.Automatic)
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
 
-    def test_automatic_groups(self):
-        cat = single(n=6, ctype=CategoryTypes.Automatic)
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.Groups)
+  def test_automatic_groups(self):
+    cat = single(n=6, ctype=CategoryTypes.Automatic)
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.Groups)
 
-    def test_automatic_single_elimination(self):
-        cat = single(n=10, ctype=CategoryTypes.Automatic)
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.SingleElimination)
+  def test_automatic_single_elimination(self):
+    cat = single(n=10, ctype=CategoryTypes.Automatic)
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.SingleElimination)
 
-    def test_groups_downgraded_to_round_robin(self):
-        cat = single(n=5, ctype=CategoryTypes.Groups)
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+  def test_groups_downgraded_to_round_robin(self):
+    cat = single(n=5, ctype=CategoryTypes.Groups)
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
 
-    def test_groups_with_two_teams_downgraded_to_round_robin(self):
-        cat = single(n=2, ctype=CategoryTypes.Groups)
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+  def test_groups_with_two_teams_downgraded_to_round_robin(self):
+    cat = single(n=2, ctype=CategoryTypes.Groups)
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
 
-    def test_one_group_with_eliminatory_stage(self):
-        cat = single(n=5, ctype=CategoryTypes.Groups)
-        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
-        cat.groupDrawQuantity = 1
-        cat.UpdateCategoryType()
-        self.assertEqual(cat.categoryType, CategoryTypes.Groups)
+  def test_one_group_with_eliminatory_stage(self):
+    cat = single(n=5, ctype=CategoryTypes.Groups)
+    cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+    cat.groupDrawQuantity = 1
+    cat.UpdateCategoryType()
+    self.assertEqual(cat.categoryType, CategoryTypes.Groups)
 
-    def test_has_eliminatory_stage(self):
-        cat = single(ctype=CategoryTypes.RoundRobin)
-        self.assertFalse(cat.HasEliminatoryStage())
+  def test_has_eliminatory_stage(self):
+    cat = single(ctype=CategoryTypes.RoundRobin)
+    self.assertFalse(cat.HasEliminatoryStage())
 
-        cat = single(ctype=CategoryTypes.Groups)
-        self.assertTrue(cat.HasEliminatoryStage())
+    cat = single(ctype=CategoryTypes.Groups)
+    self.assertTrue(cat.HasEliminatoryStage())
 
-        cat = single(ctype=CategoryTypes.SingleElimination)
-        self.assertTrue(cat.HasEliminatoryStage())
+    cat = single(ctype=CategoryTypes.SingleElimination)
+    self.assertTrue(cat.HasEliminatoryStage())
 
 
 class GroupAndByeMathTests(unittest.TestCase):
-    def test_get_number_of_groups(self):
-        self.assertEqual(single(n=6).GetNumberOfGroups(), (2, 0))
-        self.assertEqual(single(n=7).GetNumberOfGroups(), (1, 1))
-        self.assertEqual(single(n=8).GetNumberOfGroups(), (0, 2))
-        self.assertEqual(single(n=9).GetNumberOfGroups(), (3, 0))
-        self.assertEqual(single(n=11).GetNumberOfGroups(), (1, 2))
+  def test_get_number_of_groups(self):
+    self.assertEqual(single(n=6).GetNumberOfGroups(), (2, 0))
+    self.assertEqual(single(n=7).GetNumberOfGroups(), (1, 1))
+    self.assertEqual(single(n=8).GetNumberOfGroups(), (0, 2))
+    self.assertEqual(single(n=9).GetNumberOfGroups(), (3, 0))
+    self.assertEqual(single(n=11).GetNumberOfGroups(), (1, 2))
 
-    def test_get_number_of_groups_by_custom_group_size(self):
-        cat = single(n=14)
-        cat.groupDrawType = GroupDrawTypes.ByGroupSize
-        cat.groupDrawQuantity = 4
-        self.assertEqual(cat.GetNumberOfGroups(), (1, 2))
+  def test_get_number_of_groups_by_custom_group_size(self):
+    cat = single(n=14)
+    cat.groupDrawType = GroupDrawTypes.ByGroupSize
+    cat.groupDrawQuantity = 4
+    self.assertEqual(cat.GetNumberOfGroups(), (1, 2))
 
-    def test_get_number_of_groups_never_returns_zero_groups(self):
-        cat = single(n=2)
-        self.assertEqual(cat.GetNumberOfGroups(), (1, 0))
+  def test_get_number_of_groups_never_returns_zero_groups(self):
+    cat = single(n=2)
+    self.assertEqual(cat.GetNumberOfGroups(), (1, 0))
 
-    def test_get_number_of_groups_by_total_groups(self):
-        cat = single(n=10)
-        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
-        cat.groupDrawQuantity = 3
-        self.assertEqual(cat.GetNumberOfGroups(), (2, 1))
+  def test_get_number_of_groups_by_total_groups(self):
+    cat = single(n=10)
+    cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+    cat.groupDrawQuantity = 3
+    self.assertEqual(cat.GetNumberOfGroups(), (2, 1))
 
-    def test_group_size_must_be_at_least_three(self):
-        with self.assertRaises(ValueError):
-            Category("C", CategoryTypes.Groups, MatchTypes.Single, groupDrawQuantity=2)
+  def test_group_size_must_be_at_least_three(self):
+    with self.assertRaises(ValueError):
+      Category("C", CategoryTypes.Groups, MatchTypes.Single, groupDrawQuantity=2)
 
-    def test_get_byes_distribution(self):
-        cat = single(n=6)
-        self.assertEqual(cat.GetByes(3), (2, 0))  # 2 byes, todos com cabeças
-        self.assertEqual(cat.GetByes(1), (1, 1))  # 1 com cabeça, 1 sem
+  def test_get_byes_distribution(self):
+    cat = single(n=6)
+    self.assertEqual(cat.GetByes(3), (2, 0))  # 2 byes, todos com cabeças
+    self.assertEqual(cat.GetByes(1), (1, 1))  # 1 com cabeça, 1 sem
 
 
 class SortTests(unittest.TestCase):
-    def test_sort_teams_seeds_first_then_name(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
-        cat.AddTeam(Player("Zeca"))
-        cat.AddTeam(Player("Ana"))
-        cat.AddTeam(Player("Bob", seedNumber=2))
-        cat.AddTeam(Player("Cid", seedNumber=1))
-        cat.SortTeams()
-        self.assertEqual(list(cat.teams.keys()), ["Cid", "Bob", "Ana", "Zeca"])
+  def test_sort_teams_seeds_first_then_name(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Single)
+    cat.AddTeam(Player("Zeca"))
+    cat.AddTeam(Player("Ana"))
+    cat.AddTeam(Player("Bob", seedNumber=2))
+    cat.AddTeam(Player("Cid", seedNumber=1))
+    cat.SortTeams()
+    self.assertEqual(list(cat.teams.keys()), ["Cid", "Bob", "Ana", "Zeca"])
 
 
 class SortMatchesTests(unittest.TestCase):
-    def Test(self, keys: list[str], expectedKeys: list[str]):
-        cat = Category("C", CategoryTypes.Groups)
-        cat.matches = {
-            key: Match(None, None, matchKey=MatchKey(key))
-            for key in keys
-        }
+  def Test(self, keys: list[str], expectedKeys: list[str]):
+    cat = Category("C", CategoryTypes.Groups)
+    cat.matches = {
+      key: Match(None, None, matchKey=MatchKey(key))
+      for key in keys
+    }
 
-        cat.SortMatches()
+    cat.SortMatches()
 
-        self.assertEqual(list(cat.matches.keys()), expectedKeys)
+    self.assertEqual(list(cat.matches.keys()), expectedKeys)
 
-    def test_group_before_elimination(self):
-        self.Test(
-            ["004SE001", "003GR002", "001SE001", "001GR001"],
-            ["001GR001", "003GR002", "004SE001", "001SE001"],
-        )
+  def test_group_before_elimination(self):
+    self.Test(
+      ["004SE001", "003GR002", "001SE001", "001GR001"],
+      ["001GR001", "003GR002", "004SE001", "001SE001"],
+    )
 
-    def test_elimination_order(self):
-        self.Test(
-            ["001SE001", "004SE003", "004SE001", "002SE001"],
-            ["004SE001", "004SE003", "002SE001", "001SE001"],
-        )
+  def test_elimination_order(self):
+    self.Test(
+      ["001SE001", "004SE003", "004SE001", "002SE001"],
+      ["004SE001", "004SE003", "002SE001", "001SE001"],
+    )
 
-    def test_group_order(self):
-        self.Test(
-            ["003GR002", "003GR001", "001GR003", "001GR001"],
-            ["001GR001", "001GR003", "003GR001", "003GR002"],
-        )
+  def test_group_order(self):
+    self.Test(
+      ["003GR002", "003GR001", "001GR003", "001GR001"],
+      ["001GR001", "001GR003", "003GR001", "003GR002"],
+    )
 
-    def test_round_robin_order(self):
-        self.Test(
-            ["006RR005", "006RR004", "001RR001"],
-            ["006RR004", "006RR005", "001RR001"],
-        )
+  def test_round_robin_order(self):
+    self.Test(
+      ["006RR005", "006RR004", "001RR001"],
+      ["006RR004", "006RR005", "001RR001"],
+    )
 
 
 class FirstRoundTests(unittest.TestCase):
-    def test_round_robin_all_pairs(self):
-        cat = single(n=4, ctype=CategoryTypes.RoundRobin)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        self.assertEqual(len(cat.matches), 6)  # C(4,2)
-        self.assertTrue(all(k[3:5] == "RR" for k in cat.matches))
-        self.assertEqual(len(cat.groups), 1)
+  def test_round_robin_all_pairs(self):
+    cat = single(n=4, ctype=CategoryTypes.RoundRobin)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    self.assertEqual(len(cat.matches), 6)  # C(4,2)
+    self.assertTrue(all(k[3:5] == "RR" for k in cat.matches))
+    self.assertEqual(len(cat.groups), 1)
 
-    def test_round_robin_with_two_teams_creates_one_match(self):
-        cat = single(n=2, ctype=CategoryTypes.RoundRobin)
-        cat.GetFirstRound()
-        self.assertEqual(list(cat.matches), ["001RR001"])
-        match = cat.matches["001RR001"]
-        self.assertEqual((match.team1.name, match.team2.name), ("P01", "P02"))
-        self.assertEqual(len(cat.groups), 1)
+  def test_round_robin_with_two_teams_creates_one_match(self):
+    cat = single(n=2, ctype=CategoryTypes.RoundRobin)
+    cat.GetFirstRound()
+    self.assertEqual(list(cat.matches), ["001RR001"])
+    match = cat.matches["001RR001"]
+    self.assertEqual((match.team1.name, match.team2.name), ("P01", "P02"))
+    self.assertEqual(len(cat.groups), 1)
 
-    def test_groups_with_two_teams_creates_one_round_robin_match(self):
-        cat = single(n=2, ctype=CategoryTypes.Groups)
-        cat.GetFirstRound()
-        self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
-        self.assertEqual(list(cat.matches), ["001RR001"])
+  def test_groups_with_two_teams_creates_one_round_robin_match(self):
+    cat = single(n=2, ctype=CategoryTypes.Groups)
+    cat.GetFirstRound()
+    self.assertEqual(cat.categoryType, CategoryTypes.RoundRobin)
+    self.assertEqual(list(cat.matches), ["001RR001"])
 
-    def test_groups_creates_group_matches(self):
-        random.seed(0)
-        cat = single(n=9, ctype=CategoryTypes.Groups, seeds=3)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        self.assertEqual(len(cat.groups), 3)
-        gr = [k for k in cat.matches if k[3:5] == "GR"]
-        self.assertEqual(len(gr), 9)  # 3 grupos de 3 -> 3 jogos cada
+  def test_groups_creates_group_matches(self):
+    random.seed(0)
+    cat = single(n=9, ctype=CategoryTypes.Groups, seeds=3)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    self.assertEqual(len(cat.groups), 3)
+    gr = [k for k in cat.matches if k[3:5] == "GR"]
+    self.assertEqual(len(gr), 9)  # 3 grupos de 3 -> 3 jogos cada
 
-    def test_one_group_with_eliminatory_stage(self):
-        cat = single(n=5, ctype=CategoryTypes.Groups)
-        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
-        cat.groupDrawQuantity = 1
-        cat.GetFirstRound()
-        cat.GetBracket()
-        cat.CompleteMatches()
-        self.assertEqual(len(cat.groups), 1)
-        groupMatches = [m for m in cat.matches.values() if m.matchKey.IsGroups()]
-        eliminationMatches = [m for m in cat.matches.values() if m.matchKey.IsSingleElimination()]
-        self.assertEqual(len(groupMatches), 10)
-        self.assertEqual(len(eliminationMatches), 1)
+  def test_one_group_with_eliminatory_stage(self):
+    cat = single(n=5, ctype=CategoryTypes.Groups)
+    cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+    cat.groupDrawQuantity = 1
+    cat.GetFirstRound()
+    cat.GetBracket()
+    cat.CompleteMatches()
+    self.assertEqual(len(cat.groups), 1)
+    groupMatches = [m for m in cat.matches.values() if m.matchKey.IsGroups()]
+    eliminationMatches = [m for m in cat.matches.values() if m.matchKey.IsSingleElimination()]
+    self.assertEqual(len(groupMatches), 10)
+    self.assertEqual(len(eliminationMatches), 1)
 
-    def test_groups_created_by_total_groups(self):
-        random.seed(0)
-        cat = single(n=10, ctype=CategoryTypes.Groups, seeds=3)
-        cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
-        cat.groupDrawQuantity = 3
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        self.assertEqual(sorted(len(group) for group in cat.groups), [3, 3, 4])
+  def test_groups_created_by_total_groups(self):
+    random.seed(0)
+    cat = single(n=10, ctype=CategoryTypes.Groups, seeds=3)
+    cat.groupDrawType = GroupDrawTypes.ByNumberOfGroups
+    cat.groupDrawQuantity = 3
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    self.assertEqual(sorted(len(group) for group in cat.groups), [3, 3, 4])
 
-    def test_single_elimination_conserves_all_teams(self):
-        random.seed(0)
-        cat = single(n=8, ctype=CategoryTypes.SingleElimination, seeds=4)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        appearing = set()
-        for m in cat.matches.values():
-            for t in (m.team1, m.team2):
-                if t is not None:
-                    appearing.add(t.name)
-        self.assertEqual(appearing, set(cat.teams))
+  def test_single_elimination_conserves_all_teams(self):
+    random.seed(0)
+    cat = single(n=8, ctype=CategoryTypes.SingleElimination, seeds=4)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    appearing = set()
+    for m in cat.matches.values():
+      for t in (m.team1, m.team2):
+        if t is not None:
+          appearing.add(t.name)
+    self.assertEqual(appearing, set(cat.teams))
 
-    def test_single_elimination_with_two_teams_creates_final(self):
-        cat = single(n=2, ctype=CategoryTypes.SingleElimination)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        cat.GetBracket()
-        cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        self.assertEqual(list(cat.matches), ["001SE001"])
-        self.assertIsNone(cat.bracket["001SE001"])
+  def test_single_elimination_with_two_teams_creates_final(self):
+    cat = single(n=2, ctype=CategoryTypes.SingleElimination)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    cat.GetBracket()
+    cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    self.assertEqual(list(cat.matches), ["001SE001"])
+    self.assertIsNone(cat.bracket["001SE001"])
 
 
 class BracketTests(unittest.TestCase):
-    def _elim4(self):
-        random.seed(0)
-        cat = single(n=4, ctype=CategoryTypes.SingleElimination, seeds=2)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        cat.GetBracket()
-        cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        return cat
+  def _elim4(self):
+    random.seed(0)
+    cat = single(n=4, ctype=CategoryTypes.SingleElimination, seeds=2)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    cat.GetBracket()
+    cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    return cat
 
-    def test_bracket_maps_to_final(self):
-        cat = self._elim4()
-        self.assertEqual(cat.bracket["002SE001"], "001SE001")
-        self.assertEqual(cat.bracket["002SE002"], "001SE001")
-        self.assertIsNone(cat.bracket["001SE001"])
+  def test_bracket_maps_to_final(self):
+    cat = self._elim4()
+    self.assertEqual(cat.bracket["002SE001"], "001SE001")
+    self.assertEqual(cat.bracket["002SE002"], "001SE001")
+    self.assertIsNone(cat.bracket["001SE001"])
 
-    def test_complete_matches_fills_future_rounds(self):
-        cat = self._elim4()
-        self.assertIn("001SE001", cat.matches)
+  def test_complete_matches_fills_future_rounds(self):
+    cat = self._elim4()
+    self.assertIn("001SE001", cat.matches)
 
-    def test_update_bracket_promotes_winner(self):
-        cat = self._elim4()
-        first = cat.matches["002SE001"]
-        winner = first.team1
-        first.SetScore([(6, 0)], ScoreTypes.Normal)
-        self.assertEqual(first.matchWinner, MatchWinnerTypes.Team1)
-        cat.UpdateBracket()
-        self.assertIs(cat.matches["001SE001"].team1, winner)
+  def test_update_bracket_promotes_winner(self):
+    cat = self._elim4()
+    first = cat.matches["002SE001"]
+    winner = first.team1
+    first.SetScore([(6, 0)], ScoreTypes.Normal)
+    self.assertEqual(first.matchWinner, MatchWinnerTypes.Team1)
+    cat.UpdateBracket()
+    self.assertIs(cat.matches["001SE001"].team1, winner)
 
 
 class GroupsToEliminationTests(unittest.TestCase):
-    def test_full_group_phase_builds_elimination(self):
-        random.seed(42)
-        cat = single(n=9, ctype=CategoryTypes.Groups, seeds=3)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        cat.GetBracket()
-        cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        for m in cat.matches.values():
-            if m.matchKey.IsGroups():
-                m.SetScore([(6, 0)], ScoreTypes.Normal)
-        cat.UpdateBracket()
-        self.assertTrue(cat.isGroupsFinished)
-        # 3 grupos -> 6 classificados -> chave de 8 (com byes), todos posicionados
-        placed = set()
-        for m in cat.matches.values():
-            if m.matchKey.IsSingleElimination():
-                for t in (m.team1, m.team2):
-                    if t is not None:
-                        placed.add(t.name)
-        self.assertEqual(len(placed), 6)
+  def test_full_group_phase_builds_elimination(self):
+    random.seed(42)
+    cat = single(n=9, ctype=CategoryTypes.Groups, seeds=3)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    cat.GetBracket()
+    cat.CompleteMatches(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    for m in cat.matches.values():
+      if m.matchKey.IsGroups():
+        m.SetScore([(6, 0)], ScoreTypes.Normal)
+    cat.UpdateBracket()
+    self.assertTrue(cat.isGroupsFinished)
+    # 3 grupos -> 6 classificados -> chave de 8 (com byes), todos posicionados
+    placed = set()
+    for m in cat.matches.values():
+      if m.matchKey.IsSingleElimination():
+        for t in (m.team1, m.team2):
+          if t is not None:
+            placed.add(t.name)
+    self.assertEqual(len(placed), 6)
 
 
 class GetFirstEliminationStageTests(unittest.TestCase):
-    def test_single_elimination(self):
-        c = single(ctype=CategoryTypes.SingleElimination, n=5)
-        c.GetFirstRound()
-        c.GetBracket()
-        c.CompleteMatches()
-        c.SortMatches()
-        c.isInitialized = True
-        self.assertEqual(c.GetFirstEliminationStage(), 4)
+  def test_single_elimination(self):
+    c = single(ctype=CategoryTypes.SingleElimination, n=5)
+    c.GetFirstRound()
+    c.GetBracket()
+    c.CompleteMatches()
+    c.SortMatches()
+    c.isInitialized = True
+    self.assertEqual(c.GetFirstEliminationStage(), 4)
 
-    def test_round_robin(self):
-        c = single(ctype=CategoryTypes.RoundRobin, n=4)
-        c.GetFirstRound()
-        c.GetBracket()
-        c.CompleteMatches()
-        c.SortMatches()
-        c.isInitialized = True
-        self.assertIsNone(c.GetFirstEliminationStage())
+  def test_round_robin(self):
+    c = single(ctype=CategoryTypes.RoundRobin, n=4)
+    c.GetFirstRound()
+    c.GetBracket()
+    c.CompleteMatches()
+    c.SortMatches()
+    c.isInitialized = True
+    self.assertIsNone(c.GetFirstEliminationStage())
 
 
 class DoublesDrawTests(unittest.TestCase):
-    def test_seed_sum_uses_all_category_players(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
-        for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
-            cat.AddTeam(Player(name, seedNumber=seed))
+  def test_seed_sum_uses_all_category_players(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+    for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
+      cat.AddTeam(Player(name, seedNumber=seed))
 
-        self.assertEqual(cat.GetSeedSumForDrawnDoubles(), 4)
+    self.assertEqual(cat.GetSeedSumForDrawnDoubles(), 4)
 
-    def test_predefined_double_must_follow_draw_seed_rule(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
-        for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
-            cat.AddTeam(Player(name, seedNumber=seed))
+  def test_predefined_double_must_follow_draw_seed_rule(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+    for name, seed in [("A", 1), ("B", 2), ("C", 3)]:
+      cat.AddTeam(Player(name, seedNumber=seed))
 
-        with self.assertRaises(DrawingDoublesError):
-            cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
+    with self.assertRaises(DrawingDoublesError):
+      cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
 
-    def test_draw_accepts_all_players_already_in_defined_doubles(self):
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
-        cat.AddTeam(Player("A", seedNumber=1))
-        cat.AddTeam(Player("B", seedNumber=2))
-        cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
+  def test_draw_accepts_all_players_already_in_defined_doubles(self):
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+    cat.AddTeam(Player("A", seedNumber=1))
+    cat.AddTeam(Player("B", seedNumber=2))
+    cat.AddTeam(Double(cat.GetPlayer("A"), cat.GetPlayer("B")))
 
-        cat.DrawDoubles([])
-        self.assertEqual(len(cat.teams), 1)
+    cat.DrawDoubles([])
+    self.assertEqual(len(cat.teams), 1)
 
-    def test_draw_pairs_by_seed_sum(self):
-        random.seed(1)
-        cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
-        for i, seed in enumerate([1, 1, 2, 2]):
-            cat.AddTeam(Player(f"J{i}", seedNumber=seed))
-        cat.DrawDoubles([])
-        self.assertEqual(len(cat.teams), 2)
-        used = []
-        for d in cat.teams.values():
-            used += [d.player1.name, d.player2.name]
-            seeds = {d.player1.seedNumber, d.player2.seedNumber}
-            self.assertEqual(seeds, {1, 2})  # cada dupla = um seed 1 + um seed 2
-        self.assertEqual(sorted(used), ["J0", "J1", "J2", "J3"])
+  def test_draw_pairs_by_seed_sum(self):
+    random.seed(1)
+    cat = Category("C", CategoryTypes.RoundRobin, MatchTypes.Double, isRandomDoubles=True)
+    for i, seed in enumerate([1, 1, 2, 2]):
+      cat.AddTeam(Player(f"J{i}", seedNumber=seed))
+    cat.DrawDoubles([])
+    self.assertEqual(len(cat.teams), 2)
+    used = []
+    for d in cat.teams.values():
+      used += [d.player1.name, d.player2.name]
+      seeds = {d.player1.seedNumber, d.player2.seedNumber}
+      self.assertEqual(seeds, {1, 2})  # cada dupla = um seed 1 + um seed 2
+    self.assertEqual(sorted(used), ["J0", "J1", "J2", "J3"])
 
 
 class MiscTests(unittest.TestCase):
-    def test_get_matches_filter(self):
-        cat = single(n=4, ctype=CategoryTypes.RoundRobin)
-        cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
-        self.assertEqual(cat.GetMatches(), cat.matches)
-        self.assertEqual(len(cat.GetMatches(MatchKey(firstInfo=6, stageType=MatchKeyType.RoundRobin))), 6)
-        self.assertEqual(len(cat.GetMatches(MatchKey())), 0)
+  def test_get_matches_filter(self):
+    cat = single(n=4, ctype=CategoryTypes.RoundRobin)
+    cat.GetFirstRound(sets=1, setType=SetTypes.NormalSet, lastSetType=SetTypes.NormalSet)
+    self.assertEqual(cat.GetMatches(), cat.matches)
+    self.assertEqual(len(cat.GetMatches(MatchKey(firstInfo=6, stageType=MatchKeyType.RoundRobin))), 6)
+    self.assertEqual(len(cat.GetMatches(MatchKey())), 0)
 
-    def test_teams_summary(self):
-        cat = single(n=3, ctype=CategoryTypes.RoundRobin)
-        self.assertIn("Quantidade total: 3", cat.GetTeamsSummary())
+  def test_teams_summary(self):
+    cat = single(n=3, ctype=CategoryTypes.RoundRobin)
+    self.assertIn("Quantidade total: 3", cat.GetTeamsSummary())
 
 
 if __name__ == "__main__":
-    unittest.main()
+  unittest.main()
